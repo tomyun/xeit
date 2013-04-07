@@ -1,47 +1,19 @@
 (function () {
-	function loadScript(url, callback) {
-	    var script = document.createElement('script');
-	    script.type = 'text/javascript';
-	    script.src = url;
-	    script.onload = script.onreadystatechange = callback;
-	    document.head.appendChild(script);
-	}
+	var attachment = document.getElementsByTagName('body')[0].outerHTML;
 
-	if (!window.jQuery) {
-		var jQueryURL = 'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js';
-		loadScript(jQueryURL, startUp);
-	} else {
-		startUp();
-	}
+	document.body = document.createElement('body');
+	document.body.style.margin = 0;
+	document.body.style.padding = 0;
 
-	function startUp() {
-		var $ = jQuery.noConflict();
+	var xeit = document.createElement('iframe');
+	xeit.setAttribute('id', 'xeit');
+	xeit.setAttribute('src', 'http://localhost:8000/xeit.html');
+	xeit.style.width = '100%';
+	xeit.style.height = '100%';
+	xeit.style.border = 0;
+	document.body.appendChild(xeit);
 
-		var envelope = {
-			vendor: 'xe',
-			smime_header: $('param[name="smime_header"]').val(),
-			smime_body: $('param[name="smime_body"]').val(),
-			ui_desc: $('param[name="ui_desc"]').val()
-		};
-
-		$('body').replaceWith($('<body>').css({
-			margin: 0,
-			padding: 0
-		}));
-
-		window.addEventListener('message', function (e) {
-			$('#xeit')[0].contentWindow.postMessage(envelope, '*');
-		}, false);
-
-		$('<iframe>', {
-			id: 'xeit',
-			src: 'http://localhost:8000/xeit.html',
-			frameborder: 0,
-			css: {
-				width: '100%',
-				height: '100%',
-				border: 0
-			}
-		}).appendTo('body');
-	}
+	window.addEventListener('message', function (e) {
+		xeit.contentWindow.postMessage(attachment, '*');
+	}, false);
 })();

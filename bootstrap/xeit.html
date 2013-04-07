@@ -21,7 +21,7 @@
 
 					var password = $('#auth-password').val();
 					try {
-						var message = decrypt(window.envelope, password);
+						var message = decrypt(window.blob, password);
 					} catch (e) {
 						$('#auth-password-group').addClass('error');
 						$('#auth-password-help').text('다시 입력해보세요!');
@@ -43,18 +43,30 @@
 				});
 
 				window.addEventListener('message', function (e) {
-					var envelope = e.data;
-					window.envelope = envelope;
-					checkSender(envelope);
+					var attachment = $(e.data);
+					var blob = createBlobFromAttachment(attachment);
+					window.blob = blob;
+					checkSender(blob);
 				}, false)
 
 				parent.postMessage('ready', '*');
 
-				function checkSender(envelope) {
+				function createBlobFromAttachment(attachment) {
+					//TODO: xe 말고 it도 지원 필요.
+					var blob = {
+						vendor: 'xe',
+						smime_header: attachment.find('param[name="smime_header"]').val(),
+						smime_body: attachment.find('param[name="smime_body"]').val(),
+						ui_desc: attachment.find('param[name="ui_desc"]').val()
+					};
+					return blob;
+				}
+
+				function checkSender(blob) {
 					var senders = {
 						TRUEFRIEND: { name: '한국투자증권', support: true }
 					};
-					var sender = senders[envelope.ui_desc];
+					var sender = senders[blob.ui_desc];
 					var name = sender ? sender['name'] : '?';
 					var support = sender ? sender['support'] : false;
 
@@ -68,8 +80,8 @@
 					}
 				}
 
-				function decrypt(envelope, password) {
-					var der = Base64.unarmor(envelope.smime_body);
+				function decrypt(blob, password) {
+					var der = Base64.unarmor(blob.smime_body);
 					var asn1 = ASN1.decode(der);
 
 					/*
