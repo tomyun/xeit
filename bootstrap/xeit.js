@@ -5,8 +5,8 @@ var xeit = (function () {
 	 * Vendor *
 	 **********/
 
-	var Vendor = function (vendor) {
-		this.vendor = vendor || '';
+	var Vendor = function (name) {
+		this.name = name || '';
 	};
 
 	Vendor.prototype = {
