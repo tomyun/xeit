@@ -18,8 +18,7 @@
 		<script>
 			function init() {
 				window.addEventListener('message', function (e) {
-					var attachment = $(e.data);
-					xeit.init(attachment);
+					xeit.init(e.data);
 					updateAuthDialog();
 				}, false)
 			}

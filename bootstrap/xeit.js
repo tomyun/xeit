@@ -147,7 +147,9 @@ var xeit = (function () {
 	});
 
 	return {
-		init: function (doc) {
+		init: function (html) {
+			var doc = $(html);
+
 			if ($('#XEIViewer', doc).length) {
 				this.vendor = new SoftForum(
 					$('param[name="smime_header"]', doc).val().replace(/\n/g, ''),
