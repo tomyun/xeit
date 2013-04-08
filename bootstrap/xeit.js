@@ -135,23 +135,21 @@ var xeit = (function () {
 	});
 
 	return {
-		init: function (attachment) {
-			this.attachment = attachment || '';
-
-			if ($('#XEIViewer').length !== -1) {
+		init: function (doc) {
+			if ($('#XEIViewer', doc).length) {
 				this.vendor = new SoftForum(
-					attachment.find('param[name="smime_header"]').val().replace(/\n/g, ''),
-					attachment.find('param[name="smime_body"]').val().replace(/\n/g, ''),
-					attachment.find('param[name="ui_desc"]').val()
+					$('param[name="smime_header"]', doc).val().replace(/\n/g, ''),
+					$('param[name="smime_body"]', doc).val().replace(/\n/g, ''),
+					$('param[name="ui_desc"]', doc).val()
 				);
-			} else if ($('#IniMasPluginObj').length !== -1) {
+			} else if ($('#IniMasPluginObj', doc).length) {
 				//TODO: use '#InitechSMMsgToReplace'?
 				this.vendor = new IniTech(
-					attachment.find('param[name="IniSMContents"]').val(),
-					attachment.find('param[name="AttachedFile"]').val()
+					$('param[name="IniSMContents"]', doc).val(),
+					$('param[name="AttachedFile"]', doc).val()
 				);
 			} else {
-				this.vendor = new Vendor;
+				this.vendor = new Vendor();
 				parent.postMessage('fallback', '*');
 			}
 
