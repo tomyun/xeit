@@ -146,12 +146,13 @@ var xeit = (function () {
 				src: CryptoJS.enc.Base64.parse(this.contents).toString(CryptoJS.enc.Latin1),
 				offset: 0,
 
-				read: function (length) {
+				read: function (length, trim) {
+					var trim = trim || false;
 					var start = this.offset;
 					var end = this.offset + length;
 					var value = this.src.slice(start, end);
 					this.offset = end;
-					return value;
+					return trim ? $.trim(value.split('\0')[0]) : value;
 				}
 			};
 
@@ -159,8 +160,8 @@ var xeit = (function () {
 				version: blob.read(9),
 				count: parseInt(blob.read(1)),
 				company: blob.read(2),
-				cipher: blob.read(25).split('/'),
-				hasher: blob.read(20),
+				cipher: blob.read(25, true).split('/'),
+				hasher: blob.read(20, true),
 				iv: blob.read(30),
 				vendor: blob.read(20),
 				checkAreaLength: parseInt(blob.read(10)),
@@ -177,20 +178,36 @@ var xeit = (function () {
 		},
 
 		decrypt: function (password) {
-			//var ciphertext = CryptoJS.enc.Latin1.parse(this.checkArea);
-			var ciphertext = CryptoJS.enc.Latin1.parse(this.dataArea);
-
+			var hashers = {
+				MD5: CryptoJS.MD5,
+			};
 			var saltedKey1 = this.sender.salt + '|' + password;
 			var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
 			var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
-			var key = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(saltedKey2));
+			var key = hashers[this.header.hasher](CryptoJS.enc.Latin1.parse(saltedKey2));
 
-			var iv = CryptoJS.enc.Latin1.parse(this.header.iv);
+			var ciphers = {
+				SEED: CryptoJS.SEED,
+			};
 
-			var decryptedContent = CryptoJS.SEED.decrypt(
-				{ ciphertext: ciphertext },
+			var modes = {
+				CBC: CryptoJS.mode.CBC,
+			};
+
+			var paddings = {
+				PKCS5Padding: CryptoJS.pad.Pkcs7,
+			}
+
+			var decryptedContent = ciphers[this.header.cipher[0]].decrypt(
+				{
+					ciphertext: CryptoJS.enc.Latin1.parse(this.dataArea)
+				},
 				key,
-				{ iv: iv }
+				{
+					iv: CryptoJS.enc.Latin1.parse(this.header.iv),
+					mode: modes[this.header.cipher[1]],
+					padding: paddings[this.header.cipher[2]]
+				}
 			);
 
 			// 메일 본문 인코딩 변환.
