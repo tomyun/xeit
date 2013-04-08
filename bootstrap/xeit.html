@@ -17,12 +17,10 @@
 		<script src='https://raw.github.com/lapo-luchini/asn1js/master/oids.js'></script>
 		<script src='xeit.js'></script>
 		<script>
-			var xeit;
-
 			function init() {
 				window.addEventListener('message', function (e) {
 					var attachment = $(e.data);
-					xeit = new Xeit(attachment);
+					xeit.init(attachment);
 					xeit.updateAuthDialog();
 				}, false)
 			}
