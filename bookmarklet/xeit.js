@@ -7,7 +7,7 @@
 
 	var xeit = document.createElement('iframe');
 	xeit.setAttribute('id', 'xeit');
-	xeit.setAttribute('src', 'http://localhost:8000/xeit.html');
+	xeit.setAttribute('src', 'file:///Users/tomyun/Dropbox/SMIME/xeit/bootstrap/xeit.html');
 	xeit.style.width = '100%';
 	xeit.style.height = '100%';
 	xeit.style.border = 0;
