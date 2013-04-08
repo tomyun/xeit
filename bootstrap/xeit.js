@@ -139,10 +139,62 @@ var xeit = (function () {
 		this.attachedFile = attachedFile || '';
 	};
 
-	IniTech.prototype = new Vendor('it');
+	IniTech.prototype = new Vendor('IniTech');
 	$.extend(IniTech.prototype, {
+		init: function () {
+			var blob = {
+				src: CryptoJS.enc.Base64.parse(this.contents).toString(CryptoJS.enc.Latin1),
+				offset: 0,
+
+				read: function (length) {
+					var start = this.offset;
+					var end = this.offset + length;
+					var value = this.src.slice(start, end);
+					this.offset = end;
+					return value;
+				}
+			};
+
+			this.header = {
+				version: blob.read(9),
+				count: parseInt(blob.read(1)),
+				company: blob.read(2),
+				cipher: blob.read(25).split('/'),
+				hasher: blob.read(20),
+				iv: blob.read(30),
+				vendor: blob.read(20),
+				checkAreaLength: parseInt(blob.read(10)),
+				dataAreaLength: parseInt(blob.read(10))
+			};
+
+			this.checkArea = blob.read(this.header.checkAreaLength);
+			this.dataArea = blob.read(this.header.dataAreaLength);
+
+			var senders = {
+				TH: { name: 'KT', support: true, salt: 'ktbill' }
+			};
+			this.sender = senders[this.header.company] || this.sender;
+		},
+
 		decrypt: function (password) {
-			alert('TODO: support IT');
+			//var ciphertext = CryptoJS.enc.Latin1.parse(this.checkArea);
+			var ciphertext = CryptoJS.enc.Latin1.parse(this.dataArea);
+
+			var saltedKey1 = this.sender.salt + '|' + password;
+			var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
+			var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
+			var key = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(saltedKey2));
+
+			var iv = CryptoJS.enc.Latin1.parse(this.header.iv);
+
+			var decryptedContent = CryptoJS.SEED.decrypt(
+				{ ciphertext: ciphertext },
+				key,
+				{ iv: iv }
+			);
+
+			// 메일 본문 인코딩 변환.
+			return this.encode(decryptedContent);
 		}
 	});
 
@@ -159,8 +211,14 @@ var xeit = (function () {
 			} else if ($('#IniMasPluginObj', doc).length) {
 				//TODO: use '#InitechSMMsgToReplace'?
 				this.vendor = new IniTech(
-					$('param[name="IniSMContents"]', doc).val(),
+					$('param[name="IniSMContents"]', doc).val().replace(/\\n/g, ''),
 					$('param[name="AttachedFile"]', doc).val()
+				);
+			} else if (html.indexOf('IniMasPlugin') > 0) {
+				//HACK: IE에서만 동작하는 function.js 이슈 회피.
+				this.vendor = new IniTech(
+					html.match(/<PARAM NAME='IniSMContents' VALUE='([\w+\/=\\]+)'/i)[1].replace(/\\n/g, ''),
+					'' //html.match(/<PARAM NAME='AttachedFile' VALUE='([\w+\/=\\]+)'/i)[1].replace(/\\n/g, '')
 				);
 			} else {
 				this.vendor = new Vendor();
