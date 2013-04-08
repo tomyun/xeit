@@ -1,4 +1,6 @@
 var xeit = (function () {
+	"use strict";
+
 	/**********
 	 * Vendor *
 	 **********/
