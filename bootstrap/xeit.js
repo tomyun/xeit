@@ -6,8 +6,8 @@ var Xeit = (function () {
 			if ($('#XEIViewer').length !== -1) {
 				this.blob = {
 					vendor: 'xe',
-					smime_header: attachment.find('param[name="smime_header"]').val(),
-					smime_body: attachment.find('param[name="smime_body"]').val(),
+					smime_header: attachment.find('param[name="smime_header"]').val().replace(/\n/g, ''),
+					smime_body: attachment.find('param[name="smime_body"]').val().replace(/\n/g, ''),
 					ui_desc: attachment.find('param[name="ui_desc"]').val()
 				};
 			} else if ($('#IniMasPluginObj').length !== -1) {
@@ -49,20 +49,43 @@ var Xeit = (function () {
 
 		this.decrypt = function (password) {
 			if (this.blob.vendor == 'xe') {
-				var headerBase64 = this.blob.smime_header.replace(/\n/g, '');
-				var headerWords = CryptoJS.enc.Base64.parse(headerBase64);
+				var headerWords = CryptoJS.enc.Base64.parse(this.blob.smime_header);
 				var header = CryptoJS.enc.CP949.stringify(headerWords);
 
-				var contentType = header.match(/Content-Type: \s*([a-zA-Z/-]*);*/i)[1];
-				if (contentType == 'application/pkcs') {
-					return this.decrypt_XE_PKCS(password);
+				var contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
+				if (contentType == 'application/pkcs7-mime') {
+					var content = this.decrypt_XE_PKCS(this.blob.smime_body, password);
 				} else if (contentType == 'application/x-pwd') {
-					alert("TODO: x-pwd");
+					var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
+					var content = this.decrypt_XE_PWD(key, this.blob.smime_body, password);
 				}
+
+				// 메일 본문 인코딩 변환.
+				return this.encode_XE(content);
+			} else {
+				alert('TODO: support it');
 			}
 		};
 
-		this.decrypt_XE_PKCS = function (password) {
+		this.encode_XE = function (content) {
+			var message = CryptoJS.enc.Latin1.stringify(content);
+			if (message.match(/utf-8/i)) {
+				message = CryptoJS.enc.Utf8.stringify(content);
+			} else {
+				message = CryptoJS.enc.CP949.stringify(content);
+	        	message = message.replace(/euc-kr/ig, 'utf-8');
+			}
+
+			//HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
+			// message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
+			var offset = /[\n\r]{3,}/.exec(message);
+			if (offset) {
+				message = message.slice(offset.index);
+			}
+			return message;
+		};
+
+		this.decrypt_XE_PKCS = function (envelope, password) {
 			var ciphers = {
 				desCBC: CryptoJS.DES,	// 1.3.14.3.2.7,
 				seedCBC: CryptoJS.SEED	// 1.2.410.200004.1.4
@@ -74,7 +97,7 @@ var Xeit = (function () {
 				return this.stream.parseStringISO(offset, offset + length);
 			};
 
-			var der = Base64.unarmor(this.blob.smime_body);
+			var der = Base64.unarmor(envelope);
 			var asn1 = ASN1.decode(der);
 			var envelopedData = asn1.sub[1].sub[0];
 
@@ -100,23 +123,26 @@ var Xeit = (function () {
 				decryptedKey,
 				{ iv: iv }
 			);
+			return decryptedContent;
+		};
 
-			// 메일 본문 인코딩 변환.
-			var message = CryptoJS.enc.Latin1.stringify(decryptedContent);
-			if (message.match(/utf-8/i)) {
-				message = CryptoJS.enc.Utf8.stringify(decryptedContent);
-			} else {
-				message = CryptoJS.enc.CP949.stringify(decryptedContent);
-	        	message = message.replace(/euc-kr/ig, 'utf-8');
-			}
+		this.decrypt_XE_PWD = function (key, content, password) {
+			var encryptedKey = CryptoJS.enc.Base64.parse(key);
+			var passwordKey = CryptoJS.SHA1(password);
+			var iv = CryptoJS.enc.Hex.parse("0");
+			var decryptedKey = CryptoJS.SEED.decrypt(
+				{ ciphertext: encryptedKey },
+				passwordKey,
+				{ iv: iv }
+			);
 
-			//HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
-			// message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
-			var offset = /[\n\r]{3,}/.exec(message);
-			if (offset) {
-				message = message.slice(offset.index);
-			}
-			return message;
+			var encryptedContent = CryptoJS.enc.Base64.parse(content);
+			var decryptedContent = CryptoJS.SEED.decrypt(
+				{ ciphertext: encryptedContent },
+				decryptedKey,
+				{ iv: iv }
+			);
+			return decryptedContent;
 		};
 
 		this.init(attachment);
