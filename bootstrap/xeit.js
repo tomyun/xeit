@@ -41,6 +41,15 @@ var xeit = (function () {
 
 	SoftForum.prototype = new Vendor('SoftForum');
 	$.extend(SoftForum.prototype, {
+		sender: function () {
+			var senders = {
+				'TRUEFRIEND': { name: '한국투자증권', support: true },
+				'보안메일': { name: 'KB카드', support: true },
+				'HyundaiCard': { name: '현대카드', support: true }
+			};
+			return senders[this.ui_desc] || { name: '?', support: false };
+		},
+
 		decrypt: function (password) {
 			var headerWords = CryptoJS.enc.Base64.parse(this.smime_header);
 			var header = CryptoJS.enc.CP949.stringify(headerWords);
@@ -154,26 +163,6 @@ var xeit = (function () {
 			}
 
 			//TODO: updateBlob(blob)
-		},
-
-		updateAuthDialog: function () {
-			var senders = {
-				TRUEFRIEND: { name: '한국투자증권', support: true },
-				'보안메일': { name: 'KB카드', support: true },
-				'HyundaiCard': { name: '현대카드', support: true }
-			};
-			var sender = senders[this.vendor.ui_desc];
-			var name = sender ? sender['name'] : '?';
-			var support = sender ? sender['support'] : false;
-
-			$('#auth-sender-name').val(name);
-			if (support) {
-				$('#auth-sender-support').addClass('label-success').text('지원');
-			} else {
-				$('#auth-sender-support').addClass('label-important').text('미지원');
-				$('#auth-password').prop('disabled', true);
-				$('#auth-submit').addClass('disabled');
-			}
 		},
 
 		decrypt: function (password) {

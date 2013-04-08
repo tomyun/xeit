@@ -20,7 +20,7 @@
 				window.addEventListener('message', function (e) {
 					var attachment = $(e.data);
 					xeit.init(attachment);
-					xeit.updateAuthDialog();
+					updateAuthDialog();
 				}, false)
 			}
 
@@ -51,6 +51,18 @@
 					$('#auth-password-group').removeClass('error');
 					$('#auth-password-help').text('');
 				});
+			}
+
+			function updateAuthDialog () {
+				var sender = xeit.vendor.sender();
+				$('#auth-sender-name').val(sender['name']);
+				if (sender['support']) {
+					$('#auth-sender-support').addClass('label-success').text('지원');
+				} else {
+					$('#auth-sender-support').addClass('label-important').text('미지원');
+					$('#auth-password').prop('disabled', true);
+					$('#auth-submit').addClass('disabled');
+				}
 			}
 
 			function finish() {
