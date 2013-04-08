@@ -1,13 +1,13 @@
 var xeit = (function () {
-	/********
-	 * Blob *
-	 ********/
+	/**********
+	 * Vendor *
+	 **********/
 
-	var Blob = function (vendor) {
+	var Vendor = function (vendor) {
 		this.vendor = vendor || '';
 	};
 
-	Blob.prototype = {
+	Vendor.prototype = {
 		encode: function (content) {
 			var message = CryptoJS.enc.Latin1.stringify(content);
 			if (message.match(/utf-8/i)) {
@@ -31,14 +31,14 @@ var xeit = (function () {
 	 * SoftForum XecureExpress *
 	 ***************************/
 
-	var XE = function (smime_header, smime_body, ui_desc) {
+	var SoftForum = function (smime_header, smime_body, ui_desc) {
 		this.smime_header = smime_header || '';
 		this.smime_body = smime_body || '';
 		this.ui_desc = ui_desc || '';
 	};
 
-	XE.prototype = new Blob('xe');
-	$.extend(XE.prototype, {
+	SoftForum.prototype = new Vendor('SoftForum');
+	$.extend(SoftForum.prototype, {
 		decrypt: function (password) {
 			var headerWords = CryptoJS.enc.Base64.parse(this.smime_header);
 			var header = CryptoJS.enc.CP949.stringify(headerWords);
@@ -120,13 +120,13 @@ var xeit = (function () {
 	 * IniTech INISAFE Mail *
 	 ************************/
 
-	var IT = function (contents, attachedFile) {
+	var IniTech = function (contents, attachedFile) {
 		this.contents = contents || '';
 		this.attachedFile = attachedFile || '';
 	};
 
-	IT.prototype = new Blob('it');
-	$.extend(IT.prototype, {
+	IniTech.prototype = new Vendor('it');
+	$.extend(IniTech.prototype, {
 		decrypt: function (password) {
 			alert('TODO: support IT');
 		}
@@ -137,19 +137,19 @@ var xeit = (function () {
 			this.attachment = attachment || '';
 
 			if ($('#XEIViewer').length !== -1) {
-				this.blob = new XE(
+				this.vendor = new SoftForum(
 					attachment.find('param[name="smime_header"]').val().replace(/\n/g, ''),
 					attachment.find('param[name="smime_body"]').val().replace(/\n/g, ''),
 					attachment.find('param[name="ui_desc"]').val()
 				);
 			} else if ($('#IniMasPluginObj').length !== -1) {
 				//TODO: use '#InitechSMMsgToReplace'?
-				this.blob = new IT(
+				this.vendor = new IniTech(
 					attachment.find('param[name="IniSMContents"]').val(),
 					attachment.find('param[name="AttachedFile"]').val()
 				);
 			} else {
-				this.blob = new Blob;
+				this.vendor = new Vendor;
 				parent.postMessage('fallback', '*');
 			}
 
@@ -162,7 +162,7 @@ var xeit = (function () {
 				'보안메일': { name: 'KB카드', support: true },
 				'HyundaiCard': { name: '현대카드', support: true }
 			};
-			var sender = senders[this.blob.ui_desc];
+			var sender = senders[this.vendor.ui_desc];
 			var name = sender ? sender['name'] : '?';
 			var support = sender ? sender['support'] : false;
 
@@ -177,7 +177,7 @@ var xeit = (function () {
 		},
 
 		decrypt: function (password) {
-			return this.blob.decrypt(password);
+			return this.vendor.decrypt(password);
 		}
 	};
 })();
