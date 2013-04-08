@@ -6,6 +6,7 @@
 
 	var attachment = document.getElementsByTagName('body')[0].outerHTML;
 
+	var _body = document.body;
 	document.body = document.createElement('body');
 	document.body.style.margin = 0;
 	document.body.style.padding = 0;
@@ -19,6 +20,14 @@
 	document.body.appendChild(xeit);
 
 	window.addEventListener('message', function (e) {
-		xeit.contentWindow.postMessage(attachment, '*');
+		switch (e.data) {
+			case 'ready':
+			xeit.contentWindow.postMessage(attachment, '*');
+			break;
+
+			case 'fallback':
+			document.body = _body;
+			break;
+		}
 	}, false);
 })();
