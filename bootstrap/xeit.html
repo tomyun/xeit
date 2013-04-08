@@ -54,7 +54,7 @@
 			}
 
 			function updateAuthDialog () {
-				var sender = xeit.vendor.sender();
+				var sender = xeit.vendor.sender;
 				$('#auth-sender-name').val(sender['name']);
 				if (sender['support']) {
 					$('#auth-sender-support').addClass('label-success').text('지원');

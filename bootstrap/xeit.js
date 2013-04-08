@@ -7,9 +7,12 @@ var xeit = (function () {
 
 	var Vendor = function (name) {
 		this.name = name || '';
+		this.sender = { name: '?', support: false };
 	};
 
 	Vendor.prototype = {
+		init: function () {},
+
 		encode: function (content) {
 			var message = CryptoJS.enc.Latin1.stringify(content);
 			if (message.match(/utf-8/i)) {
@@ -41,13 +44,13 @@ var xeit = (function () {
 
 	SoftForum.prototype = new Vendor('SoftForum');
 	$.extend(SoftForum.prototype, {
-		sender: function () {
+		init: function () {
 			var senders = {
 				'TRUEFRIEND': { name: '한국투자증권', support: true },
 				'보안메일': { name: 'KB카드', support: true },
 				'HyundaiCard': { name: '현대카드', support: true }
 			};
-			return senders[this.ui_desc] || { name: '?', support: false };
+			this.sender = senders[this.ui_desc] || this.sender;
 		},
 
 		decrypt: function (password) {
@@ -161,8 +164,7 @@ var xeit = (function () {
 				this.vendor = new Vendor();
 				parent.postMessage('fallback', '*');
 			}
-
-			//TODO: updateBlob(blob)
+			this.vendor.init();
 		},
 
 		decrypt: function (password) {
