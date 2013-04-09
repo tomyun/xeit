@@ -45,28 +45,27 @@ var xeit = (function () {
 	SoftForum.prototype = new Vendor('SoftForum');
 	$.extend(SoftForum.prototype, {
 		init: function () {
+			var headerWords = CryptoJS.enc.Base64.parse(this.smime_header);
+			var header = CryptoJS.enc.CP949.stringify(headerWords);
+
+			var contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
+			if (contentType == 'application/pkcs7-mime') {
+				this.decrypt = function (password) {
+					return this.decryptSMIME(this.smime_body, password);
+				};
+			} else if (contentType == 'application/x-pwd') {
+				var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
+				this.decrypt = function (password) {
+					return this.decryptPWD(key, this.smime_body, password);
+				};
+			}
+
 			var senders = {
 				'TRUEFRIEND': { name: '한국투자증권', support: true },
 				'보안메일': { name: 'KB카드', support: true },
 				'HyundaiCard': { name: '현대카드', support: true }
 			};
 			this.sender = senders[this.ui_desc] || this.sender;
-		},
-
-		decrypt: function (password) {
-			var headerWords = CryptoJS.enc.Base64.parse(this.smime_header);
-			var header = CryptoJS.enc.CP949.stringify(headerWords);
-
-			var contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
-			if (contentType == 'application/pkcs7-mime') {
-				var content = this.decryptSMIME(this.smime_body, password);
-			} else if (contentType == 'application/x-pwd') {
-				var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
-				var content = this.decryptPWD(key, this.smime_body, password);
-			}
-
-			// 메일 본문 인코딩 변환.
-			return this.encode(content);
 		},
 
 		decryptSMIME: function (envelope, password) {
@@ -198,7 +197,7 @@ var xeit = (function () {
 				PKCS5Padding: CryptoJS.pad.Pkcs7,
 			}
 
-			var decryptedContent = ciphers[this.header.cipher[0]].decrypt(
+			return ciphers[this.header.cipher[0]].decrypt(
 				{
 					ciphertext: CryptoJS.enc.Latin1.parse(this.dataArea)
 				},
@@ -209,9 +208,6 @@ var xeit = (function () {
 					padding: paddings[this.header.cipher[2]]
 				}
 			);
-
-			// 메일 본문 인코딩 변환.
-			return this.encode(decryptedContent);
 		}
 	});
 
@@ -253,7 +249,12 @@ var xeit = (function () {
 		},
 
 		decrypt: function (password) {
-			return this.vendor.decrypt(password);
+			var decryptedContent = this.vendor.decrypt(password);
+			console.log(decryptedContent)
+			// 메일 본문 인코딩 변환.
+			var encodedContent = this.vendor.encode(decryptedContent);
+			console.log(encodedContent)
+			return encodedContent;
 		}
 	};
 })();
