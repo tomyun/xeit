@@ -31,7 +31,7 @@
 
 					var password = $('#auth-password').val();
 					try {
-						var message = xeit.decrypt(password);
+						var message = xeit.load(password);
 					} catch (e) {
 						$('#auth-password-group').addClass('error');
 						$('#auth-password-help').text('다시 입력해보세요!');

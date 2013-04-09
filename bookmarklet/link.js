@@ -4,7 +4,7 @@
 		return;
 	}
 
-	var attachment = document.getElementsByTagName('body')[0].outerHTML;
+	var attachment = document.getElementsByTagName('html')[0].outerHTML;
 
 	var _body = document.body;
 	document.body = document.createElement('body');

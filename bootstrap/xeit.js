@@ -13,8 +13,12 @@ var xeit = (function () {
 	Vendor.prototype = {
 		init: function () {},
 
-		render: function (content) {
-			return this.encode(content);
+		load: function (password) {
+			return this.render(this.decrypt(password));
+		},
+
+		decrypt: function (password) {
+			return '';
 		},
 
 		encode: function (content) {
@@ -26,6 +30,10 @@ var xeit = (function () {
 				message = CryptoJS.enc.CP949.stringify(content);
 	        	return message.replace(/euc-kr/ig, 'utf-8');
 			}
+		},
+
+		render: function (content) {
+			return this.encode(content);
 		}
 	};
 
@@ -49,15 +57,6 @@ var xeit = (function () {
 			if (contentType == 'application/pkcs7-mime') {
 				this.decrypt = function (password) {
 					return this.decryptSMIME(this.smime_body, password);
-				};
-
-				this.render = function (content) {
-					message = this.encode(content);
-
-					//HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
-					// message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
-					var offset = /[\n\r]{3,}/.exec(message);
-					return offset ? message.slice(offset.index) : message;
 				};
 			} else if (contentType == 'application/x-pwd') {
 				var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
@@ -132,6 +131,15 @@ var xeit = (function () {
 				{ iv: iv }
 			);
 			return decryptedContent;
+		},
+
+		render: function (content) {
+			var message = this.encode(content);
+
+			//HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
+			// message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
+			var offset = /[\n\r]{3,}/.exec(message);
+			return offset ? message.slice(offset.index) : message;
 		}
 	});
 
@@ -139,7 +147,8 @@ var xeit = (function () {
 	 * IniTech INISAFE Mail *
 	 ************************/
 
-	var IniTech = function (contents, attachedFile) {
+	var IniTech = function (html, contents, attachedFile) {
+		this.html = html || '';
 		this.contents = contents || '';
 		this.attachedFile = attachedFile || '';
 	};
@@ -214,6 +223,19 @@ var xeit = (function () {
 					padding: paddings[this.header.cipher[2]]
 				}
 			);
+		},
+
+		render: function (content) {
+			return this.html.replace(
+				/<object [\s\S]*<\/object>/ig,
+				''
+			).replace(
+				/activeControl\([\s\S]*\);?/,
+				''
+			).replace(
+				/id="InitechSMMsgToReplace">/,
+				'>' + this.encode(content)
+			);
 		}
 	});
 
@@ -227,7 +249,7 @@ var xeit = (function () {
 					$('param[name="ui_desc"]', $doc).val()
 				);
 			} else if (html.indexOf('IniMasPlugin') > 0) {
-				html = html.replace(
+				var body = html.replace(
 					'activeControl(',
 					"var activeControl = function (a, b, c) {" +
 						"var d = document.createElement('div');" +
@@ -235,14 +257,18 @@ var xeit = (function () {
 						"d.firstChild.innerHTML = b + c;" +
 						"document.getElementById('embedControl').appendChild(d);" +
 					"}("
+				).replace(
+					/^[\s\S]*<body.*?>|<\/body>[\s\S]*$/ig,
+					''
 				);
+
 				//HACK: IE에서만 동작하는 function.js 이슈 회피.
 				if (!$('#IniMasPluginObj', $doc).length) {
-					$doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(html, document, true));
+					$doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
 				}
 
-				//TODO: use '#InitechSMMsgToReplace'?
 				this.vendor = new IniTech(
+					html,
 					$('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
 					$('param[name="AttachedFile"]', $doc).val()
 				);				
@@ -250,15 +276,12 @@ var xeit = (function () {
 				this.vendor = new Vendor();
 				parent.postMessage('fallback', '*');
 			}
-			$doc.remove();
+			$($doc).remove();
 			this.vendor.init();
 		},
 
-		decrypt: function (password) {
-			var decryptedContent = this.vendor.decrypt(password);
-			var renderedContent = this.vendor.render(decryptedContent);
-			console.log(renderedContent)
-			return renderedContent;
+		load: function (password) {
+			return this.vendor.load(password);
 		}
 	};
 })();
