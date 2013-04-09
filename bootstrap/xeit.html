@@ -68,7 +68,7 @@
 			}
 
 			function finish() {
-				parent.postMessage('ready', '*');
+				window.parent.postMessage('ready', '*');
 			}
 
 			$(document).ready(function () {
