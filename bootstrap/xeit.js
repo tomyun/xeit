@@ -186,6 +186,7 @@ var xeit = (function () {
 			this.dataArea = blob.read(this.header.dataAreaLength);
 
 			var senders = {
+				CC: { name: '우리은행 BC카드', support: true, salt: 'bccard', ignore_replacer: true },
 				TH: { name: 'KT', support: true, salt: 'ktbill' }
 			};
 			this.sender = senders[this.header.company] || this.sender;
@@ -226,16 +227,26 @@ var xeit = (function () {
 		},
 
 		render: function (content) {
-			return this.html.replace(
+			var message = this.encode(content);
+			var rendered = this.html.replace(
 				/<object [\s\S]*<\/object>/ig,
 				''
 			).replace(
 				/activeControl\([\s\S]*\);?/,
 				''
-			).replace(
-				/id="InitechSMMsgToReplace">/,
-				'>' + this.encode(content)
 			);
+
+			if (this.sender.ignore_replacer) {
+				return rendered.replace(
+					/<body[\s\S]*?<\/body>/i,
+					'<body>' + message + '</body>'
+				);
+			} else {
+				return rendered.replace(
+					/id="InitechSMMsgToReplace">/,
+					'>' + message
+				);
+			}
 		}
 	});
 
@@ -250,13 +261,13 @@ var xeit = (function () {
 				);
 			} else if (html.indexOf('IniMasPlugin') > 0) {
 				var body = html.replace(
-					'activeControl(',
+					/activeControl\(([\s]*['"])/,
 					"var activeControl = function (a, b, c) {" +
 						"var d = document.createElement('div');" +
 						"d.innerHTML = \"<OBJECT ID='IniMasPluginObj'>\" + a;" +
 						"d.firstChild.innerHTML = b + c;" +
 						"document.getElementById('embedControl').appendChild(d);" +
-					"}("
+					"}($1"
 				).replace(
 					/^[\s\S]*<body.*?>|<\/body>[\s\S]*$/ig,
 					''
