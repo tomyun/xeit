@@ -217,17 +217,14 @@ var xeit = (function () {
 
 	return {
 		init: function (html) {
-			var doc = $(html);
-
-			if ($('#XEIViewer', doc).length) {
+			var $doc = $.parseHTML(html)
+			if ($('#XEIViewer', $doc).length) {
 				this.vendor = new SoftForum(
-					$('param[name="smime_header"]', doc).val().replace(/\n/g, ''),
-					$('param[name="smime_body"]', doc).val().replace(/\n/g, ''),
-					$('param[name="ui_desc"]', doc).val()
+					$('param[name="smime_header"]', $doc).val().replace(/\n/g, ''),
+					$('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
+					$('param[name="ui_desc"]', $doc).val()
 				);
 			} else if (html.indexOf('IniMasPlugin') > 0) {
-				//html = html.replace(/<font.*?>|<\/font>/ig, '');
-				//html = html.replace(/<script language=".*">/ig, '<script>');
 				html = html.replace(
 					'activeControl(',
 					"var activeControl = function (a, b, c) {" +
@@ -238,20 +235,20 @@ var xeit = (function () {
 					"}("
 				);
 				//HACK: IE에서만 동작하는 function.js 이슈 회피.
-				if (!$('#IniMasPluginObj', doc).length) {
-					doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(html, document, true));
+				if (!$('#IniMasPluginObj', $doc).length) {
+					$doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(html, document, true));
 				}
 
 				//TODO: use '#InitechSMMsgToReplace'?
 				this.vendor = new IniTech(
-					$('param[name="IniSMContents"]', doc).val().replace(/\n/g, ''),
-					$('param[name="AttachedFile"]', doc).val()
+					$('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
+					$('param[name="AttachedFile"]', $doc).val()
 				);				
 			} else {
 				this.vendor = new Vendor();
 				parent.postMessage('fallback', '*');
 			}
-			doc.remove();
+			$doc.remove();
 			this.vendor.init();
 		},
 
