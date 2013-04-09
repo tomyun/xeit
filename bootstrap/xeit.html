@@ -38,6 +38,9 @@
 						return;
 					}
 					$('#mail-content').attr('srcdoc', message);
+
+					//HACK: 로딩 지연시 프레임 잘리는 현상 방지.
+					$('#mail-content').height(window.document.height);
 					$('#mail-content').load(function () {
 						var height = $('#mail-content')[0].contentDocument.height
 						$('#mail-content').height(height);
