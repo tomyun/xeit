@@ -5,8 +5,8 @@ var xeit = (function () {
 	 * Vendor *
 	 **********/
 
-	var Vendor = function (name) {
-		this.name = name || '';
+	var Vendor = function (product) {
+		this.product = product || '';
 		this.sender = { name: '?', support: false };
 	};
 
@@ -47,7 +47,7 @@ var xeit = (function () {
 		this.ui_desc = ui_desc || '';
 	};
 
-	SoftForum.prototype = new Vendor('SoftForum');
+	SoftForum.prototype = new Vendor('XecureExpress');
 	$.extend(SoftForum.prototype, {
 		init: function () {
 			var headerWords = CryptoJS.enc.Base64.parse(this.smime_header);
@@ -153,7 +153,7 @@ var xeit = (function () {
 		this.attachedFile = attachedFile || '';
 	};
 
-	IniTech.prototype = new Vendor('IniTech');
+	IniTech.prototype = new Vendor('INISAFE Mail');
 	$.extend(IniTech.prototype, {
 		init: function () {
 			var blob = {
