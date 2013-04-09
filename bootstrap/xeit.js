@@ -225,22 +225,33 @@ var xeit = (function () {
 					$('param[name="smime_body"]', doc).val().replace(/\n/g, ''),
 					$('param[name="ui_desc"]', doc).val()
 				);
-			} else if ($('#IniMasPluginObj', doc).length) {
+			} else if (html.indexOf('IniMasPlugin') > 0) {
+				//html = html.replace(/<font.*?>|<\/font>/ig, '');
+				//html = html.replace(/<script language=".*">/ig, '<script>');
+				html = html.replace(
+					'activeControl(',
+					"var activeControl = function (a, b, c) {" +
+						"var d = document.createElement('div');" +
+						"d.innerHTML = \"<OBJECT ID='IniMasPluginObj'>\" + a;" +
+						"d.firstChild.innerHTML = b + c;" +
+						"document.getElementById('embedControl').appendChild(d);" +
+					"}("
+				);
+				//HACK: IE에서만 동작하는 function.js 이슈 회피.
+				if (!$('#IniMasPluginObj', doc).length) {
+					doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(html, document, true));
+				}
+
 				//TODO: use '#InitechSMMsgToReplace'?
 				this.vendor = new IniTech(
-					$('param[name="IniSMContents"]', doc).val().replace(/\\n/g, ''),
+					$('param[name="IniSMContents"]', doc).val().replace(/\n/g, ''),
 					$('param[name="AttachedFile"]', doc).val()
-				);
-			} else if (html.indexOf('IniMasPlugin') > 0) {
-				//HACK: IE에서만 동작하는 function.js 이슈 회피.
-				this.vendor = new IniTech(
-					html.match(/<PARAM NAME='IniSMContents' VALUE='([\w+\/=\\]+)'/i)[1].replace(/\\n/g, ''),
-					'' //html.match(/<PARAM NAME='AttachedFile' VALUE='([\w+\/=\\]+)'/i)[1].replace(/\\n/g, '')
-				);
+				);				
 			} else {
 				this.vendor = new Vendor();
 				parent.postMessage('fallback', '*');
 			}
+			doc.remove();
 			this.vendor.init();
 		},
 
