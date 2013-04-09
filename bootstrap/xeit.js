@@ -15,7 +15,7 @@ var xeit = (function () {
 
 		render: function (content) {
 			return this.encode(content);
-		}
+		},
 
 		encode: function (content) {
 			// 메일 본문 인코딩 변환.
