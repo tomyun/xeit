@@ -13,22 +13,19 @@ var xeit = (function () {
 	Vendor.prototype = {
 		init: function () {},
 
+		render: function (content) {
+			return this.encode(content);
+		}
+
 		encode: function (content) {
+			// 메일 본문 인코딩 변환.
 			var message = CryptoJS.enc.Latin1.stringify(content);
 			if (message.match(/utf-8/i)) {
-				message = CryptoJS.enc.Utf8.stringify(content);
+				return CryptoJS.enc.Utf8.stringify(content);
 			} else {
 				message = CryptoJS.enc.CP949.stringify(content);
-	        	message = message.replace(/euc-kr/ig, 'utf-8');
+	        	return message.replace(/euc-kr/ig, 'utf-8');
 			}
-
-			//HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
-			// message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
-			var offset = /[\n\r]{3,}/.exec(message);
-			if (offset) {
-				message = message.slice(offset.index);
-			}
-			return message;
 		}
 	};
 
@@ -52,6 +49,15 @@ var xeit = (function () {
 			if (contentType == 'application/pkcs7-mime') {
 				this.decrypt = function (password) {
 					return this.decryptSMIME(this.smime_body, password);
+				};
+
+				this.render = function (content) {
+					message = this.encode(content);
+
+					//HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
+					// message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
+					var offset = /[\n\r]{3,}/.exec(message);
+					return offset ? message.slice(offset.index) : message;
 				};
 			} else if (contentType == 'application/x-pwd') {
 				var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
@@ -250,11 +256,9 @@ var xeit = (function () {
 
 		decrypt: function (password) {
 			var decryptedContent = this.vendor.decrypt(password);
-			console.log(decryptedContent)
-			// 메일 본문 인코딩 변환.
-			var encodedContent = this.vendor.encode(decryptedContent);
-			console.log(encodedContent)
-			return encodedContent;
+			var renderedContent = this.vendor.render(decryptedContent);
+			console.log(renderedContent)
+			return renderedContent;
 		}
 	};
 })();
