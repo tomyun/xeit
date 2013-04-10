@@ -14,6 +14,7 @@
 		<script src='https://raw.github.com/lapo-luchini/asn1js/master/asn1.js'></script>
 		<script src='https://raw.github.com/lapo-luchini/asn1js/master/base64.js'></script>
 		<script src='https://raw.github.com/lapo-luchini/asn1js/master/oids.js'></script>
+		<script src='https://raw.github.com/jugglinmike/srcdoc-polyfill/master/srcdoc-polyfill.min.js'></script>
 		<script src='xeit.js'></script>
 		<script>
 			function init() {
@@ -37,12 +38,15 @@
 						$('#auth-password-help').text('다시 입력해보세요!');
 						return;
 					}
-					$('#mail-content').attr('srcdoc', message);
+
+					//HACK: Firefox는 아직 iframe srcdoc 미지원.
+					//$('#mail-content').attr('srcdoc', message);
+					srcDoc.set($('#mail-content')[0], message);
 
 					//HACK: 로딩 지연시 프레임 잘리는 현상 방지.
-					$('#mail-content').height(window.document.height);
+					$('#mail-content').height(window.innerHeight);
 					$('#mail-content').load(function () {
-						var height = $('#mail-content')[0].contentDocument.height
+						var height = $('#mail-content')[0].contentDocument.documentElement.scrollHeight
 						$('#mail-content').height(height);
 					});
 
