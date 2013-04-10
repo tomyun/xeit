@@ -1,132 +1,132 @@
 <!DOCTYPE html>
 <html lang='ko'>
-	<head>
-		<meta charset='utf-8'>
-		<title>Xeit</title>
-		<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-		<link rel='stylesheet' href='css/bootstrap.min.css' media='screen'>
-		<script src='http://code.jquery.com/jquery.js'></script>
-		<script src='js/bootstrap.min.js'></script>
-		<script src='http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha1.js'></script>
-		<script src='http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js'></script>
-		<script src='https://raw.github.com/tomyun/crypto-js/seed/src/seed.js'></script>
-		<script src='https://raw.github.com/tomyun/crypto-js/seed/src/enc-cp949.js'></script>
-		<script src='https://raw.github.com/lapo-luchini/asn1js/master/asn1.js'></script>
-		<script src='https://raw.github.com/lapo-luchini/asn1js/master/base64.js'></script>
-		<script src='https://raw.github.com/lapo-luchini/asn1js/master/oids.js'></script>
-		<script src='https://raw.github.com/jugglinmike/srcdoc-polyfill/master/srcdoc-polyfill.min.js'></script>
-		<script src='xeit.js'></script>
-		<script>
-			function init() {
-				window.addEventListener('message', function (e) {
-					xeit.init(e.data);
-					updateAuthDialog();
-				}, false)
-			}
+    <head>
+        <meta charset='utf-8'>
+        <title>Xeit</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <link rel='stylesheet' href='css/bootstrap.min.css' media='screen'>
+        <script src='http://code.jquery.com/jquery.js'></script>
+        <script src='js/bootstrap.min.js'></script>
+        <script src='http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha1.js'></script>
+        <script src='http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/tripledes.js'></script>
+        <script src='https://raw.github.com/tomyun/crypto-js/seed/src/seed.js'></script>
+        <script src='https://raw.github.com/tomyun/crypto-js/seed/src/enc-cp949.js'></script>
+        <script src='https://raw.github.com/lapo-luchini/asn1js/master/asn1.js'></script>
+        <script src='https://raw.github.com/lapo-luchini/asn1js/master/base64.js'></script>
+        <script src='https://raw.github.com/lapo-luchini/asn1js/master/oids.js'></script>
+        <script src='https://raw.github.com/jugglinmike/srcdoc-polyfill/master/srcdoc-polyfill.min.js'></script>
+        <script src='xeit.js'></script>
+        <script>
+            function init() {
+                window.addEventListener('message', function (e) {
+                    xeit.init(e.data);
+                    updateAuthDialog();
+                }, false)
+            }
 
-			function setupAuthDialog() {
-				$('#auth-dialog').modal({backdrop: 'static', keyboard: 'false'});
+            function setupAuthDialog() {
+                $('#auth-dialog').modal({backdrop: 'static', keyboard: 'false'});
 
-				$('#auth-submit').on('click', function (e) {
-					e.preventDefault();
+                $('#auth-submit').on('click', function (e) {
+                    e.preventDefault();
 
-					var password = $('#auth-password').val();
-					try {
-						var message = xeit.load(password);
-					} catch (e) {
-						$('#auth-password-group').addClass('error');
-						$('#auth-password-help').text(e.message);
-						return;
-					}
+                    var password = $('#auth-password').val();
+                    try {
+                        var message = xeit.load(password);
+                    } catch (e) {
+                        $('#auth-password-group').addClass('error');
+                        $('#auth-password-help').text(e.message);
+                        return;
+                    }
 
-					//HACK: Firefox는 아직 iframe srcdoc 미지원.
-					//$('#mail-content').attr('srcdoc', message);
-					srcDoc.set($('#mail-content')[0], message);
+                    //HACK: Firefox는 아직 iframe srcdoc 미지원.
+                    //$('#mail-content').attr('srcdoc', message);
+                    srcDoc.set($('#mail-content')[0], message);
 
-					//HACK: 로딩 지연시 프레임 잘리는 현상 방지.
-					$('#mail-content').height(window.innerHeight);
-					$('#mail-content').load(function () {
-						var height = $('#mail-content')[0].contentDocument.documentElement.scrollHeight
-						$('#mail-content').height(height);
-					});
+                    //HACK: 로딩 지연시 프레임 잘리는 현상 방지.
+                    $('#mail-content').height(window.innerHeight);
+                    $('#mail-content').load(function () {
+                        var height = $('#mail-content')[0].contentDocument.documentElement.scrollHeight
+                        $('#mail-content').height(height);
+                    });
 
-					$('#auth-dialog').modal('hide');
-				});
+                    $('#auth-dialog').modal('hide');
+                });
 
-				$('#auth-password').on('focus', function (e) {
-					$('#auth-password-group').removeClass('error');
-					$('#auth-password-help').text('');
-				});
-			}
+                $('#auth-password').on('focus', function (e) {
+                    $('#auth-password-group').removeClass('error');
+                    $('#auth-password-help').text('');
+                });
+            }
 
-			function updateAuthDialog() {
-				var sender = xeit.vendor.sender;
-				$('#auth-sender-name').val(sender['name']);
-				if (sender['support']) {
-					$('#auth-sender-support').addClass('label-success').text('지원');
-				} else {
-					$('#auth-sender-support').addClass('label-important').text('미지원');
-					$('#auth-password').prop('disabled', true);
-					$('#auth-submit').addClass('disabled');
-				}
-			}
+            function updateAuthDialog() {
+                var sender = xeit.vendor.sender;
+                $('#auth-sender-name').val(sender['name']);
+                if (sender['support']) {
+                    $('#auth-sender-support').addClass('label-success').text('지원');
+                } else {
+                    $('#auth-sender-support').addClass('label-important').text('미지원');
+                    $('#auth-password').prop('disabled', true);
+                    $('#auth-submit').addClass('disabled');
+                }
+            }
 
-			function finish() {
-				window.parent.postMessage('ready', '*');
-			}
+            function finish() {
+                window.parent.postMessage('ready', '*');
+            }
 
-			$(document).ready(function () {
-				init();
-				setupAuthDialog();
-				finish();
-			});
-		</script>
-	</head>
-	<body>
-		<div class='navbar navbar-static-top navbar-inverse'>
-			<div class='navbar-inner'>
-				<a href='#' class='brand'>Xeit</a>
-				<ul class='nav'>
-					<li class='active'><a href='#mail' data-toggle='tab'>보안메일</a></li>
-					<li><a href='#help' data-toggle='tab'>도움말</a></li>
-				</ul>
-			</div>
-		</div>
+            $(document).ready(function () {
+                init();
+                setupAuthDialog();
+                finish();
+            });
+        </script>
+    </head>
+    <body>
+        <div class='navbar navbar-static-top navbar-inverse'>
+            <div class='navbar-inner'>
+                <a href='#' class='brand'>Xeit</a>
+                <ul class='nav'>
+                    <li class='active'><a href='#mail' data-toggle='tab'>보안메일</a></li>
+                    <li><a href='#help' data-toggle='tab'>도움말</a></li>
+                </ul>
+            </div>
+        </div>
 
-		<div class='tab-content'>
-			<div id='mail' class='tab-pane active'>
-				<iframe id='mail-content' style='width: 100%; height: 100%; border: 0;'></iframe>
+        <div class='tab-content'>
+            <div id='mail' class='tab-pane active'>
+                <iframe id='mail-content' style='width: 100%; height: 100%; border: 0;'></iframe>
 
-				<div id='auth-dialog' class='modal hide fade'>
-					<div class='modal-header'>
-						<h3>보안메일</h3>
-					</div>
-					<div class='modal-body'>
-						<form id='auth-form' class='form-horizontal'>
-							<div class='control-group'>
-								<label class='control-label' for='auth-password'>보낸 곳</label>
-								<div class='controls'>
-									<input type='text' id='auth-sender-name' disabled> <span class='help-inline'><span id='auth-sender-support' class='label'></span></span>
-								</div>
-							</div>
-							<div id='auth-password-group' class='control-group'>
-								<label class='control-label' for='auth-password'>비밀번호</label>
-								<div class='controls'>
-									<input type='password' id='auth-password' placeholder='주민등록번호 뒤 7자리' pattern='[0-9]{7}' required> <span id='auth-password-help' class='help-inline'></span>
-								</div>
-							</div>
-						</form>
+                <div id='auth-dialog' class='modal hide fade'>
+                    <div class='modal-header'>
+                        <h3>보안메일</h3>
+                    </div>
+                    <div class='modal-body'>
+                        <form id='auth-form' class='form-horizontal'>
+                            <div class='control-group'>
+                                <label class='control-label' for='auth-password'>보낸 곳</label>
+                                <div class='controls'>
+                                    <input type='text' id='auth-sender-name' disabled> <span class='help-inline'><span id='auth-sender-support' class='label'></span></span>
+                                </div>
+                            </div>
+                            <div id='auth-password-group' class='control-group'>
+                                <label class='control-label' for='auth-password'>비밀번호</label>
+                                <div class='controls'>
+                                    <input type='password' id='auth-password' placeholder='주민등록번호 뒤 7자리' pattern='[0-9]{7}' required> <span id='auth-password-help' class='help-inline'></span>
+                                </div>
+                            </div>
+                        </form>
 
-						<p class='muted'><i class='icon-info-sign'></i> 비밀번호와 메일 내용은 외부로 전송하거나 저장하지 않으니 걱정마세요.</p>
-					</div>
-					<div class='modal-footer'>
-						<a href='#' id='auth-submit' class='btn btn-primary'>열어보기</a>
-					</div>
-				</div>
-			</div>
-			<div id='help' class='tab-pane'>
-				<h3>도움말</h3>
-			</div>
-		</div>
-	</body>
+                        <p class='muted'><i class='icon-info-sign'></i> 비밀번호와 메일 내용은 외부로 전송하거나 저장하지 않으니 걱정마세요.</p>
+                    </div>
+                    <div class='modal-footer'>
+                        <a href='#' id='auth-submit' class='btn btn-primary'>열어보기</a>
+                    </div>
+                </div>
+            </div>
+            <div id='help' class='tab-pane'>
+                <h3>도움말</h3>
+            </div>
+        </div>
+    </body>
 </html>
