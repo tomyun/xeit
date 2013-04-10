@@ -102,6 +102,8 @@ var xeit = (function () {
 				{ iv: iv }
 			);
 
+			this.verify(decryptedKey);
+
 			// 대칭키로 암호화된 메일 본문 복호화.
 			var encryptedContentInfo = envelopedData.sub[2];
 			var contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d;
@@ -124,6 +126,8 @@ var xeit = (function () {
 				{ iv: iv }
 			);
 
+			this.verify(decryptedKey);
+
 			var encryptedContent = CryptoJS.enc.Base64.parse(content);
 			var decryptedContent = CryptoJS.SEED.decrypt(
 				{ ciphertext: encryptedContent },
@@ -131,6 +135,31 @@ var xeit = (function () {
 				{ iv: iv }
 			);
 			return decryptedContent;
+		},
+
+		verify: function (content) {
+			function value(index) {
+				return content.words[index >>> 2] >>> ((3 - index % 4) * 8) & 0xff;
+			}
+
+			var last = content.words.length * 4 - 1;
+			if (last > 0) {
+				var length = value(last);
+				if (0x01 <= length && length <= 0x10) {
+					var pads = [];
+					for (var i = 0; i < length; i++) {
+						pads.push(value(last - i));
+					}
+					if (pads.every(function (element, index, array) {
+						return (element == length);
+					})) {
+						return;
+					}
+				}
+			}
+
+			// PKCS#5/#7 padding이 잘못 되어 있으면 비밀번호 오류로 간주.
+			throw Error('다시 입력해주세요!');
 		},
 
 		render: function (content) {
@@ -213,6 +242,8 @@ var xeit = (function () {
 				PKCS5Padding: CryptoJS.pad.Pkcs7,
 			}
 
+			this.verify('Initech');
+
 			return ciphers[this.header.cipher[0]].decrypt(
 				{
 					ciphertext: CryptoJS.enc.Latin1.parse(this.dataArea)
@@ -224,6 +255,22 @@ var xeit = (function () {
 					padding: paddings[this.header.cipher[2]]
 				}
 			);
+		},
+
+		verify: function (secret) {
+			if (ciphers[this.header.cipher[0]].decrypt(
+				{
+					ciphertext: CryptoJS.enc.Latin1.parse(this.checkArea)
+				},
+				key,
+				{
+					iv: CryptoJS.enc.Latin1.parse(this.header.iv),
+					mode: modes[this.header.cipher[1]],
+					padding: paddings[this.header.cipher[2]]
+				}
+			).toString(CryptoJS.enc.Latin1) != secret) {
+				throw Error('다시 입력해주세요!');
+			}
 		},
 
 		render: function (content) {

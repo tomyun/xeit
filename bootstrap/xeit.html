@@ -35,7 +35,7 @@
 						var message = xeit.load(password);
 					} catch (e) {
 						$('#auth-password-group').addClass('error');
-						$('#auth-password-help').text('다시 입력해보세요!');
+						$('#auth-password-help').text(e.message);
 						return;
 					}
 
