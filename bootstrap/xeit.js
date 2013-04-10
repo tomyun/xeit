@@ -50,15 +50,14 @@ var xeit = (function () {
     SoftForum.prototype = new Vendor('XecureExpress');
     $.extend(SoftForum.prototype, {
         init: function () {
-            var headerWords = CryptoJS.enc.Base64.parse(this.smime_header);
-            var header = CryptoJS.enc.CP949.stringify(headerWords);
-
-            var contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
-            if (contentType == 'application/pkcs7-mime') {
+            var headerWords = CryptoJS.enc.Base64.parse(this.smime_header),
+                header = CryptoJS.enc.CP949.stringify(headerWords),
+                contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
+            if (contentType === 'application/pkcs7-mime') {
                 this.decrypt = function (password) {
                     return this.decryptSMIME(this.smime_body, password);
                 };
-            } else if (contentType == 'application/x-pwd') {
+            } else if (contentType === 'application/x-pwd') {
                 var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
                 this.decrypt = function (password) {
                     return this.decryptPWD(key, this.smime_body, password);
@@ -85,15 +84,15 @@ var xeit = (function () {
                 return this.stream.parseStringISO(offset, offset + length);
             };
 
-            var der = Base64.unarmor(envelope);
-            var asn1 = ASN1.decode(der);
-            var envelopedData = asn1.sub[1].sub[0];
+            var der = Base64.unarmor(envelope),
+                asn1 = ASN1.decode(der),
+                envelopedData = asn1.sub[1].sub[0];
 
             // 주민등록번호로 암호화된 대칭키 복호화.
-            var recipientInfos = envelopedData.sub[1];
-            var keyTransportRecipientInfo = recipientInfos.sub[0];
-            var keyEncryptionAlgorithm = oids[keyTransportRecipientInfo.sub[2].sub[0].content()].d;
-            var encryptedKey = CryptoJS.enc.Latin1.parse(keyTransportRecipientInfo.sub[3].contentRaw());
+            var recipientInfos = envelopedData.sub[1],
+                keyTransportRecipientInfo = recipientInfos.sub[0],
+                keyEncryptionAlgorithm = oids[keyTransportRecipientInfo.sub[2].sub[0].content()].d,
+                encryptedKey = CryptoJS.enc.Latin1.parse(keyTransportRecipientInfo.sub[3].contentRaw());
             var passwordKey = CryptoJS.SHA1(password);
             var iv = CryptoJS.enc.Hex.parse("0");
             var decryptedKey = ciphers[keyEncryptionAlgorithm].decrypt(
@@ -105,9 +104,9 @@ var xeit = (function () {
             this.verify(decryptedKey);
 
             // 대칭키로 암호화된 메일 본문 복호화.
-            var encryptedContentInfo = envelopedData.sub[2];
-            var contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d;
-            var encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
+            var encryptedContentInfo = envelopedData.sub[2],
+                contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d,
+                encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
             var decryptedContent = ciphers[contentEncryptionAlgorithm].decrypt(
                 { ciphertext: encryptedContent },
                 decryptedKey,
@@ -201,14 +200,14 @@ var xeit = (function () {
 
             this.header = {
                 version: blob.read(9),
-                count: parseInt(blob.read(1)),
+                count: parseInt(blob.read(1), 10),
                 company: blob.read(2),
                 cipher: blob.read(25, true).split('/'),
                 hasher: blob.read(20, true),
                 iv: blob.read(30),
                 vendor: blob.read(20),
-                checkAreaLength: parseInt(blob.read(10)),
-                dataAreaLength: parseInt(blob.read(10))
+                checkAreaLength: parseInt(blob.read(10), 10),
+                dataAreaLength: parseInt(blob.read(10), 10)
             };
 
             this.checkArea = blob.read(this.header.checkAreaLength);
@@ -223,7 +222,7 @@ var xeit = (function () {
 
         decrypt: function (password) {
             var hashers = {
-                MD5: CryptoJS.MD5,
+                MD5: CryptoJS.MD5
             };
             var saltedKey1 = this.sender.salt + '|' + password;
             var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
@@ -231,16 +230,16 @@ var xeit = (function () {
             var key = hashers[this.header.hasher](CryptoJS.enc.Latin1.parse(saltedKey2));
 
             var ciphers = {
-                SEED: CryptoJS.SEED,
+                SEED: CryptoJS.SEED
             };
 
             var modes = {
-                CBC: CryptoJS.mode.CBC,
+                CBC: CryptoJS.mode.CBC
             };
 
             var paddings = {
-                PKCS5Padding: CryptoJS.pad.Pkcs7,
-            }
+                PKCS5Padding: CryptoJS.pad.Pkcs7
+            };
 
             this.verify('Initech');
 
@@ -299,7 +298,7 @@ var xeit = (function () {
 
     return {
         init: function (html) {
-            var $doc = $.parseHTML(html)
+            var $doc = $.parseHTML(html);
             if ($('#XEIViewer', $doc).length) {
                 this.vendor = new SoftForum(
                     $('param[name="smime_header"]', $doc).val().replace(/\n/g, ''),
