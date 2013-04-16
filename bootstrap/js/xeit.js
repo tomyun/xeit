@@ -164,9 +164,8 @@ var xeit = (function () {
         render: function (content) {
             var message = this.encode(content);
 
-            //HACK: DOCTYPE 없는 메일도 있으니 헤더와 본문 사이의 줄바꿈으로 인식.
-            // message = message.replace(/[\s\S]*(<!DOCTYPE)/i, "$1")
-            var offset = /[\n\r]{3,}/.exec(message);
+            //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
+            var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
             return offset ? message.slice(offset.index) : message;
         }
     });
