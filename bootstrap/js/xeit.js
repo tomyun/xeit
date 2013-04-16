@@ -58,9 +58,11 @@ var xeit = (function () {
                     return this.decryptSMIME(this.smime_body, password);
                 };
             } else if (contentType === 'application/x-pwd') {
-                var key = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i)[2];
+                var match = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i);
+                var kind = parseInt(match[1]);
+                var key = match[2];
                 this.decrypt = function (password) {
-                    return this.decryptPWD(key, this.smime_body, password);
+                    return this.decryptPWD(kind, key, this.smime_body, password);
                 };
             }
 
@@ -68,6 +70,7 @@ var xeit = (function () {
                 'TRUEFRIEND': { name: '한국투자증권', support: true },
                 '보안메일': { name: 'KB카드', support: true },
                 'HyundaiCard': { name: '현대카드', support: true }
+                '신한카드 보안메일': { name: '신한카드', support: true }
             };
             this.sender = senders[this.ui_desc] || this.sender;
         },
@@ -115,11 +118,16 @@ var xeit = (function () {
             return decryptedContent;
         },
 
-        decryptPWD: function (key, content, password) {
+        decryptPWD: function (kind, key, content, password) {
+            var ciphers = {
+                0: CryptoJS.DES,
+                10: CryptoJS.SEED
+            };
+
             var encryptedKey = CryptoJS.enc.Base64.parse(key);
             var passwordKey = CryptoJS.SHA1(password);
             var iv = CryptoJS.enc.Hex.parse("0");
-            var decryptedKey = CryptoJS.SEED.decrypt(
+            var decryptedKey = ciphers[kind].decrypt(
                 { ciphertext: encryptedKey },
                 passwordKey,
                 { iv: iv }
@@ -128,7 +136,7 @@ var xeit = (function () {
             this.verify(decryptedKey);
 
             var encryptedContent = CryptoJS.enc.Base64.parse(content);
-            var decryptedContent = CryptoJS.SEED.decrypt(
+            var decryptedContent = ciphers[kind].decrypt(
                 { ciphertext: encryptedContent },
                 decryptedKey,
                 { iv: iv }
