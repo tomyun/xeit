@@ -72,7 +72,7 @@ var xeit = (function () {
                 '보안메일': { name: 'KB카드', support: true },
                 '신한카드 보안메일': { name: '신한카드', support: true }
             };
-            this.sender = senders[this.ui_desc] || this.sender;
+            this.sender = senders[this.ui_desc] || ((this.ui_desc) ? { name: this.ui_desc, support: false } : this.sender);
         },
 
         decryptSMIME: function (envelope, password) {
