@@ -211,8 +211,8 @@ var xeit = (function () {
                 company: blob.read(2),
                 cipher: blob.read(25, true).split('/'),
                 hasher: blob.read(20, true),
-                iv: blob.read(30),
-                vendor: blob.read(20),
+                iv: CryptoJS.enc.Base64.parse(blob.read(30)),
+                keygen: blob.read(20, true),
                 checkAreaLength: parseInt(blob.read(10), 10),
                 dataAreaLength: parseInt(blob.read(10), 10)
             };
@@ -222,57 +222,66 @@ var xeit = (function () {
 
             var senders = {
                 CC: { name: '우리은행 BC카드', support: true, salt: 'bccard', ignore_replacer: true },
+                TC: { name: 'SKT', support: true, salt: 'SKT' },
                 TH: { name: 'KT', support: true, salt: 'ktbill' }
             };
-            this.sender = senders[this.header.company] || this.sender;
+            this.sender = senders[this.header.company] || ((this.header.company) ? { name: this.header.company, support: false } : this.sender);
+        },
+
+        hashers: {
+            MD5: CryptoJS.MD5,
+            HMACwithSHA1: CryptoJS.HmacSHA1
+        },
+
+        ciphers: {
+            SEED: CryptoJS.SEED
+        },
+
+        modes: {
+            CBC: CryptoJS.mode.CBC
+        },
+
+        paddings: {
+            PKCS5Padding: CryptoJS.pad.Pkcs7
         },
 
         decrypt: function (password) {
-            var hashers = {
-                MD5: CryptoJS.MD5
-            };
-            var saltedKey1 = this.sender.salt + '|' + password;
-            var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
-            var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
-            var key = hashers[this.header.hasher](CryptoJS.enc.Latin1.parse(saltedKey2));
+            console.log(this.sender)
 
-            var ciphers = {
-                SEED: CryptoJS.SEED
-            };
+            if (this.header.keygen == 'INITECH') {
+                var saltedKey1 = this.sender.salt + '|' + password;
+                var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
+                var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
+                var key = this.hashers[this.header.hasher](CryptoJS.enc.Latin1.parse(saltedKey2), CryptoJS.enc.Latin1.parse(saltedKey2));
+            } else if (this.header.keygen == 'PBKDF2') {
+                var key = CryptoJS.PBKDF2(password, this.header.iv, { keySize: 128/32, iterations: 5139 });
+            }
 
-            var modes = {
-                CBC: CryptoJS.mode.CBC
-            };
+            this.verify('Initech', key);
 
-            var paddings = {
-                PKCS5Padding: CryptoJS.pad.Pkcs7
-            };
-
-            this.verify('Initech');
-
-            return ciphers[this.header.cipher[0]].decrypt(
+            return this.ciphers[this.header.cipher[0]].decrypt(
                 {
                     ciphertext: CryptoJS.enc.Latin1.parse(this.dataArea)
                 },
                 key,
                 {
-                    iv: CryptoJS.enc.Latin1.parse(this.header.iv),
-                    mode: modes[this.header.cipher[1]],
-                    padding: paddings[this.header.cipher[2]]
+                    iv: this.header.iv,
+                    mode: this.modes[this.header.cipher[1]],
+                    padding: this.paddings[this.header.cipher[2]]
                 }
             );
         },
 
-        verify: function (secret) {
-            if (ciphers[this.header.cipher[0]].decrypt(
+        verify: function (secret, key) {
+            if (this.ciphers[this.header.cipher[0]].decrypt(
                 {
                     ciphertext: CryptoJS.enc.Latin1.parse(this.checkArea)
                 },
                 key,
                 {
-                    iv: CryptoJS.enc.Latin1.parse(this.header.iv),
-                    mode: modes[this.header.cipher[1]],
-                    padding: paddings[this.header.cipher[2]]
+                    iv: this.header.iv,
+                    mode: this.modes[this.header.cipher[1]],
+                    padding: this.paddings[this.header.cipher[2]]
                 }
             ).toString(CryptoJS.enc.Latin1) != secret) {
                 throw Error('다시 입력해주세요!');
@@ -289,16 +298,22 @@ var xeit = (function () {
                 ''
             );
 
-            if (this.sender.ignore_replacer) {
-                return rendered.replace(
-                    /<body[\s\S]*?<\/body>/i,
-                    '<body>' + message + '</body>'
-                );
+            var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
+            if (offset) {
+                //HACK: 온전한 HTML 문서이면 그대로 표출.
+                return message.slice(offset.index);
             } else {
-                return rendered.replace(
-                    /id="InitechSMMsgToReplace">/,
-                    '>' + message
-                );
+                if (this.sender.ignore_replacer) {
+                    return rendered.replace(
+                        /<body[\s\S]*?<\/body>/i,
+                        '<body>' + message + '</body>'
+                    );
+                } else {
+                    return rendered.replace(
+                        /id="InitechSMMsgToReplace">/,
+                        '>' + message
+                    );
+                }
             }
         }
     });
@@ -312,7 +327,7 @@ var xeit = (function () {
                     $('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="ui_desc"]', $doc).val()
                 );
-            } else if (html.indexOf('IniMasPlugin') > 0) {
+            } else if (html.indexOf('IniMasPlugin') > 0 || html.indexOf('IniCrossMailObj') > 0) {
                 var body = html.replace(
                     /activeControl\(([\s]*['"])/,
                     "var activeControl = function (a, b, c) {" +
@@ -327,7 +342,7 @@ var xeit = (function () {
                 );
 
                 //HACK: IE에서만 동작하는 function.js 이슈 회피.
-                if (!$('#IniMasPluginObj', $doc).length) {
+                if (html.indexOf('function.js') > 0 && !$('#IniMasPluginObj', $doc).length) {
                     $doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
                 }
 
@@ -335,7 +350,7 @@ var xeit = (function () {
                     html,
                     $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="AttachedFile"]', $doc).val()
-                );              
+                );
             } else {
                 this.vendor = new Vendor();
                 parent.postMessage('fallback', '*');
