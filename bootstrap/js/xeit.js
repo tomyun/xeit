@@ -205,20 +205,43 @@ var xeit = (function () {
                 }
             };
 
+            var hashers = {
+                MD5: CryptoJS.MD5,
+                HMACwithSHA1: CryptoJS.HmacSHA1
+            };
+
+            var ciphers = {
+                SEED: CryptoJS.SEED
+            };
+
+            var modes = {
+                CBC: CryptoJS.mode.CBC
+            };
+
+            var paddings = {
+                PKCS5Padding: CryptoJS.pad.Pkcs7
+            };
+
             this.header = {
                 version: blob.read(9),
                 count: parseInt(blob.read(1), 10),
                 company: blob.read(2),
-                cipher: blob.read(25, true).split('/'),
-                hasher: blob.read(20, true),
+                algorithm: blob.read(25, true).split('/'),
+                hasher: hashers[blob.read(20, true)],
                 iv: CryptoJS.enc.Base64.parse(blob.read(30)),
                 keygen: blob.read(20, true),
                 checkAreaLength: parseInt(blob.read(10), 10),
                 dataAreaLength: parseInt(blob.read(10), 10)
             };
 
-            this.checkArea = blob.read(this.header.checkAreaLength);
-            this.dataArea = blob.read(this.header.dataAreaLength);
+            $.extend(this.header, {
+                cipher: ciphers[this.header.algorithm[0]],
+                mode: modes[this.header.algorithm[1]],
+                padding: paddings[this.header.algorithm[2]]
+            });
+
+            this.checkArea = CryptoJS.enc.Latin1.parse(blob.read(this.header.checkAreaLength));
+            this.dataArea = CryptoJS.enc.Latin1.parse(blob.read(this.header.dataAreaLength));
 
             var senders = {
                 CC: { name: '우리은행 BC카드', support: true, salt: 'bccard', ignore_replacer: true },
@@ -228,26 +251,7 @@ var xeit = (function () {
             this.sender = senders[this.header.company] || ((this.header.company) ? { name: this.header.company, support: false } : this.sender);
         },
 
-        hashers: {
-            MD5: CryptoJS.MD5,
-            HMACwithSHA1: CryptoJS.HmacSHA1
-        },
-
-        ciphers: {
-            SEED: CryptoJS.SEED
-        },
-
-        modes: {
-            CBC: CryptoJS.mode.CBC
-        },
-
-        paddings: {
-            PKCS5Padding: CryptoJS.pad.Pkcs7
-        },
-
         decrypt: function (password) {
-            console.log(this.sender)
-
             if (this.header.keygen == 'INITECH') {
                 var saltedKey1 = this.sender.salt + '|' + password;
                 var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
@@ -259,29 +263,29 @@ var xeit = (function () {
 
             this.verify('Initech', key);
 
-            return this.ciphers[this.header.cipher[0]].decrypt(
+            return this.header.cipher.decrypt(
                 {
-                    ciphertext: CryptoJS.enc.Latin1.parse(this.dataArea)
+                    ciphertext: this.dataArea
                 },
                 key,
                 {
                     iv: this.header.iv,
-                    mode: this.modes[this.header.cipher[1]],
-                    padding: this.paddings[this.header.cipher[2]]
+                    mode: this.header.mode,
+                    padding: this.header.padding
                 }
             );
         },
 
         verify: function (secret, key) {
-            if (this.ciphers[this.header.cipher[0]].decrypt(
+            if (this.header.cipher.decrypt(
                 {
-                    ciphertext: CryptoJS.enc.Latin1.parse(this.checkArea)
+                    ciphertext: this.checkArea
                 },
                 key,
                 {
                     iv: this.header.iv,
-                    mode: this.modes[this.header.cipher[1]],
-                    padding: this.paddings[this.header.cipher[2]]
+                    mode: this.header.mode,
+                    padding: this.header.padding
                 }
             ).toString(CryptoJS.enc.Latin1) != secret) {
                 throw Error('다시 입력해주세요!');
