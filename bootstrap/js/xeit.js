@@ -182,15 +182,55 @@ var xeit = (function () {
      * IniTech INISAFE Mail *
      ************************/
 
-    var IniTech = function (html, contents, attachedFile) {
+    var IniTech = function (html, contents, attachedFile, optData) {
         this.html = html || '';
         this.contents = contents || '';
         this.attachedFile = attachedFile || '';
+        this.optData = optData || '';
     };
 
     IniTech.prototype = new Vendor('INISAFE Mail');
     $.extend(IniTech.prototype, {
         init: function () {
+            var S = this.unpack();
+
+            this.checkArea = S.checkArea;
+            this.dataArea = S.dataArea;
+
+            this.hasher = {
+                MD5: CryptoJS.MD5,
+                SHA1: CryptoJS.SHA1
+            }[S.hash];
+
+            this.cipher = {
+                DES: CryptoJS.DES,
+                SEED: CryptoJS.SEED
+            }[S.crypto[0]];
+
+            this.mode = {
+                CBC: CryptoJS.mode.CBC
+            }[S.crypto[1]];
+
+            this.padding = {
+                PKCS5Padding: CryptoJS.pad.Pkcs7
+            }[S.crypto[2]];
+
+            this.sender = {
+                CC: { name: '우리은행 BC카드', support: true, salt: 'bccard', ignore_replacer: true },
+                TC: { name: 'SKT', support: true, salt: 'SKT' },
+                TH: { name: 'KT', support: true, salt: 'ktbill' }
+            }[S.company] || ((S.company) ? { name: S.company, support: false } : this.sender);
+
+            if (S.keygen == 'INITECH') {
+                this.iv = CryptoJS.enc.Latin1.parse(S.iv);
+                this.keygen = this.keygenINITECH;
+            } else if (S.keygen == 'PBKDF2') {
+                this.iv = CryptoJS.enc.Base64.parse(S.iv);
+                this.keygen = this.keygenPBKDF2;
+            }
+        },
+
+        unpack: function () {
             var blob = {
                 src: CryptoJS.enc.Base64.parse(this.contents).toString(CryptoJS.enc.Latin1),
                 offset: 0,
@@ -204,88 +244,60 @@ var xeit = (function () {
                     return trim ? $.trim(value.split('\0')[0]) : value;
                 }
             };
-
-            var hashers = {
-                MD5: CryptoJS.MD5,
-                HMACwithSHA1: CryptoJS.HmacSHA1
-            };
-
-            var ciphers = {
-                SEED: CryptoJS.SEED
-            };
-
-            var modes = {
-                CBC: CryptoJS.mode.CBC
-            };
-
-            var paddings = {
-                PKCS5Padding: CryptoJS.pad.Pkcs7
-            };
-
-            this.header = {
+            var struct = {
                 version: blob.read(9),
                 count: parseInt(blob.read(1), 10),
                 company: blob.read(2),
-                algorithm: blob.read(25, true).split('/'),
-                hasher: hashers[blob.read(20, true)],
-                iv: CryptoJS.enc.Base64.parse(blob.read(30)),
+                crypto: blob.read(25, true).split('/'),
+                hash: blob.read(20, true),
+                iv: blob.read(30),
                 keygen: blob.read(20, true),
                 checkAreaLength: parseInt(blob.read(10), 10),
                 dataAreaLength: parseInt(blob.read(10), 10)
             };
+            struct.checkArea = CryptoJS.enc.Latin1.parse(blob.read(struct.checkAreaLength));
+            struct.dataArea = CryptoJS.enc.Latin1.parse(blob.read(struct.dataAreaLength));
+            return struct;
+        },
 
-            $.extend(this.header, {
-                cipher: ciphers[this.header.algorithm[0]],
-                mode: modes[this.header.algorithm[1]],
-                padding: paddings[this.header.algorithm[2]]
-            });
+        keygenINITECH: function (password) {
+            var saltedKey1 = this.sender.salt + '|' + password;
+            var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
+            var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
+            return this.hasher(CryptoJS.enc.Latin1.parse(saltedKey2));
+        },
 
-            this.checkArea = CryptoJS.enc.Latin1.parse(blob.read(this.header.checkAreaLength));
-            this.dataArea = CryptoJS.enc.Latin1.parse(blob.read(this.header.dataAreaLength));
-
-            var senders = {
-                CC: { name: '우리은행 BC카드', support: true, salt: 'bccard', ignore_replacer: true },
-                TC: { name: 'SKT', support: true, salt: 'SKT' },
-                TH: { name: 'KT', support: true, salt: 'ktbill' }
-            };
-            this.sender = senders[this.header.company] || ((this.header.company) ? { name: this.header.company, support: false } : this.sender);
+        keygenPBKDF2: function (password) {
+            return CryptoJS.PBKDF2(password, this.iv, { keySize: 128/32, iterations: 5139 });
         },
 
         decrypt: function (password) {
-            if (this.header.keygen == 'INITECH') {
-                var saltedKey1 = this.sender.salt + '|' + password;
-                var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
-                var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
-                var key = this.hashers[this.header.hasher](CryptoJS.enc.Latin1.parse(saltedKey2), CryptoJS.enc.Latin1.parse(saltedKey2));
-            } else if (this.header.keygen == 'PBKDF2') {
-                var key = CryptoJS.PBKDF2(password, this.header.iv, { keySize: 128/32, iterations: 5139 });
-            }
-
+            var key = this.keygen(password);
             this.verify('Initech', key);
 
-            return this.header.cipher.decrypt(
+            return this.cipher.decrypt(
                 {
                     ciphertext: this.dataArea
                 },
                 key,
                 {
-                    iv: this.header.iv,
-                    mode: this.header.mode,
-                    padding: this.header.padding
+                    iv: this.iv,
+                    mode: this.mode,
+                    padding: this.padding
                 }
             );
         },
 
         verify: function (secret, key) {
-            if (this.header.cipher.decrypt(
+            if (this.cipher.decrypt(
                 {
                     ciphertext: this.checkArea
                 },
                 key,
                 {
-                    iv: this.header.iv,
-                    mode: this.header.mode,
-                    padding: this.header.padding
+                    iv: this.iv,
+                    mode: this.mode,
+                    padding: this.padding
                 }
             ).toString(CryptoJS.enc.Latin1) != secret) {
                 throw Error('다시 입력해주세요!');
@@ -331,7 +343,8 @@ var xeit = (function () {
                     $('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="ui_desc"]', $doc).val()
                 );
-            } else if (html.indexOf('IniMasPlugin') > 0 || html.indexOf('IniCrossMailObj') > 0) {
+            } else if (html.indexOf('IniMasPlugin') > 0) {
+                //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
                 var body = html.replace(
                     /activeControl\(([\s]*['"])/,
                     "var activeControl = function (a, b, c) {" +
@@ -344,16 +357,19 @@ var xeit = (function () {
                     /^[\s\S]*<body.*?>|<\/body>[\s\S]*$/ig,
                     ''
                 );
-
-                //HACK: IE에서만 동작하는 function.js 이슈 회피.
-                if (html.indexOf('function.js') > 0 && !$('#IniMasPluginObj', $doc).length) {
-                    $doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
-                }
+                $doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
 
                 this.vendor = new IniTech(
                     html,
                     $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="AttachedFile"]', $doc).val()
+                );
+            } else if (html.indexOf('IniCrossMailObj') > 0) {
+                this.vendor = new IniTech(
+                    html,
+                    $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
+                    $('param[name="AttachedFile"]', $doc).val(),
+                    $('param[name="OptData"]', $doc).val()
                 );
             } else {
                 this.vendor = new Vendor();
