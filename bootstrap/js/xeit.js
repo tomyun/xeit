@@ -66,13 +66,12 @@ var xeit = (function () {
                 };
             }
 
-            var senders = {
+            this.sender = {
                 'HyundaiCard': { name: '현대카드', support: true },
                 'TRUEFRIEND': { name: '한국투자증권', support: true },
                 '보안메일': { name: 'KB카드', support: true },
                 '신한카드 보안메일': { name: '신한카드', support: true }
-            };
-            this.sender = senders[this.ui_desc] || ((this.ui_desc) ? { name: this.ui_desc, support: false } : this.sender);
+            }[this.ui_desc] || ((this.ui_desc) ? { name: this.ui_desc, support: false } : this.sender);
         },
 
         decryptSMIME: function (envelope, password) {
