@@ -165,7 +165,7 @@ var xeit = (function () {
             }
 
             // PKCS#5/#7 padding이 잘못 되어 있으면 비밀번호 오류로 간주.
-            throw Error('다시 입력해주세요!');
+            throw Error('다시 입력해보세요!');
         },
 
         render: function (content) {
@@ -299,7 +299,7 @@ var xeit = (function () {
                     padding: this.padding
                 }
             ).toString(CryptoJS.enc.Latin1) != secret) {
-                throw Error('다시 입력해주세요!');
+                throw Error('다시 입력해보세요!');
             }
         },
 
