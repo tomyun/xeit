@@ -1,3 +1,5 @@
+/* NavBar */
+
 body > .navbar {
   font-size: 13px;
 }
@@ -14,4 +16,13 @@ body > .navbar .brand:hover {
   color: #999;
   text-decoration: none;
   text-shadow: 0 1px 0 rgba(255,255,255,.1), 0 0 30px rgba(255,255,255,.4);
+}
+
+/* Footer */
+
+.footer {
+  padding: 30px 0;
+  margin-top: 70px;
+  border-top: 1px solid #e5e5e5;
+  background-color: #f5f5f5;
 }
