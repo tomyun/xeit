@@ -7,7 +7,7 @@ var xeit = (function () {
 
     var Vendor = function (product) {
         this.product = product || '';
-        this.sender = { name: '?', support: false };
+        this.sender = { name: '?', support: false, hint: '-', keylen: 0 };
     };
 
     Vendor.prototype = {
@@ -67,11 +67,12 @@ var xeit = (function () {
             }
 
             this.sender = {
-                'HyundaiCard': { name: '현대카드', support: true },
-                'TRUEFRIEND': { name: '한국투자증권', support: true },
-                '보안메일': { name: 'KB카드', support: true },
-                '신한카드 보안메일': { name: '신한카드', support: true }
-            }[this.ui_desc] || ((this.ui_desc) ? { name: this.ui_desc, support: false } : this.sender);
+                'HyundaiCard': { name: '현대카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                'TRUEFRIEND': { name: '한국투자증권', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                '보안메일': { name: 'KB카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                '신한카드 보안메일': { name: '신한카드', support: true, hint: '주민등록번호 뒤', keylen: 7 }
+            }[this.ui_desc] || ((this.ui_desc) ? $.extend({}, this.sender, { name: this.ui_desc })
+                                               : this.sender);
         },
 
         decryptSMIME: function (envelope, password) {
@@ -215,10 +216,11 @@ var xeit = (function () {
             }[S.crypto[2]];
 
             this.sender = {
-                CC: { name: '우리은행 BC카드', support: true, salt: 'bccard', ignore_replacer: true },
-                TC: { name: 'SKT', support: true, salt: 'SKT' },
-                TH: { name: 'KT', support: true, salt: 'ktbill' }
-            }[S.company] || ((S.company) ? { name: S.company, support: false } : this.sender);
+                CC: { name: '우리은행 (BC카드)', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'bccard', ignore_replacer: true },
+                TC: { name: 'SKT', support: true, hint: '주민등록번호 앞 또는 뒤', keylen: '6,7', salt: 'SKT' },
+                TH: { name: 'KT', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'ktbill' }
+            }[S.company] || ((S.company) ? $.extend({}, this.sender, { name: S.company, hint: S.keygen })
+                                         : this.sender);
 
             if (S.keygen == 'INITECH') {
                 this.iv = CryptoJS.enc.Latin1.parse(S.iv);

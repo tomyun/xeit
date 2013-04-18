@@ -44,13 +44,23 @@
 
             function updateAuthDialog() {
                 var sender = xeit.vendor.sender;
+
+                // 발송기관 표시.
                 $('#auth-sender-name').val(sender['name']);
                 if (sender['support']) {
                     $('#auth-sender-support').addClass('label-success').text('지원');
                 } else {
                     $('#auth-sender-support').addClass('label-important').text('미지원');
-                    $('#auth-password').prop('disabled', true);
                     $('#auth-submit').addClass('disabled');
+                }
+
+                // 비밀번호 설명 표시.
+                if (sender['keylen']) {
+                    $('#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'] + '자리)')
+                                       .prop('pattern', '[0-9]{' + sender['keylen'] + '}');
+                } else {
+                    $('#auth-password').prop('placeholder', sender['hint'])
+                                       .prop('disabled', true);
                 }
             }
 
@@ -122,7 +132,7 @@
                             <div id='auth-password-group' class='control-group'>
                                 <label class='control-label' for='auth-password'>비밀번호</label>
                                 <div class='controls'>
-                                    <input type='password' id='auth-password' placeholder='주민등록번호 뒤 7자리' pattern='[0-9]{7}' required> <span id='auth-password-help' class='help-inline'></span>
+                                    <input type='password' id='auth-password' required> <span id='auth-password-help' class='help-inline'></span>
                                 </div>
                             </div>
                         </form>
