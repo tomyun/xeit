@@ -153,10 +153,10 @@
                         <div class='span10 offset1'>
                             <section id='faq'>
                                 <div class='page-header'>
-                                    <h2>FAQ</h2>
+                                    <h2>FAQ <small>자주 하는 질문</small></h2>
                                 </div>
                                 <dl>
-                                    <dt>이게 뭔데요?</dt>
+                                    <dt>이게 뭔가요?</dt>
                                     <dd>
                                         <p><strong>Xeit</strong>는 금융기관들이 보내주는 거래명세서 등의 보안메일을 인터넷 익스플로러가 아닌 사파리나 크롬, 파이어폭스에서도 열어볼 수 있게 해주는 서비스입니다.</p>
                                     </dd>
@@ -164,49 +164,95 @@
                                     <dd>
                                         <p>국내에서 사용하는 대다수의 보안메일은 윈도의 인터넷 익스플로러에 ActiveX 플러그인을 설치해야만 볼 수 있도록 되어 있습니다. 다른 OS나 브라우저를 사용하는 사람들은 볼 수 있는 방법이 없었지요.</p>
                                     </dd>
-                                    <dt>어떻게 쓰는거죠?</dt>
+                                    <dt>어떻게 보는거죠?</dt>
                                     <dd>
-                                        <p>일단 웹 브라우저의 즐겨찾기에 <strong>Xeit</strong>의 북마클릿을 등록해놓습니다. 그리고 보안메일의 첨부파일을 열어보면 빈 화면이나 ActiveX 설치 안내 문구가 나올텐데요. 이때 좀전에 등록했던 북마클릿을 누르면 비밀번호 입력 화면으로 바뀌면서 보안메일을 읽을 수 있게 됩니다.</p>
+                                        <p>인터넷 익스플로러가 아닌 브라우저에서 보안메일의 첨부파일을 열어보면 빈 화면 또는 플러그인 설치 안내 화면이 나오는 것을 많이 보셨을 거에요. 이 상태에서 브라우저에 등록해놓은 <strong>Xeit</strong> 북마클릿을 누르면 비밀번호 입력 화면이 등장하면서 보안메일을 읽을 수 있게 됩니다.
+                                        </p>
+                                    </dt>
+                                    <dt>설치는 어찌하죠?</dt>
+                                        <p>일단 웹 브라우저 상단에 북마클릿을 넣을 수 있는 공간이 있는지 확인해보세요. 사파리에서는 책갈피 막대(Bookmarks Bar), 크롬에서는 북마크바(Bookmarks Bar), 파이어폭스에서는 북마크 도구모음(Bookmarks Toolbar)이라고 부르는 곳입니다. 맥이라면 <span class="label">⌥</span> + <span class="label">⌘</span> + <span class="label">B</span>를 눌러서 확인해볼 수도 있습니다. 그 다음에는 아래의 버튼을 끌어 넣으면 됩니다.</p>
+                                        <div class="well">
+                                            <p class="text-center"><a href="javascript:(function(){var%20xeit=document.getElementById('xeit');if(xeit){return;}var%20attachment=document.getElementsByTagName('html')[0].outerHTML;var%20_body=document.body;document.body=document.createElement('body');document.body.style.margin=0;document.body.style.padding=0;document.body.style.height='100%25';xeit=document.createElement('iframe');xeit.setAttribute('id','xeit');xeit.setAttribute('src','https://tomyun.github.io/xeit/xeit.html');xeit.style.width='100%25';xeit.style.height='100%25';xeit.style.border=0;document.body.appendChild(xeit);window.addEventListener('message',function(e){switch(e.data){case%20'ready':xeit.contentWindow.postMessage(attachment,'*');break;case%20'fallback':document.body=_body;break;}},false);})();"><button class="btn btn-info" type="button"><i class="icon-bookmark icon-white"></i> Xeit</button></a></p>
+                                            <p class="text-center text-info">이 버튼을 브라우저 상단의 책갈피에 끌어 넣으세요!</p>
+                                        </div>
                                     </dd>
-                                    <dt>안전한가요?</dt>
+                                    <dt>어디서 쓸 수 있죠?</dt>
                                     <dd>
-                                        <p></p>
+                                        <p>맥에서 사파리(6)를 기준으로 만들었으며 크롬(26)과 파이어폭스(20)에서도 돌아가는 것을 확인하였습니다. 인터넷 익스플로러에서는 확인해보지 못 했네요.</o>
+                                    </dd>
+                                    <dt>믿을 수 있나요?</dt>
+                                    <dd>
+                                        <p>설치된 북마클릿을 실행하면 기능을 불러오기 위해 인터넷 연결이 필요하기는 하지만 보안메일 해제를 위한 모든 연산은 브라우저 내에서 순수 JavaScript 기반으로 이루어집니다. 입력하신 비밀번호와 해제된 메일 내용은 브라우저 외부로 유출되지 않으니 걱정하지 않으셔도 됩니다. 참고로 모든 코드는 GitHub에 공개되어 있습니다.</p>
                                     </dd>
                                     <dt>어디어디 볼 수 있죠?</dt>
                                     <dd>
-                                        <p>국내 대다수 금융기관들의 보안메일 형식을 지원하도록 개발하였습니다만, 직접 확인해본 곳이 많지는 않습니다. 아래 목록 외에는 일부러 막아놓은 상태인데 최대한 빨리 확인하여 목록을 늘릴 수 있도록 하겠습니다.</p>
+                                        <p>대표적인 보안메일 플러그인의 형식을 대부분 지원하지만, 발송기관별로도 조금씩 다른 관계로 아직 확인되지 않은 곳들이 많습니다. 일단 아래 목록 외에는 막아놓은 상태인데요. 최대한 빨리 확인하여 추가하겠습니다.</p>
 
                                         <table class="table table-condensed table-striped table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>금융기관</th>
-                                                    <th>지원</th>
+                                                    <th>발송기관</th>
+                                                    <th>플러그인</th>
+                                                    <th>세부유형</th>
+                                                    <th>알고리즘</th>
+                                                    <th>지원여부</th>
                                                     <th>비고</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr>
                                                     <td>KB국민카드</td>
+                                                    <td>XecureExpress</td>
+                                                    <td>PKCS#7</td>
+                                                    <td>SEED, SHA1</td>
                                                     <td><i class="icon-ok"></i></td>
                                                     <td></td>
                                                 </tr>
                                                 <tr>
                                                     <td>KT</td>
+                                                    <td>INISAFE Mail</td>
+                                                    <td>INITECH</td>
+                                                    <td>SEED, SHA1, MD5</td>
+                                                    <td><i class="icon-ok"></i></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>SKT</td>
+                                                    <td>INISAFE Mail</td>
+                                                    <td>PBKDF2</td>
+                                                    <td>SEED, HMAC-SHA1</td>
+                                                    <td><i class="icon-ok"></i></td>
+                                                    <td>최근에 유형 변경?</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>신한카드</td>
+                                                    <td>XecureExpress</td>
+                                                    <td>PWD</td>
+                                                    <td>DES, SHA1</td>
                                                     <td><i class="icon-ok"></i></td>
                                                     <td></td>
                                                 </tr>
                                                 <tr>
                                                     <td>우리은행 (BC카드)</td>
+                                                    <td>INISAFE Mail</td>
+                                                    <td>INITECH</td>
+                                                    <td>SEED, SHA1, MD5</td>
                                                     <td><i class="icon-ok"></i></td>
                                                     <td></td>
                                                 </tr>
                                                 <tr>
                                                     <td>한국투자증권</td>
+                                                    <td>XecureExpress</td>
+                                                    <td>PKCS#7</td>
+                                                    <td>DES, SHA1</td>
                                                     <td><i class="icon-ok"></i></td>
                                                     <td></td>
                                                 </tr>
                                                 <tr>
                                                     <td>현대카드</td>
+                                                    <td>XecureExpress</td>
+                                                    <td>PWD</td>
+                                                    <td>SEED, SHA1</td>
                                                     <td><i class="icon-ok"></i></td>
                                                     <td></td>
                                                 </tr>
@@ -214,12 +260,23 @@
                                         </table>
                                     </p>
                                     </dd>
+                                    <dt>좀 더 알고 싶어요.</dt>
+                                    <dd>
+                                        <p>궁금한 점이나 하고 싶은 말씀들은 GitHub에 올려주시거나 <a href="http://twitter.com/tomyun" target="_blank">@tomyun</a>으로 연락주세요.</p>
+                                    </dd>
                                 </dl>
                             </section>
                         </div>
                     </div>
                 </div>
             </div>
+            <footer class="footer">
+                <div class="cotainer-fluid">
+                    <p class="text-center muted">
+                        &copy; 2013 Team BASA
+                    </p>
+                </div>
+            </footer>
         </div>
     </body>
 </html>
