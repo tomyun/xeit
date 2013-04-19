@@ -216,6 +216,7 @@ var xeit = (function () {
             }[S.crypto[2]];
 
             this.sender = {
+                BO: { name: '신한은행', support: true, hint: '보안메일 비밀번호', keylen: '6,8', salt: 'shinhanbank' },
                 CC: { name: '우리은행 (BC카드)', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'bccard', ignore_replacer: true },
                 TC: { name: 'SKT', support: true, hint: '주민등록번호 앞 또는 뒤', keylen: '6,7', salt: 'SKT' },
                 TH: { name: 'KT', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'ktbill' }
