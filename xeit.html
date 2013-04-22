@@ -19,26 +19,28 @@
         <script src='http://tomyun.github.io/xeit/xeit.js'></script>
         <script>
             function setupAuthDialog() {
-                $('#auth-dialog').modal({backdrop: 'static', keyboard: 'false'});
+                $('#auth-dialog').modal({backdrop: 'static', keyboard: false});
 
-                $('#auth-submit').on('click', function (e) {
+                $('#auth-form').on('submit', function (e) {
                     e.preventDefault();
 
-                    var password = $('#auth-password').val();
+                    var password = $('input#auth-password').val();
                     try {
                         var message = xeit.load(password);
                     } catch (e) {
                         $('#auth-password-group').addClass('error');
                         $('#auth-password-help').text(e.message);
-                        return;
+                        throw e;
                     }
                     showMail(message);
                     $('#auth-dialog').modal('hide');
                 });
 
-                $('#auth-password').on('focus', function (e) {
-                    $('#auth-password-group').removeClass('error');
-                    $('#auth-password-help').text('');
+                $('input#auth-password').on('keyup', function (e) {
+                    if (e.keyCode != 13) {
+                        $('#auth-password-group').removeClass('error');
+                        $('#auth-password-help').text('');
+                    }
                 });
             }
 
@@ -142,7 +144,7 @@
                             <p class='muted'><i class='icon-info-sign'></i> 비밀번호와 메일 내용은 외부로 전송하거나 저장하지 않으니 걱정마세요.</p>
                         </div>
                         <div class='modal-footer'>
-                            <a href='#' id='auth-submit' class='btn btn-primary'>열어보기</a>
+                            <button type="submit" form="auth-form" id="auth-submit" class="btn btn-primary">열어보기</button>
                         </div>
                     </div>
                 </div>
