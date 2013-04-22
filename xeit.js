@@ -384,7 +384,6 @@ var xeit = (function () {
                 );
             } else {
                 this.vendor = new Vendor();
-                parent.postMessage('fallback', '*');
             }
             $($doc).remove();
             this.vendor.init();

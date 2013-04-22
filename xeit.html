@@ -19,57 +19,76 @@
         <script src='http://tomyun.github.io/xeit/xeit.js'></script>
         <script>
             function setupAuthDialog() {
-                $('#auth-dialog').modal({backdrop: 'static', keyboard: false});
-
-                $('#auth-form').on('submit', function (e) {
-                    e.preventDefault();
-
-                    var password = $('input#auth-password').val();
-                    try {
-                        var message = xeit.load(password);
-                    } catch (e) {
-                        $('#auth-password-group').addClass('error');
-                        $('#auth-password-help').text(e.message);
-                        throw e;
-                    }
-                    showMail(message);
-                    $('#auth-dialog').modal('hide');
+                $authDialog = $('#auth-dialog').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                }).on('shown', function () {
+                    $('input#auth-password').trigger('focus');
                 });
-
-                $('input#auth-password').on('keyup', function (e) {
-                    if (e.keyCode != 13) {
-                        $('#auth-password-group').removeClass('error');
-                        $('#auth-password-help').text('');
-                    }
-                });
-            }
-
-            function updateAuthDialog() {
                 var sender = xeit.vendor.sender;
 
                 // 발송기관 표시.
                 $('#auth-sender-name').val(sender['name']);
+
+                // 지원여부에 따른 인증화면 구성.
                 if (sender['support']) {
                     $('#auth-sender-support').addClass('label-success').text('지원');
+
+                    $('input#auth-password').on('keyup', function (e) {
+                        //HACK: 엔터키로 폼 제출하는 경우 오류 메시지 초기화 방지.
+                        if (e.keyCode != 13) {
+                            $('#auth-password-group').removeClass('error');
+                            $('#auth-password-help').text('');
+                        }
+                    });
+
+                    $('#auth-info').addClass('alert-info').html('<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
+
+                    $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
+                    $('#auth-form').on('submit', function (e) {
+                        e.preventDefault();
+
+                        var password = $('input#auth-password').val();
+                        try {
+                            var message = xeit.load(password);
+                        } catch (err) {
+                            $('#auth-password-group').addClass('error');
+                            $('#auth-password-help').text(err.message);
+                            throw err;
+                        }
+                        $authDialog.on('hidden', function () {
+                            showMail(message);
+                        }).modal('hide');
+                    });
                 } else {
                     $('#auth-sender-support').addClass('label-important').text('미지원');
-                    $('#auth-submit').addClass('disabled');
+
+                    $('#auth-info').addClass('alert-error').html('<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
+
+                    $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
+                    $('#auth-form').on('submit', function (e) {
+                        e.preventDefault();
+
+                        $authDialog.on('hidden', function () {
+                            parent.postMessage('fallback', '*');
+                        }).modal('hide');
+                    });
                 }
 
                 // 비밀번호 설명 표시.
                 if (sender['keylen']) {
-                    $('#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'].toString().replace(',', '~') + '자리)')
-                                       .prop('pattern', '[0-9]{' + sender['keylen'] + '}');
+                    $('input#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'].toString().replace(',', '~') + '자리)')
+                                            .prop('pattern', '[0-9]{' + sender['keylen'] + '}');
                 } else {
-                    $('#auth-password').prop('placeholder', sender['hint'])
-                                       .prop('disabled', true);
+                    $('input#auth-password').prop('placeholder', sender['hint'])
+                                            .prop('disabled', true);
                 }
             }
 
             function loadMail() {
                 window.addEventListener('message', function (e) {
                     xeit.init(e.data);
-                    updateAuthDialog();
+                    setupAuthDialog();
                 }, false);
                 window.parent.postMessage('ready', '*');
             }
@@ -98,7 +117,6 @@
 
             $(document).ready(function () {
                 if (window.self !== window.top) {
-                    setupAuthDialog();
                     loadMail();
                 } else {
                     loadHelp();
@@ -140,11 +158,10 @@
                                     </div>
                                 </div>
                             </form>
-
-                            <p class='muted'><i class='icon-info-sign'></i> 비밀번호와 메일 내용은 외부로 전송하거나 저장하지 않으니 걱정마세요.</p>
+                            <div id='auth-info' class='alert'></div>
                         </div>
                         <div class='modal-footer'>
-                            <button type="submit" form="auth-form" id="auth-submit" class="btn btn-primary">열어보기</button>
+                            <button type="submit" form="auth-form" id="auth-submit" class="btn"></button>
                         </div>
                     </div>
                 </div>
