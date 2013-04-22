@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "xeit",
+  "version": "1",
+  "description": "Xeit는 금융기관들이 보내주는 거래명세서 등의 보안메일을 인터넷 익스플로러가 아닌 크롬에서 쉽에 열 수 있도록 해주는 익스텐션",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  
+  "page_action": {
+    "default_icon" : "icon.png",
+    "default_title" : "There's a 'sandwich' in this page!"
+  },
+
+  "content_scripts" : [
+    {
+      "matches" : [
+        "http://*/*",
+        "https://*/*",
+        "file://*/*"
+      ],
+      "js" : ["contentscript.js"],
+      "run_at" : "document_idle",
+      "all_frames" : false
+    }
+  ],
+  
+  "icons" : {
+    "48" : "icon.png",
+    "128" : "icon.png"
+  }
+}
