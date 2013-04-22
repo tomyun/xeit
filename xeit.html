@@ -56,7 +56,7 @@
 
                 // 비밀번호 설명 표시.
                 if (sender['keylen']) {
-                    $('#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'].replace(',', '~') + '자리)')
+                    $('#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'].toString().replace(',', '~') + '자리)')
                                        .prop('pattern', '[0-9]{' + sender['keylen'] + '}');
                 } else {
                     $('#auth-password').prop('placeholder', sender['hint'])
