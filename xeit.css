@@ -1,3 +1,15 @@
+/* Wrap */
+html, body {
+  height: 100%;
+}
+
+#wrap {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -60px;
+}
+
 /* NavBar */
 
 body > .navbar {
@@ -20,9 +32,33 @@ body > .navbar .brand:hover {
 
 /* Footer */
 
-.footer {
-  padding: 30px 0;
-  margin-top: 70px;
+#push, #footer {
+  height: 60px;
+}
+
+#footer {
   border-top: 1px solid #e5e5e5;
   background-color: #f5f5f5;
+}
+
+#footer .credit {
+  margin: 20px 0;
+}
+
+/* Table */
+@media (max-width: 767px) {
+  #footer {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Landscape phones */
+@media (max-width: 480px) {
+  #footer {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
 }

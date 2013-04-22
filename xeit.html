@@ -106,52 +106,52 @@
         <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-40224792-1','github.io');ga('send','pageview');</script>
     </head>
     <body>
-        <div class='navbar navbar-static-top navbar-inverse'>
-            <div class='navbar-inner'>
-                <span class='brand'>Xeit</span>
-                <ul id='xeit-nav' class='nav'>
-                    <li><a class='disabled' href='#mail' data-toggle='tab'>보안메일</a></li>
-                    <li><a href='#help' data-toggle='tab'>도움말</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class='tab-content'>
-            <div id='auth' class='tab-pane active'>
-                <div id='auth-dialog' class='modal hide fade'>
-                    <div class='modal-header'>
-                        <h3>보안메일</h3>
-                    </div>
-                    <div class='modal-body'>
-                        <form id='auth-form' class='form-horizontal'>
-                            <div class='control-group'>
-                                <label class='control-label' for='auth-password'>보낸 곳</label>
-                                <div class='controls'>
-                                    <input type='text' id='auth-sender-name' disabled> <span class='help-inline'><span id='auth-sender-support' class='label'></span></span>
-                                </div>
-                            </div>
-                            <div id='auth-password-group' class='control-group'>
-                                <label class='control-label' for='auth-password'>비밀번호</label>
-                                <div class='controls'>
-                                    <input type='password' id='auth-password' required> <span id='auth-password-help' class='help-inline'></span>
-                                </div>
-                            </div>
-                        </form>
-
-                        <p class='muted'><i class='icon-info-sign'></i> 비밀번호와 메일 내용은 외부로 전송하거나 저장하지 않으니 걱정마세요.</p>
-                    </div>
-                    <div class='modal-footer'>
-                        <a href='#' id='auth-submit' class='btn btn-primary'>열어보기</a>
-                    </div>
+        <div id="wrap">
+            <div class='navbar navbar-static-top navbar-inverse'>
+                <div class='navbar-inner'>
+                    <span class='brand'>Xeit</span>
+                    <ul id='xeit-nav' class='nav'>
+                        <li><a class='disabled' href='#mail' data-toggle='tab'>보안메일</a></li>
+                        <li><a href='#help' data-toggle='tab'>도움말</a></li>
+                    </ul>
                 </div>
             </div>
-            <div id='mail' class='tab-pane'>
-                <iframe id='mail-content' style='width: 100%; height: 100%; border: 0;'></iframe>
-            </div>
-            <div id='help' class='tab-pane'>
-                <div class='container-fluid'>
-                    <div class='row-fluid'>
-                        <div class='span10 offset1'>
+
+            <div class='tab-content'>
+                <div id='auth' class='tab-pane active'>
+                    <div id='auth-dialog' class='modal hide fade'>
+                        <div class='modal-header'>
+                            <h3>보안메일</h3>
+                        </div>
+                        <div class='modal-body'>
+                            <form id='auth-form' class='form-horizontal'>
+                                <div class='control-group'>
+                                    <label class='control-label' for='auth-password'>보낸 곳</label>
+                                    <div class='controls'>
+                                        <input type='text' id='auth-sender-name' disabled> <span class='help-inline'><span id='auth-sender-support' class='label'></span></span>
+                                    </div>
+                                </div>
+                                <div id='auth-password-group' class='control-group'>
+                                    <label class='control-label' for='auth-password'>비밀번호</label>
+                                    <div class='controls'>
+                                        <input type='password' id='auth-password' required> <span id='auth-password-help' class='help-inline'></span>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <p class='muted'><i class='icon-info-sign'></i> 비밀번호와 메일 내용은 외부로 전송하거나 저장하지 않으니 걱정마세요.</p>
+                        </div>
+                        <div class='modal-footer'>
+                            <a href='#' id='auth-submit' class='btn btn-primary'>열어보기</a>
+                        </div>
+                    </div>
+                </div>
+                <div id='mail' class='tab-pane'>
+                    <iframe id='mail-content' style='width: 100%; height: 100%; border: 0;'></iframe>
+                </div>
+                <div id='help' class='tab-pane'>
+                    <div class='container-fluid'>
+                        <div class='row-fluid'>
                             <section id='faq'>
                                 <div class='page-header'>
                                     <h2>FAQ <small>자주 하는 질문</small></h2>
@@ -279,13 +279,14 @@
                     </div>
                 </div>
             </div>
-            <footer class="footer">
-                <div class="cotainer-fluid">
-                    <p class="text-center muted">
-                        &copy; 2013 Team BASA
-                    </p>
-                </div>
-            </footer>
+            <div id="push"></div>
         </div>
+        <footer id="footer">
+            <div class="container">
+                <p class="text-center muted credit">
+                    &copy; 2013 Team BASA
+                </p>
+            </div>
+        </footer>
     </body>
 </html>
