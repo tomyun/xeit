@@ -369,12 +369,12 @@ var xeit = (function () {
                     ''
                 );
                 $doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
-
                 this.vendor = new IniTech(
                     html,
                     $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="AttachedFile"]', $doc).val()
                 );
+                $doc.remove();
             } else if (html.indexOf('IniCrossMailObj') > -1) {
                 this.vendor = new IniTech(
                     html,
@@ -385,7 +385,6 @@ var xeit = (function () {
             } else {
                 this.vendor = new Vendor();
             }
-            $($doc).remove();
             this.vendor.init();
         },
 
