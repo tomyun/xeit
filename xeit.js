@@ -69,7 +69,7 @@ var xeit = (function () {
             this.sender = {
                 'HyundaiCard': { name: '현대카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
                 'TRUEFRIEND': { name: '한국투자증권', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                '보안메일': { name: 'KB카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                '보안메일': { name: 'KB카드 or 롯데포인트', support: true, hint: '주민등록번호 뒤', keylen: 7 },
                 '신한카드 보안메일': { name: '신한카드', support: true, hint: '주민등록번호 뒤', keylen: 7 }
             }[this.ui_desc] || ((this.ui_desc) ? $.extend({}, this.sender, { name: this.ui_desc })
                                                : this.sender);
