@@ -354,7 +354,7 @@ var xeit = (function () {
                     $('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="ui_desc"]', $doc).val()
                 );
-            } else if (html.indexOf('IniMasPlugin') > 0) {
+            } else if (html.indexOf('IniMasPlugin') > -1) {
                 //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
                 var body = html.replace(
                     /activeControl\(([\s]*['"])/,
@@ -375,7 +375,7 @@ var xeit = (function () {
                     $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="AttachedFile"]', $doc).val()
                 );
-            } else if (html.indexOf('IniCrossMailObj') > 0) {
+            } else if (html.indexOf('IniCrossMailObj') > -1) {
                 this.vendor = new IniTech(
                     html,
                     $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
