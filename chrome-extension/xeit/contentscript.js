@@ -1,13 +1,11 @@
 var check = function() {
 	var bodyText = document.body.innerText;
-	return 
-		document.getElementById('XEIViewer') ||
+	return document.getElementById('XEIViewer') ||
 		bodyText.indexOf('IniMasPlugin') > -1 ||
 		bodyText.indexOf('IniCrossMailObj') > -1 ;
 }
 
 if (check()) {
-
 	var injectCode = function(){
 		var xeit=document.getElementById('xeit');
 		if(xeit){
@@ -38,12 +36,8 @@ if (check()) {
 
 	var script = document.createElement('script');
 	script.textContent = '(' + injectCode + ')()';
+	
 	(document.head||document.documentElement).appendChild(script);
 
-
-
-  // The regular expression produced a match, so notify the background page.
   chrome.extension.sendRequest({}, function(response) {});
-} else {
-  // No match was found.
 }
