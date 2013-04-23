@@ -51,7 +51,6 @@ var xeit = (function () {
     SoftForum.prototype = new Vendor('XecureExpress');
     $.extend(SoftForum.prototype, {
         init: function () {
-            debugger;
             var headerWords = CryptoJS.enc.Base64.parse(this.smime_header),
                 header = CryptoJS.enc.CP949.stringify(headerWords),
                 contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
@@ -77,8 +76,6 @@ var xeit = (function () {
                     company = 'Xeit.uplus';
                 } else if (/(?=.*lottecard)(?=.*point)/.test(header)){
                     company = 'Xeit.lottePoint';
-//                } else if (//.test(header)){
-//                  company = 
                 }
             }
 
