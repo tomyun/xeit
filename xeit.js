@@ -79,6 +79,10 @@ var xeit = (function () {
             if (company === '보안메일') {
                 if (this.html.indexOf('kbcard.kbstar.com') > -1) {
                     company = 'Xeit.kbcard';
+                } else if (/(?=.*lottecard)(?=.*point)/.test(header)) {
+                    company = 'Xeit.lottepoint';
+                } else if (this.html.indexOf('uplus.co.kr') > -1) {
+                    company = 'Xeit.uplus';
                 } else if (this.info_msg.indexOf('KEB') > -1) {
                     company = 'Xeit.yescard';
                 }
@@ -101,6 +105,20 @@ var xeit = (function () {
 
                 'Xeit.kbcard': {
                     name: 'KB국민카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.lottepoint': {
+                    name: '롯데포인트카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.uplus': {
+                    name: 'LG유플러스',
                     support: true,
                     hint: '주민등록번호 뒤',
                     keylen: 7
@@ -439,6 +457,17 @@ var xeit = (function () {
                     $('param[name="info_msg"]').val(),
                     $('param[name="ui_option"]').val(),
                     $('param[name="ui_desc"]').val()
+                );
+            } else if (/prtObj\(([\s\S])*\);/.test(html)) {
+                //TODO: LGU+ 인식용으로 기존 로직과 병합 가능성 확인 필요. (by RyanYoon)
+                var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
+                this.vendor = new SoftForum(
+                    html,
+                    data[5],
+                    data[7],
+                    data[9],
+                    data[11],
+                    data[13]
                 );
             } else if (html.indexOf('IniMasPlugin') > -1) {
                 //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
