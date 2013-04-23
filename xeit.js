@@ -13,6 +13,11 @@ var xeit = (function () {
     Vendor.prototype = {
         init: function () {},
 
+        peel: function (param, decode) {
+            param = (param) ? param.replace(/\n/g, '') : '';
+            return (decode) ? CryptoJS.enc.CP949.stringify(CryptoJS.enc.Base64.parse(param)) : param;
+        },
+
         load: function (password) {
             return this.render(this.decrypt(password));
         },
@@ -42,15 +47,10 @@ var xeit = (function () {
      ***************************/
 
     var SoftForum = function (html, smime_header, smime_body, info_msg, ui_option, ui_desc) {
-        function peel(message, decode) {
-            message = (message) ? message.replace(/\n/g, '') : '';
-            return (decode) ? CryptoJS.enc.CP949.stringify(CryptoJS.enc.Base64.parse(message)) : message
-        }
-
         this.html = html || '';
-        this.smime_header = peel(smime_header);
-        this.smime_body = peel(smime_body);
-        this.info_msg = peel(info_msg, true);
+        this.smime_header = this.peel(smime_header);
+        this.smime_body = this.peel(smime_body);
+        this.info_msg = this.peel(info_msg, true);
         this.ui_option = ui_option || '';
         this.ui_desc = ui_desc || '';
     };
@@ -205,9 +205,9 @@ var xeit = (function () {
 
     var IniTech = function (html, contents, attachedFile, optData) {
         this.html = html || '';
-        this.contents = contents || '';
+        this.contents = this.peel(contents);
         this.attachedFile = attachedFile || '';
-        this.optData = optData || '';
+        this.optData = this.peel(optData);
     };
 
     IniTech.prototype = new Vendor('INISAFE Mail');
@@ -387,13 +387,13 @@ var xeit = (function () {
                 $doc.empty().append($.parseHTML(body, document, true));
                 this.vendor = new IniTech(
                     html,
-                    $('param[name="IniSMContents"]').val().replace(/\n/g, ''),
+                    $('param[name="IniSMContents"]').val(),
                     $('param[name="AttachedFile"]').val()
                 );
             } else if (html.indexOf('IniCrossMailObj') > -1) {
                 this.vendor = new IniTech(
                     html,
-                    $('param[name="IniSMContents"]').val().replace(/\n/g, ''),
+                    $('param[name="IniSMContents"]').val(),
                     $('param[name="AttachedFile"]').val(),
                     $('param[name="OptData"]').val()
                 );
