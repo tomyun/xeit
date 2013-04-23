@@ -353,7 +353,18 @@ var xeit = (function () {
     return {
         init: function (html) {
             var $doc = $.parseHTML(html);
-            if ($('#XEIViewer', $doc).length) {
+
+            var isContained = function(doc){
+                var i, len;
+                for(i=0,len=doc.length;i<len;i++){
+                    if(doc[i].id=='XEIViewer'){
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            if (isContained($doc)) {
                 this.vendor = new SoftForum(
                     html,
                     $('param[name="smime_header"]', $doc).val().replace(/\n/g, ''),
@@ -388,14 +399,6 @@ var xeit = (function () {
                     $('param[name="AttachedFile"]', $doc).val(),
                     $('param[name="OptData"]', $doc).val()
                 );
-            } else if (/prtObj\(([\s\S])*\);/.test(html)) {
-                //LGU+
-                var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
-                this.vendor = new SoftForum(
-                    html,
-                    data[5],
-                    data[7],
-                    data[13]);
             } else {
                 this.vendor = new Vendor();
             }
