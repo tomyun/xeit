@@ -85,11 +85,43 @@ var xeit = (function () {
             }
 
             this.sender = {
-                'HyundaiCard': { name: '현대카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'TRUEFRIEND': { name: '한국투자증권', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'Xeit.kbcard': { name: 'KB국민카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'Xeit.yescard': { name: '외환카드', support: true, hint: '주민등록번호 뒤', keylen: 7, postrender: function (m) { return m.replace(/href="#topmove"/g, ''); } },
-                '신한카드 보안메일': { name: '신한카드', support: true, hint: '주민등록번호 뒤', keylen: 7 }
+                'HyundaiCard': {
+                    name: '현대카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'TRUEFRIEND': {
+                    name: '한국투자증권',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.kbcard': {
+                    name: 'KB국민카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.yescard': {
+                    name: '외환카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7,
+                    render_hack: function (m) {
+                        return m.replace(/href="#topmove"/g, '');
+                    }
+                },
+
+                '신한카드 보안메일': {
+                    name: '신한카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                }
             }[company] || ((company) ? $.extend({}, this.sender, { name: company }) : this.sender);
         },
 
@@ -195,7 +227,7 @@ var xeit = (function () {
             message = (offset) ? message.slice(offset.index) : message;
 
             //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
-            return (this.sender.postrender) ? this.sender.postrender(message) : message;
+            return (this.sender.render_hack) ? this.sender.render_hack(message) : message;
         }
     });
 
@@ -237,10 +269,44 @@ var xeit = (function () {
             }[S.crypto[2]];
 
             this.sender = {
-                BO: { name: '신한은행', support: true, hint: '보안메일 비밀번호', keylen: '6,8', salt: 'shinhanbank' },
-                CC: { name: '우리은행 (BC카드)', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'bccard', render_hack: function (f, m) { return { 'frame': f.replace('id="objHeader"', '$& style="display:none"'), 'message': m }; } },
-                TC: { name: 'SKT', support: true, hint: '주민등록번호 앞 또는 뒤', keylen: '6,7', salt: 'SKT', ignore_replacer: true },
-                TH: { name: 'KT', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'ktbill' }
+                BO: {
+                    name: '신한은행',
+                    support: true,
+                    hint: '보안메일 비밀번호',
+                    keylen: '6,8',
+                    salt: 'shinhanbank'
+                },
+
+                CC: {
+                    name: '우리은행 (BC카드)',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7,
+                    salt: 'bccard',
+                    render_hack: function (f, m) {
+                        return {
+                            'frame': f.replace('id="objHeader"', '$& style="display:none"'),
+                            'message': m
+                        };
+                    }
+                },
+
+                TC: {
+                    name: 'SKT',
+                    support: true,
+                    hint: '주민등록번호 앞 또는 뒤',
+                    keylen: '6,7',
+                    salt: 'SKT',
+                    ignore_replacer: true
+                },
+
+                TH: {
+                    name: 'KT',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7,
+                    salt: 'ktbill'
+                }
             }[S.company] || ((S.company) ? $.extend({}, this.sender, { name: S.company, hint: S.keygen })
                                          : this.sender);
 
