@@ -41,10 +41,17 @@ var xeit = (function () {
      * SoftForum XecureExpress *
      ***************************/
 
-    var SoftForum = function (html, smime_header, smime_body, ui_desc) {
+    var SoftForum = function (html, smime_header, smime_body, info_msg, ui_option, ui_desc) {
+        function peel(message, decode) {
+            message = (message) ? message.replace(/\n/g, '') : '';
+            return (decode) ? CryptoJS.enc.CP949.stringify(CryptoJS.enc.Base64.parse(message)) : message
+        }
+
         this.html = html || '';
-        this.smime_header = smime_header || '';
-        this.smime_body = smime_body || '';
+        this.smime_header = peel(smime_header);
+        this.smime_body = peel(smime_body);
+        this.info_msg = peel(info_msg, true);
+        this.ui_option = ui_option || '';
         this.ui_desc = ui_desc || '';
     };
 
@@ -72,6 +79,8 @@ var xeit = (function () {
             if (company === '보안메일') {
                 if (this.html.indexOf('kbcard.kbstar.com') > -1) {
                     company = 'Xeit.kbcard';
+                } else if (this.info_msg.indexOf('KEB') > -1) {
+                    company = 'Xeit.yescard';
                 }
             }
 
@@ -79,6 +88,7 @@ var xeit = (function () {
                 'HyundaiCard': { name: '현대카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
                 'TRUEFRIEND': { name: '한국투자증권', support: true, hint: '주민등록번호 뒤', keylen: 7 },
                 'Xeit.kbcard': { name: 'KB국민카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                'Xeit.yescard': { name: '외환카드', support: true, hint: '주민등록번호 뒤', keylen: 7, postrender: function (m) { return m.replace(/href="#topmove"/g, ''); } },
                 '신한카드 보안메일': { name: '신한카드', support: true, hint: '주민등록번호 뒤', keylen: 7 }
             }[company] || ((company) ? $.extend({}, this.sender, { name: company }) : this.sender);
         },
@@ -182,7 +192,10 @@ var xeit = (function () {
 
             //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
             var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-            return offset ? message.slice(offset.index) : message;
+            message = (offset) ? message.slice(offset.index) : message;
+
+            //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
+            return (this.sender.postrender) ? this.sender.postrender(message) : message;
         }
     });
 
@@ -351,8 +364,10 @@ var xeit = (function () {
             if ($('#XEIViewer').length) {
                 this.vendor = new SoftForum(
                     html,
-                    $('param[name="smime_header"]').val().replace(/\n/g, ''),
-                    $('param[name="smime_body"]').val().replace(/\n/g, ''),
+                    $('param[name="smime_header"]').val(),
+                    $('param[name="smime_body"]').val(),
+                    $('param[name="info_msg"]').val(),
+                    $('param[name="ui_option"]').val(),
                     $('param[name="ui_desc"]').val()
                 );
             } else if (html.indexOf('IniMasPlugin') > -1) {
