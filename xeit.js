@@ -348,12 +348,12 @@ var xeit = (function () {
         init: function (html) {
             //HACK: <object> 태그의 상위 노드로써 DOM에 임시로 추가하여 query 수행.
             var $doc = $('<div>', { id: 'Xeit-temp' }).hide().appendTo($('body')).append($.parseHTML(html));
-            if ($('#XEIViewer', $doc).length) {
+            if ($('#XEIViewer').length) {
                 this.vendor = new SoftForum(
                     html,
-                    $('param[name="smime_header"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="ui_desc"]', $doc).val()
+                    $('param[name="smime_header"]').val().replace(/\n/g, ''),
+                    $('param[name="smime_body"]').val().replace(/\n/g, ''),
+                    $('param[name="ui_desc"]').val()
                 );
             } else if (html.indexOf('IniMasPlugin') > -1) {
                 //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
@@ -372,15 +372,15 @@ var xeit = (function () {
                 $doc.empty().append($.parseHTML(body, document, true));
                 this.vendor = new IniTech(
                     html,
-                    $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="AttachedFile"]', $doc).val()
+                    $('param[name="IniSMContents"]').val().replace(/\n/g, ''),
+                    $('param[name="AttachedFile"]').val()
                 );
             } else if (html.indexOf('IniCrossMailObj') > -1) {
                 this.vendor = new IniTech(
                     html,
-                    $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="AttachedFile"]', $doc).val(),
-                    $('param[name="OptData"]', $doc).val()
+                    $('param[name="IniSMContents"]').val().replace(/\n/g, ''),
+                    $('param[name="AttachedFile"]').val(),
+                    $('param[name="OptData"]').val()
                 );
             } else {
                 this.vendor = new Vendor();
