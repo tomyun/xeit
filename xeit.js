@@ -41,7 +41,8 @@ var xeit = (function () {
      * SoftForum XecureExpress *
      ***************************/
 
-    var SoftForum = function (smime_header, smime_body, ui_desc) {
+    var SoftForum = function (html, smime_header, smime_body, ui_desc) {
+        this.html = html || '';
         this.smime_header = smime_header || '';
         this.smime_body = smime_body || '';
         this.ui_desc = ui_desc || '';
@@ -50,6 +51,7 @@ var xeit = (function () {
     SoftForum.prototype = new Vendor('XecureExpress');
     $.extend(SoftForum.prototype, {
         init: function () {
+            debugger;
             var headerWords = CryptoJS.enc.Base64.parse(this.smime_header),
                 header = CryptoJS.enc.CP949.stringify(headerWords),
                 contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
@@ -66,13 +68,28 @@ var xeit = (function () {
                 };
             }
 
+            //HACK: 구분자가 '보안메일'로 동일한 발송기관 강제 구분.
+            var company = this.ui_desc;
+            if (company === '보안메일') {
+                if (this.html.indexOf('kbcard.kbstar.com') > -1) {
+                    company = 'Xeit.kbcard';
+                } else if(this.html.indexOf('uplus.co.kr') > -1) {
+                    company = 'Xeit.uplus';
+                } else if (/(?=.*lottecard)(?=.*point)/.test(header)){
+                    company = 'Xeit.lottePoint';
+//                } else if (//.test(header)){
+//                  company = 
+                }
+            }
+
             this.sender = {
                 'HyundaiCard': { name: '현대카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
                 'TRUEFRIEND': { name: '한국투자증권', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                '보안메일': { name: 'KB카드 or 롯데포인트', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                'Xeit.kbcard': { name: 'KB국민카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                'Xeit.uplus' : { name: 'LG유플러스', support: true, hint: '주민등록번호 뒤', keylen: 7 },
+                'Xeit.lottePoint': { name: '롯데포인트카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
                 '신한카드 보안메일': { name: '신한카드', support: true, hint: '주민등록번호 뒤', keylen: 7 }
-            }[this.ui_desc] || ((this.ui_desc) ? $.extend({}, this.sender, { name: this.ui_desc })
-                                               : this.sender);
+            }[company] || ((company) ? $.extend({}, this.sender, { name: company }) : this.sender);
         },
 
         decryptSMIME: function (envelope, password) {
@@ -341,6 +358,7 @@ var xeit = (function () {
             var $doc = $.parseHTML(html);
             if ($('#XEIViewer', $doc).length) {
                 this.vendor = new SoftForum(
+                    html,
                     $('param[name="smime_header"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="ui_desc"]', $doc).val()
@@ -360,12 +378,12 @@ var xeit = (function () {
                     ''
                 );
                 $doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
-
                 this.vendor = new IniTech(
                     html,
                     $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
                     $('param[name="AttachedFile"]', $doc).val()
                 );
+                $doc.remove();
             } else if (html.indexOf('IniCrossMailObj') > -1) {
                 this.vendor = new IniTech(
                     html,
@@ -373,11 +391,17 @@ var xeit = (function () {
                     $('param[name="AttachedFile"]', $doc).val(),
                     $('param[name="OptData"]', $doc).val()
                 );
+            } else if (/prtObj\(([\s\S])*\);/.test(html)) {
+                //LGU+
+                var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
+                this.vendor = new SoftForum(
+                    html,
+                    data[5],
+                    data[7],
+                    data[13]);
             } else {
                 this.vendor = new Vendor();
-                parent.postMessage('fallback', '*');
             }
-            $($doc).remove();
             this.vendor.init();
         },
 
