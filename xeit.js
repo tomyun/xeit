@@ -238,8 +238,8 @@ var xeit = (function () {
 
             this.sender = {
                 BO: { name: '신한은행', support: true, hint: '보안메일 비밀번호', keylen: '6,8', salt: 'shinhanbank' },
-                CC: { name: '우리은행 (BC카드)', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'bccard', ignore_replacer: true },
-                TC: { name: 'SKT', support: true, hint: '주민등록번호 앞 또는 뒤', keylen: '6,7', salt: 'SKT' },
+                CC: { name: '우리은행 (BC카드)', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'bccard', render_hack: function (f, m) { return { 'frame': f.replace('id="objHeader"', '$& style="display:none"'), 'message': m }; } },
+                TC: { name: 'SKT', support: true, hint: '주민등록번호 앞 또는 뒤', keylen: '6,7', salt: 'SKT', ignore_replacer: true },
                 TH: { name: 'KT', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'ktbill' }
             }[S.company] || ((S.company) ? $.extend({}, this.sender, { name: S.company, hint: S.keygen })
                                          : this.sender);
@@ -329,7 +329,7 @@ var xeit = (function () {
 
         render: function (content) {
             var message = this.encode(content);
-            var rendered = this.html.replace(
+            var frame = this.html.replace(
                 /<object [\s\S]*<\/object>/ig,
                 ''
             ).replace(
@@ -337,22 +337,26 @@ var xeit = (function () {
                 ''
             );
 
-            var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-            if (offset) {
-                //HACK: 온전한 HTML 문서이면 그대로 표출.
-                return message.slice(offset.index);
-            } else {
-                if (this.sender.ignore_replacer) {
-                    return rendered.replace(
-                        /<body[\s\S]*?<\/body>/i,
-                        '<body>' + message + '</body>'
-                    );
+            //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
+            if (this.sender.render_hack) {
+                var fm = this.sender.render_hack(frame, message);
+                frame = fm['frame'];
+                message = fm['message'];
+            }
+
+            if (this.sender.ignore_replacer) {
+                var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
+                if (offset) {
+                    //HACK: 일부 메일 앞쪽의 알 수 없는 (암호화 관련?) 문자열 제거.
+                    return message.slice(offset.index);
                 } else {
-                    return rendered.replace(
-                        /id="InitechSMMsgToReplace">/,
-                        '>' + message
-                    );
+                    return message;
                 }
+            } else {
+                return frame.replace(
+                    /id="InitechSMMsgToReplace">/,
+                    '>' + message.replace(/\$/g, '$$$$')
+                );
             }
         }
     });
