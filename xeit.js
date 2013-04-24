@@ -266,7 +266,7 @@ var xeit = (function () {
 
             //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
             if (this.sender.render_hack) {
-                fm = this.sender.render_hack(frame, message);
+                var fm = this.sender.render_hack(frame, message);
                 frame = fm['frame'];
                 message = fm['message'];
             }
