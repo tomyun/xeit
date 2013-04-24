@@ -98,6 +98,13 @@ var xeit = (function () {
                     keylen: 7
                 },
 
+                'LG카드 보안메일': {
+                    name: '신한카드 (구 LG카드)',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
                 'TRUEFRIEND': {
                     name: '한국투자증권',
                     support: true,
