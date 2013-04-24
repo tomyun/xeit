@@ -81,6 +81,8 @@ var xeit = (function () {
                     company = 'Xeit.kbcard';
                 } else if (/(?=.*lottecard)(?=.*point)/.test(header)) {
                     company = 'Xeit.lottepoint';
+                } else if (this.html.indexOf('samsungcard.co.kr') > -1) {
+                    company = 'Xeit.samsungcard';
                 } else if (this.html.indexOf('uplus.co.kr') > -1) {
                     company = 'Xeit.uplus';
                 } else if (this.info_msg.indexOf('KEB') > -1) {
@@ -115,6 +117,13 @@ var xeit = (function () {
                     support: true,
                     hint: '주민등록번호 뒤',
                     keylen: 7
+                },
+
+                'Xeit.samsungcard': {
+                    name: '삼성카드',
+                    support: false,
+                    hint: '-',
+                    keylen: 0
                 },
 
                 'Xeit.uplus': {
