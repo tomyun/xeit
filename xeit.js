@@ -145,8 +145,11 @@ var xeit = (function () {
                     support: true,
                     hint: '주민등록번호 뒤',
                     keylen: 7,
-                    render_hack: function (m) {
-                        return m.replace(/href="#topmove"/g, '');
+                    render_hack: function (f, m) {
+                        return {
+                            'frame': f,
+                            'message': m.replace(/href="#topmove"/g, '')
+                        };
                     }
                 },
 
@@ -255,13 +258,20 @@ var xeit = (function () {
 
         render: function (content) {
             var message = this.encode(content);
+            var frame = this.html;
 
             //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
             var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
             message = (offset) ? message.slice(offset.index) : message;
 
             //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
-            return (this.sender.render_hack) ? this.sender.render_hack(message) : message;
+            if (this.sender.render_hack) {
+                fm = this.sender.render_hack(frame, message);
+                frame = fm['frame'];
+                message = fm['message'];
+            }
+
+            return message;
         }
     });
 
