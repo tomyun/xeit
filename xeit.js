@@ -13,6 +13,11 @@ var xeit = (function () {
     Vendor.prototype = {
         init: function () {},
 
+        peel: function (param, decode) {
+            param = (param) ? param.replace(/\n/g, '') : '';
+            return (decode) ? CryptoJS.enc.CP949.stringify(CryptoJS.enc.Base64.parse(param)) : param;
+        },
+
         load: function (password) {
             return this.render(this.decrypt(password));
         },
@@ -41,10 +46,12 @@ var xeit = (function () {
      * SoftForum XecureExpress *
      ***************************/
 
-    var SoftForum = function (html, smime_header, smime_body, ui_desc) {
+    var SoftForum = function (html, smime_header, smime_body, info_msg, ui_option, ui_desc) {
         this.html = html || '';
-        this.smime_header = smime_header || '';
-        this.smime_body = smime_body || '';
+        this.smime_header = this.peel(smime_header);
+        this.smime_body = this.peel(smime_body);
+        this.info_msg = this.peel(info_msg, true);
+        this.ui_option = ui_option || '';
         this.ui_desc = ui_desc || '';
     };
 
@@ -70,22 +77,69 @@ var xeit = (function () {
             //HACK: 구분자가 '보안메일'로 동일한 발송기관 강제 구분.
             var company = this.ui_desc;
             if (company === '보안메일') {
-                if (this.html.indexOf('kbcard.kbstar.com') > -1) {
+                if (this.html.indexOf('kbcard') > -1) {
                     company = 'Xeit.kbcard';
-                } else if(this.html.indexOf('uplus.co.kr') > -1) {
+                } else if (/(?=.*lottecard)(?=.*point)/.test(header)) {
+                    company = 'Xeit.lottepoint';
+                } else if (this.html.indexOf('uplus.co.kr') > -1) {
                     company = 'Xeit.uplus';
-                } else if (/(?=.*lottecard)(?=.*point)/.test(header)){
-                    company = 'Xeit.lottePoint';
+                } else if (this.info_msg.indexOf('KEB') > -1) {
+                    company = 'Xeit.yescard';
                 }
             }
 
             this.sender = {
-                'HyundaiCard': { name: '현대카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'TRUEFRIEND': { name: '한국투자증권', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'Xeit.kbcard': { name: 'KB국민카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'Xeit.uplus' : { name: 'LG유플러스', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                'Xeit.lottePoint': { name: '롯데포인트카드', support: true, hint: '주민등록번호 뒤', keylen: 7 },
-                '신한카드 보안메일': { name: '신한카드', support: true, hint: '주민등록번호 뒤', keylen: 7 }
+                'HyundaiCard': {
+                    name: '현대카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'TRUEFRIEND': {
+                    name: '한국투자증권',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.kbcard': {
+                    name: 'KB국민카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.lottepoint': {
+                    name: '롯데포인트카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.uplus': {
+                    name: 'LG유플러스',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.yescard': {
+                    name: '외환카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7,
+                    render_hack: function (m) {
+                        return m.replace(/href="#topmove"/g, '');
+                    }
+                },
+
+                '신한카드 보안메일': {
+                    name: '신한카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                }
             }[company] || ((company) ? $.extend({}, this.sender, { name: company }) : this.sender);
         },
 
@@ -188,7 +242,10 @@ var xeit = (function () {
 
             //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
             var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-            return offset ? message.slice(offset.index) : message;
+            message = (offset) ? message.slice(offset.index) : message;
+
+            //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
+            return (this.sender.render_hack) ? this.sender.render_hack(message) : message;
         }
     });
 
@@ -198,9 +255,9 @@ var xeit = (function () {
 
     var IniTech = function (html, contents, attachedFile, optData) {
         this.html = html || '';
-        this.contents = contents || '';
+        this.contents = this.peel(contents);
         this.attachedFile = attachedFile || '';
-        this.optData = optData || '';
+        this.optData = this.peel(optData);
     };
 
     IniTech.prototype = new Vendor('INISAFE Mail');
@@ -230,10 +287,44 @@ var xeit = (function () {
             }[S.crypto[2]];
 
             this.sender = {
-                BO: { name: '신한은행', support: true, hint: '보안메일 비밀번호', keylen: '6,8', salt: 'shinhanbank' },
-                CC: { name: '우리은행 (BC카드)', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'bccard', ignore_replacer: true },
-                TC: { name: 'SKT', support: true, hint: '주민등록번호 앞 또는 뒤', keylen: '6,7', salt: 'SKT' },
-                TH: { name: 'KT', support: true, hint: '주민등록번호 뒤', keylen: 7, salt: 'ktbill' }
+                BO: {
+                    name: '신한은행',
+                    support: true,
+                    hint: '보안메일 비밀번호',
+                    keylen: '6,8',
+                    salt: 'shinhanbank'
+                },
+
+                CC: {
+                    name: '우리은행 (BC카드)',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7,
+                    salt: 'bccard',
+                    render_hack: function (f, m) {
+                        return {
+                            'frame': f.replace('id="objHeader"', '$& style="display:none"'),
+                            'message': m
+                        };
+                    }
+                },
+
+                TC: {
+                    name: 'SKT',
+                    support: true,
+                    hint: '주민등록번호 앞 또는 뒤',
+                    keylen: '6,7',
+                    salt: 'SKT',
+                    ignore_replacer: true
+                },
+
+                TH: {
+                    name: 'KT',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7,
+                    salt: 'ktbill'
+                }
             }[S.company] || ((S.company) ? $.extend({}, this.sender, { name: S.company, hint: S.keygen })
                                          : this.sender);
 
@@ -322,7 +413,7 @@ var xeit = (function () {
 
         render: function (content) {
             var message = this.encode(content);
-            var rendered = this.html.replace(
+            var frame = this.html.replace(
                 /<object [\s\S]*<\/object>/ig,
                 ''
             ).replace(
@@ -330,46 +421,53 @@ var xeit = (function () {
                 ''
             );
 
-            var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-            if (offset) {
-                //HACK: 온전한 HTML 문서이면 그대로 표출.
-                return message.slice(offset.index);
-            } else {
-                if (this.sender.ignore_replacer) {
-                    return rendered.replace(
-                        /<body[\s\S]*?<\/body>/i,
-                        '<body>' + message + '</body>'
-                    );
+            //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
+            if (this.sender.render_hack) {
+                var fm = this.sender.render_hack(frame, message);
+                frame = fm['frame'];
+                message = fm['message'];
+            }
+
+            if (this.sender.ignore_replacer) {
+                var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
+                if (offset) {
+                    //HACK: 일부 메일 앞쪽의 알 수 없는 (암호화 관련?) 문자열 제거.
+                    return message.slice(offset.index);
                 } else {
-                    return rendered.replace(
-                        /id="InitechSMMsgToReplace">/,
-                        '>' + message
-                    );
+                    return message;
                 }
+            } else {
+                return frame.replace(
+                    /id="InitechSMMsgToReplace">/,
+                    '>' + message.replace(/\$/g, '$$$$')
+                );
             }
         }
     });
 
     return {
         init: function (html) {
-            var $doc = $.parseHTML(html);
-
-            var isContained = function(doc){
-                var i, len;
-                for(i=0,len=doc.length;i<len;i++){
-                    if(doc[i].id=='XEIViewer'){
-                        return true;
-                    }
-                }
-                return false;
-            };
-
-            if (isContained($doc)) {
+            //HACK: <object> 태그의 상위 노드로써 DOM에 임시로 추가하여 query 수행.
+            var $doc = $('<div>', { id: 'Xeit-temp' }).hide().appendTo($('body')).append($.parseHTML(html));
+            if ($('#XEIViewer').length) {
                 this.vendor = new SoftForum(
                     html,
-                    $('param[name="smime_header"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="smime_body"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="ui_desc"]', $doc).val()
+                    $('param[name="smime_header"]').val(),
+                    $('param[name="smime_body"]').val(),
+                    $('param[name="info_msg"]').val(),
+                    $('param[name="ui_option"]').val(),
+                    $('param[name="ui_desc"]').val()
+                );
+            } else if (/prtObj\(([\s\S])*\);/.test(html)) {
+                //TODO: LGU+ 인식용으로 기존 로직과 병합 가능성 확인 필요. (by RyanYoon)
+                var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
+                this.vendor = new SoftForum(
+                    html,
+                    data[5],
+                    data[7],
+                    data[9],
+                    data[11],
+                    data[13]
                 );
             } else if (html.indexOf('IniMasPlugin') > -1) {
                 //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
@@ -385,23 +483,23 @@ var xeit = (function () {
                     /^[\s\S]*<body.*?>|<\/body>[\s\S]*$/ig,
                     ''
                 );
-                $doc = $('<div>', { id: 'temp' }).hide().appendTo($('body')).append($.parseHTML(body, document, true));
+                $doc.empty().append($.parseHTML(body, document, true));
                 this.vendor = new IniTech(
                     html,
-                    $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="AttachedFile"]', $doc).val()
+                    $('param[name="IniSMContents"]').val(),
+                    $('param[name="AttachedFile"]').val()
                 );
-                $doc.remove();
             } else if (html.indexOf('IniCrossMailObj') > -1) {
                 this.vendor = new IniTech(
                     html,
-                    $('param[name="IniSMContents"]', $doc).val().replace(/\n/g, ''),
-                    $('param[name="AttachedFile"]', $doc).val(),
-                    $('param[name="OptData"]', $doc).val()
+                    $('param[name="IniSMContents"]').val(),
+                    $('param[name="AttachedFile"]').val(),
+                    $('param[name="OptData"]').val()
                 );
             } else {
                 this.vendor = new Vendor();
             }
+            $doc.remove();
             this.vendor.init();
         },
 

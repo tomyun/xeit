@@ -12,11 +12,11 @@ html, body {
 
 /* NavBar */
 
-body > .navbar {
+.navbar {
   font-size: 13px;
 }
 
-body > .navbar .brand {
+.navbar .brand {
   font-weight: bold;
   color: #000;
   text-shadow: 0 1px 0 rgba(255,255,255,.1), 0 0 30px rgba(255,255,255,.125);
@@ -24,10 +24,16 @@ body > .navbar .brand {
      -moz-transition: all .2s linear;
           transition: all .2s linear;
 }
-body > .navbar .brand:hover {
+.navbar .brand:hover {
   color: #999;
   text-decoration: none;
   text-shadow: 0 1px 0 rgba(255,255,255,.1), 0 0 30px rgba(255,255,255,.4);
+}
+
+/* Auth dialog */
+
+#auth-info.alert {
+  margin-bottom: 0;
 }
 
 /* Footer */
