@@ -18,6 +18,22 @@ var xeit = (function () {
             return (decode) ? CryptoJS.enc.CP949.stringify(CryptoJS.enc.Base64.parse(param)) : param;
         },
 
+        blob: function (contents) {
+            return {
+                src: CryptoJS.enc.Base64.parse(contents).toString(CryptoJS.enc.Latin1),
+                offset: 0,
+
+                read: function (length, trim) {
+                    var trim = trim || false;
+                    var start = this.offset;
+                    var end = this.offset + length;
+                    var value = this.src.slice(start, end);
+                    this.offset = end;
+                    return (trim) ? $.trim(value.split('\0')[0]) : value;
+                }
+            };
+        },
+
         load: function (password) {
             return this.render(this.decrypt(password));
         },
@@ -364,19 +380,7 @@ var xeit = (function () {
         },
 
         unpack: function () {
-            var blob = {
-                src: CryptoJS.enc.Base64.parse(this.contents).toString(CryptoJS.enc.Latin1),
-                offset: 0,
-
-                read: function (length, trim) {
-                    var trim = trim || false;
-                    var start = this.offset;
-                    var end = this.offset + length;
-                    var value = this.src.slice(start, end);
-                    this.offset = end;
-                    return trim ? $.trim(value.split('\0')[0]) : value;
-                }
-            };
+            var blob = this.blob(this.contents);
             var struct = {
                 version: blob.read(9),
                 count: parseInt(blob.read(1), 10),
