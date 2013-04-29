@@ -496,6 +496,13 @@ var xeit = (function () {
                     support: false,
                     hint: '-',
                     keylen: 0
+                },
+
+                'KTF<cyberbill@ebill.ktfreetel.com>': {
+                    name: 'KTF',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
                 }
             }[S.Sender] || ((S.Sender) ? $.extend({}, this.sender, { name: S.Sender, hint: S.ContentEncryptionAlgorithm })
                                          : this.sender);
