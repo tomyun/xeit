@@ -475,6 +475,118 @@ var xeit = (function () {
         }
     });
 
+    /*************************
+     * Soft25 JX-Mail Secure *
+     *************************/
+
+    var Soft25 = function (html, contents) {
+        this.html = html || '';
+        this.contents = this.peel(contents);
+    };
+
+    Soft25.prototype = new Vendor('JX-Mail Secure');
+    $.extend(Soft25.prototype, {
+        init: function () {
+            var S = this.unpack();
+            $.extend(this, S);
+
+            this.sender = {
+                '병무청(동원담당)': {
+                    name: '병무청',
+                    support: false,
+                    hint: '-',
+                    keylen: 0
+                }
+            }[S.Sender] || ((S.Sender) ? $.extend({}, this.sender, { name: S.Sender, hint: S.ContentEncryptionAlgorithm })
+                                         : this.sender);
+        },
+
+        unpack: function () {
+            function ord(string, reverse) {
+                var reverse = reverse || false,
+                    string = (reverse) ? string.split('').reverse().join('') : string;
+
+                var value = 0;
+                for (var i = 0; i < string.length; i++) {
+                    value <<= 8
+                    value += string.charCodeAt(i)
+                }
+                return value;
+            }
+
+            var blob = this.blob(this.contents);
+            var headerLength = ord(blob.read(2), true),
+                encryptedHeader = blob.read(headerLength),
+                decryptedHeader = '';
+            for (var i = 0; i < headerLength; i++) {
+                decryptedHeader += String.fromCharCode(encryptedHeader.charCodeAt(i) ^ 0x6b);
+            }
+
+            var struct = {},
+                params = decryptedHeader.split('\n');
+            $.each(params, function(i, param) {
+                var values = param.split(': ');
+                if (values[0]) {
+                    struct[values[0]] = values[1];
+                }
+            });
+            $.each(struct, function(key, value) {
+                if (key.match(/Count|Offset|Size|Use$/)) {
+                    struct[key] = (value.length > 0) ? parseInt(value) : '';
+                } else if (key.match(/HintKey|MailSubject|Sender$/)) {
+                    value = $.trim(value);
+                    var buffer = new ArrayBuffer(value.length),
+                        bufferView = new Uint8Array(buffer);
+                    for (var i = 0; i < value.length; i++) {
+                        bufferView[i] = value.charCodeAt(i);
+                    }
+
+                    //HACK: couldn't import lib-typedarray.js from CryptoJS
+                    //var wordArray = CryptoJS.lib.WordArray.create(bufferView);
+                    var words = [];
+                    for (var i = 0; i < bufferView.byteLength; i++) {
+                        words[i >>> 2] |= bufferView[i] << (24 - (i % 4) * 8);
+                    }
+                    var wordArray = CryptoJS.lib.WordArray.create(words, bufferView.byteLength);
+                    struct[key] = CryptoJS.enc.CP949.stringify(wordArray);
+                }
+            });
+            if (struct.SenderCertUse) {
+                struct.SenderCertData = CryptoJS.enc.Latin1.parse(blob.read(struct.SenderCertSize));
+            }
+            struct.OriginalFileData = CryptoJS.enc.Latin1.parse(blob.read(struct.OriginalFileSize));
+            return struct;
+        },
+
+        keygen: function (password) {
+            return CryptoJS.enc.Latin1.parse(password);
+        },
+
+        decrypt: function (password) {
+            var key = this.keygen(password);
+            this.verify('JXBLOCKMAIL!@#', key);
+
+            return CryptoJS.RC4.decrypt(
+                {
+                    ciphertext: this.OriginalFileData
+                },
+                key
+            );
+        },
+
+        verify: function (secret, key) {
+            // HashKey, HeaderEncKey, ReceiverVid 중 가장 간단한 것으로 비교.
+            var hash = CryptoJS.MD5(key).toString(CryptoJS.enc.Hex);
+            if (hash != this.HashKey) {
+                throw Error('다시 입력해보세요!');
+            }
+        },
+
+        render: function (content) {
+            return this.encode(content);
+        }
+    });
+
     return {
         init: function (html) {
             //HACK: <object> 태그의 상위 노드로써 DOM에 임시로 추가하여 query 수행.
@@ -525,6 +637,11 @@ var xeit = (function () {
                     $('param[name="IniSMContents"]').val(),
                     $('param[name="AttachedFile"]').val(),
                     $('param[name="OptData"]').val()
+                );
+            } else if ($('#JXCEAL').length) {
+                this.vendor = new Soft25(
+                    html,
+                    $('#JSEncContents').val()
                 );
             } else {
                 this.vendor = new Vendor();
