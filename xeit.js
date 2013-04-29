@@ -475,16 +475,16 @@ var xeit = (function () {
         }
     });
 
-    /*************************
-     * Soft25 JX-Mail Secure *
-     *************************/
+    /*****************************
+     * Soft25 JX-Mail Enterprise *
+     *****************************/
 
     var Soft25 = function (html, contents) {
         this.html = html || '';
         this.contents = this.peel(contents);
     };
 
-    Soft25.prototype = new Vendor('JX-Mail Secure');
+    Soft25.prototype = new Vendor('JX-Mail Enterprise');
     $.extend(Soft25.prototype, {
         init: function () {
             var S = this.unpack();
