@@ -64,7 +64,7 @@ var xeit = (function () {
 
     var SoftForum = function (html, smime_header, smime_body, info_msg, ui_option, ui_desc) {
         this.html = html || '';
-        this.smime_header = this.peel(smime_header);
+        this.smime_header = this.peel(smime_header, true);
         this.smime_body = this.peel(smime_body);
         this.info_msg = this.peel(info_msg, true);
         this.ui_option = ui_option || '';
@@ -74,15 +74,13 @@ var xeit = (function () {
     SoftForum.prototype = new Vendor('XecureExpress');
     $.extend(SoftForum.prototype, {
         init: function () {
-            var headerWords = CryptoJS.enc.Base64.parse(this.smime_header),
-                header = CryptoJS.enc.CP949.stringify(headerWords),
-                contentType = header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
+            var contentType = this.smime_header.match(/Content-Type: \s*([\w-\/]+);*/i)[1];
             if (contentType === 'application/pkcs7-mime') {
                 this.decrypt = function (password) {
                     return this.decryptSMIME(this.smime_body, password);
                 };
             } else if (contentType === 'application/x-pwd') {
-                var match = header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i);
+                var match = this.smime_header.match(/X-XE_KEY: \s*([\d]+): \s*([\w+\/=]+);*/i);
                 var kind = parseInt(match[1]);
                 var key = match[2];
                 this.decrypt = function (password) {
@@ -95,7 +93,7 @@ var xeit = (function () {
             if (company === '보안메일') {
                 if (this.html.indexOf('kbcard') > -1) {
                     company = 'Xeit.kbcard';
-                } else if (/(?=.*lottecard)(?=.*point)/.test(header)) {
+                } else if (/(?=.*lottecard)(?=.*point)/.test(this.smime_header)) {
                     company = 'Xeit.lottepoint';
                 } else if (this.html.indexOf('samsungcard.co.kr') > -1) {
                     company = 'Xeit.samsungcard';
