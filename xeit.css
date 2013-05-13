@@ -68,3 +68,13 @@ html, body {
     padding-bottom: 20px;
   }
 }
+
+/* Typography */
+body,
+input,
+button,
+select,
+textarea,
+.navbar-search .search-query {
+  font-family: "Helvetica Neue", Helvetica, Arial, "Apple SD Gothic Neo", "Nanum Gothic", "Malgun Gothic", sans-serif;
+}
