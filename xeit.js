@@ -90,7 +90,7 @@ var xeit = (function () {
 
             //HACK: 구분자가 '보안메일'로 동일한 발송기관 강제 구분.
             var company = this.ui_desc;
-            if (company === '보안메일') {
+            if (company === '보안메일' || company === 'ｺｸｾﾈｸﾞﾀﾏ') {
                 if (this.html.indexOf('kbcard') > -1) {
                     company = 'Xeit.kbcard';
                 } else if (/(?=.*lottecard)(?=.*point)/.test(this.smime_header)) {
