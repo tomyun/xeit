@@ -102,6 +102,8 @@ var xeit = (function () {
                 } else if (this.info_msg.indexOf('KEB') > -1) {
                     company = 'Xeit.yescard';
                 }
+            } else if (company === '悼剧积疙 焊救皋老') {
+                company = '동양생명 보안메일';
             }
 
             this.sender = {
@@ -165,6 +167,13 @@ var xeit = (function () {
                             'message': m.replace(/href="#topmove"/g, '')
                         };
                     }
+                },
+
+                '동양생명 보안메일': {
+                    name: '동양생명',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
                 },
 
                 '신한카드 보안메일': {
