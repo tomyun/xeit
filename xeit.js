@@ -345,7 +345,7 @@ var xeit = (function () {
                 },
 
                 CC: {
-                    name: '우리은행 (BC카드)',
+                    name: 'BC카드',
                     support: true,
                     hint: '주민등록번호 뒤',
                     keylen: 7,
