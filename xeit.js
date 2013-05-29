@@ -336,6 +336,14 @@ var xeit = (function () {
             }[S.crypto[2]];
 
             this.sender = {
+                BC: {
+                    name: 'NH농협카드',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: '7',
+                    salt: 'nonghyup'
+                },
+
                 BO: {
                     name: '신한은행',
                     support: true,
@@ -379,9 +387,16 @@ var xeit = (function () {
 
             if (S.keygen == 'INITECH') {
                 this.iv = CryptoJS.enc.Latin1.parse(S.iv);
+                this.salt = this.sender.salt;
                 this.keygen = this.keygenINITECH;
             } else if (S.keygen == 'PBKDF2') {
-                this.iv = CryptoJS.enc.Base64.parse(S.iv);
+                if (S.version >= 'J 1.0.4') {
+                    this.iv = CryptoJS.enc.Base64.parse(S.iv);
+                    this.salt = this.iv.clone();
+                } else {
+                    this.iv = CryptoJS.enc.Latin1.parse(S.iv);
+                    this.salt = CryptoJS.enc.Latin1.parse(this.sender.salt);
+                }
                 this.keygen = this.keygenPBKDF2;
             }
         },
@@ -389,7 +404,7 @@ var xeit = (function () {
         unpack: function () {
             var blob = this.blob(this.contents);
             var struct = {
-                version: blob.read(9),
+                version: blob.read(9, true),
                 count: parseInt(blob.read(1), 10),
                 company: blob.read(2),
                 crypto: blob.read(25, true).split('/'),
@@ -405,14 +420,14 @@ var xeit = (function () {
         },
 
         keygenINITECH: function (password) {
-            var saltedKey1 = this.sender.salt + '|' + password;
+            var saltedKey1 = this.salt + '|' + password;
             var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
-            var saltedKey2 = this.sender.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
+            var saltedKey2 = this.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
             return this.hasher(CryptoJS.enc.Latin1.parse(saltedKey2));
         },
 
         keygenPBKDF2: function (password) {
-            return CryptoJS.PBKDF2(password, this.iv, { keySize: 128/32, iterations: 5139 });
+            return CryptoJS.PBKDF2(password, this.salt, { keySize: 128/32, iterations: 5139 });
         },
 
         decrypt: function (password) {
