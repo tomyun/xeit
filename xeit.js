@@ -318,13 +318,13 @@ var xeit = (function () {
             this.dataArea = S.dataArea;
 
             this.hasher = {
-                MD5: CryptoJS.MD5,
-                SHA1: CryptoJS.SHA1
+                MD5: { helper: CryptoJS.MD5, algorithm: CryptoJS.algo.MD5 },
+                SHA1: { helper: CryptoJS.SHA1, algorithm: CryptoJS.algo.SHA1 }
             }[S.hash];
 
             this.cipher = {
-                DES: CryptoJS.DES,
-                SEED: CryptoJS.SEED
+                DES: { helper: CryptoJS.DES, algorithm: CryptoJS.algo.DES },
+                SEED: { helper: CryptoJS.SEED, algorithm: CryptoJS.algo.SEED }
             }[S.crypto[0]];
 
             this.mode = {
@@ -389,15 +389,20 @@ var xeit = (function () {
                 this.iv = CryptoJS.enc.Latin1.parse(S.iv);
                 this.salt = this.sender.salt;
                 this.keygen = this.keygenINITECH;
-            } else if (S.keygen == 'PBKDF2') {
-                if (S.version >= 'J 1.0.4') {
+            } else {
+                if (S.version >= 'J 1.0.3') {
                     this.iv = CryptoJS.enc.Base64.parse(S.iv);
                     this.salt = this.iv.clone();
                 } else {
                     this.iv = CryptoJS.enc.Latin1.parse(S.iv);
                     this.salt = CryptoJS.enc.Latin1.parse(this.sender.salt);
                 }
-                this.keygen = this.keygenPBKDF2;
+
+                if (S.keygen == 'PBKDF1') {
+                    this.keygen = this.keygenPBKDF1;
+                } else if (S.keygen == 'PBKDF2') {
+                    this.keygen = this.keygenPBKDF2;
+                }
             }
         },
 
@@ -423,18 +428,29 @@ var xeit = (function () {
             var saltedKey1 = this.salt + '|' + password;
             var hashedKey = CryptoJS.SHA1(CryptoJS.SHA1(CryptoJS.SHA1(saltedKey1)));
             var saltedKey2 = this.salt + password + hashedKey.toString(CryptoJS.enc.Latin1);
-            return this.hasher(CryptoJS.enc.Latin1.parse(saltedKey2));
+            return this.hasher.helper(CryptoJS.enc.Latin1.parse(saltedKey2));
+        },
+
+        keygenPBKDF1: function (password) {
+            return CryptoJS.PBKDF1(password, this.salt, {
+                keySize: this.cipher.algorithm.keySize,
+                hasher: this.hasher.algorithm,
+                iterations: 5139
+            });
         },
 
         keygenPBKDF2: function (password) {
-            return CryptoJS.PBKDF2(password, this.salt, { keySize: 128/32, iterations: 5139 });
+            return CryptoJS.PBKDF2(password, this.salt, {
+                keySize: this.cipher.algorithm.keySize,
+                iterations: 5139
+            });
         },
 
         decrypt: function (password) {
             var key = this.keygen(password);
             this.verify('Initech', key);
 
-            return this.cipher.decrypt(
+            return this.cipher.helper.decrypt(
                 {
                     ciphertext: this.dataArea
                 },
@@ -448,7 +464,7 @@ var xeit = (function () {
         },
 
         verify: function (secret, key) {
-            if (this.cipher.decrypt(
+            if (this.cipher.helper.decrypt(
                 {
                     ciphertext: this.checkArea
                 },
