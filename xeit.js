@@ -145,8 +145,7 @@ var xeit = (function () {
                 'Xeit.samsungcard': {
                     name: '삼성카드',
                     support: false,
-                    hint: '-',
-                    keylen: 0
+                    hint: '-'
                 },
 
                 'Xeit.uplus': {

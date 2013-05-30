@@ -67,6 +67,8 @@
                 } else {
                     $('#auth-sender-support').addClass('label-important').text('미지원');
 
+                    $('input#auth-password').prop('disabled', true);
+
                     $('#auth-info').addClass('alert-error').html('<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
 
                     $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
@@ -80,12 +82,11 @@
                 }
 
                 // 비밀번호 설명 표시.
-                if (sender['keylen']) {
+                if (typeof sender['keylen'] !== 'undefined') {
                     $('input#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'].toString().replace(',', '~') + '자리)')
                                             .prop('pattern', '[0-9]{' + sender['keylen'] + '}');
                 } else {
-                    $('input#auth-password').prop('placeholder', sender['hint'])
-                                            .prop('disabled', true);
+                    $('input#auth-password').prop('placeholder', sender['hint']);
                 }
             }
 
