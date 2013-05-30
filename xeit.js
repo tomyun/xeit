@@ -365,6 +365,13 @@ var xeit = (function () {
                     }
                 },
 
+                KA: {
+                    name: 'Initech',
+                    support: true,
+                    hint: '보안메일 비밀번호',
+                    salt: 'consulting'
+                },
+
                 TC: {
                     name: 'SKT',
                     support: true,
