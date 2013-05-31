@@ -50,12 +50,8 @@ var req = require('request'),
 
 			} else {
 
-				req.post({
-					url: apiUrl.sendBuddy,
-					form: { 
-						buddyId: buddyId,
-						content: encodeURIComponent(content)
-					}
+				req.get({
+					uri: apiUrl.sendBuddy + "&buddyId=" + buddyId + "&content=" + encodeURIComponent(content)
 				}, this.createResponseHandler(callback));
 
 			}
@@ -107,12 +103,8 @@ var req = require('request'),
 
 			} else {
 
-				req.post({
-					url: apiUrl.sendGroup,
-					form: { 
-						groupId: groupId,
-						content: encodeURIComponent(content)
-					}
+				req.get({
+					uri: apiUrl.sendGroup + "&groupId=" + groupId + "&content=" + encodeURIComponent(content)
 				}, this.createResponseHandler(callback));
 
 			}
@@ -135,14 +127,16 @@ var req = require('request'),
 		 *      http://dna.daum.net/apis/mypeople/ref#filedownload      
 		 */
 		downloadFile: function (fileId, fileName) {
+
 			req.get({
 				uri: apiUrl.downloadFile + "&fileId=" + fileId,
 			}).pipe(fs.createWriteStream('mypeople/bot_data/download/' + fileName + '.jpg'));
+			
 		},
 
 		createResponseHandler: function (callback) {
 			return function (error, resp, data) {
-				
+				console.log(resp.request.uri.href);
 				if (error) {
 					callback(error);
 				} else {
