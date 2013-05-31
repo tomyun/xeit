@@ -10,7 +10,6 @@
     "request": "latest",
     "socket.io": "latest",
     "jquery": "latest",
-    //"crypto-js": "latest",
     "iconv": "latest",
     "phantomjs": "latest"
   }
