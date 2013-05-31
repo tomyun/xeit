@@ -1,6 +1,9 @@
 var Bot = require("./lib/bot");
 var bot = new Bot( "https://apis.daum.net", "MYPEOPLE_BOT_API_KEY");
 
+var xeit = require('./lib/xeit.js');
+var state = 'URL대기';
+
 exports.addBuddy = function(buddyId) {
 
 	bot.buddyProfile(buddyId, function(error, data) {
@@ -78,10 +81,55 @@ exports.profileDownload = function(buddyId) {
 
 exports.sendFromMessage = function(buddyId, content) {
 
-	bot.sendMessageToBuddy(buddyId, content, null, function(error, data) {
-		if(!error){
+	var message = '안녕하세요! Xeit입니다.';
+
+	if (state == 'URL대기') {
+		message = '보안메일 URL을 입력해주세요!';
+
+		if (content.startsWith('http://') || content.startsWith('https://')) {
+			var request = require('request');
+			request({
+				url: content,
+				encoding: null
+			}, function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					var html = body.toString();
+					if (html.search(/euc-kr/i) != -1) {
+						var iconv = new require('iconv').Iconv('EUC-KR', 'UTF-8');
+						html = iconv.convert(body);
+					}
+					xeit.init(html);
+
+					var sender = xeit.vendor.sender;
+					if (sender['support']) {
+						state = '비밀번호대기';
+						message = sender['name'] + '이군요. 이제 비밀번호를 알려주세요~';
+					} else {
+						message = '보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.';
+					}
+				} else {
+					message = 'URL이 잘못된 것 같아요.';
+				}
+			});
+		}
+	} else if (state == '비밀번호대기') {
+		try {
+			var mail = xeit.load(content);
+			//TODO: 배열 저장?
+
+			state = '열람대기';
+			message = '그럼 뭐든지 물어보세요.';
+		} catch (err) {
+			message = err.message;
+		}
+	} else if (state == '열람대기') {
+		//TODO: 선범씨!
+	}
+
+	bot.sendMessageToBuddy(buddyId, message, null, function(error, data) {
+		if (!error) {
 			console.log(data);
-		}else{
+		} else {
 			console.log(error);
 		}
 	});
