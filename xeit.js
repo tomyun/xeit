@@ -754,7 +754,7 @@ var xeit = (function () {
                     /^[\s\S]*<body.*?>|<\/body>[\s\S]*$/ig,
                     ''
                 );
-                $doc.empty().append($.parseHTML(body, document, true));
+                $doc.empty().append($.parseHTML(body, true));
                 this.vendor = new IniTech(
                     html,
                     $('param[name="IniSMContents"]').val(),
