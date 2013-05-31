@@ -86,7 +86,7 @@ exports.sendFromMessage = function(buddyId, content) {
 	if (state == 'URL대기') {
 		message = '보안메일 URL을 입력해주세요!';
 
-		if (content.startsWith('http://') || content.startsWith('https://')) {
+		if (/^https?:\/\//.test(content)) {
 			var request = require('request');
 			request({
 				url: content,
