@@ -1,0 +1,13 @@
+{
+  "name": "MypeopleBot",
+  "version": "0.0.2",
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "express": "latest",
+    "jade": "latest",
+    "request": "latest",
+    "socket.io": "latest"
+  }
+}
