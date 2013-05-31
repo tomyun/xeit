@@ -512,7 +512,7 @@ var xeit = (function () {
                 }
             } else {
                 return frame.replace(
-                    /id="InitechSMMsgToReplace">/,
+                    /id=['"]InitechSMMsgToReplace['"]>/,
                     '>' + message.replace(/\$/g, '$$$$')
                 );
             }
