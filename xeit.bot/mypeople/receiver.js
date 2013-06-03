@@ -82,6 +82,15 @@ exports.profileDownload = function(buddyId) {
 exports.sendFromMessage = function(buddyId, content) {
 
 	var message = '안녕하세요! Xeit입니다.';
+	function reply(message) {
+		bot.sendMessageToBuddy(buddyId, message, null, function(error, data) {
+			if (!error) {
+				console.log(data);
+			} else {
+				console.log(error);
+			}
+		});
+	}
 
 	if (state == 'URL대기') {
 		message = '보안메일 URL을 입력해주세요!';
@@ -96,7 +105,7 @@ exports.sendFromMessage = function(buddyId, content) {
 					var html = body.toString();
 					if (html.search(/euc-kr/i) != -1) {
 						var iconv = new require('iconv').Iconv('EUC-KR', 'UTF-8');
-						html = iconv.convert(body);
+						html = iconv.convert.toString(body);
 					}
 					xeit.init(html);
 
@@ -110,7 +119,9 @@ exports.sendFromMessage = function(buddyId, content) {
 				} else {
 					message = 'URL이 잘못된 것 같아요.';
 				}
+				reply(message);
 			});
+			return;
 		}
 	} else if (state == '비밀번호대기') {
 		try {
@@ -125,14 +136,7 @@ exports.sendFromMessage = function(buddyId, content) {
 	} else if (state == '열람대기') {
 		//TODO: 선범씨!
 	}
-
-	bot.sendMessageToBuddy(buddyId, message, null, function(error, data) {
-		if (!error) {
-			console.log(data);
-		} else {
-			console.log(error);
-		}
-	});
+	reply(message);
 
 };
 
