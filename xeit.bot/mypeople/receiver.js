@@ -105,7 +105,7 @@ exports.sendFromMessage = function(buddyId, content) {
 					var html = body.toString();
 					if (html.search(/euc-kr/i) != -1) {
 						var iconv = new require('iconv').Iconv('EUC-KR', 'UTF-8');
-						html = iconv.convert.toString(body);
+						html = iconv.convert(body).toString();
 					}
 					xeit.init(html);
 
