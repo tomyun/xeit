@@ -23,3 +23,11 @@ FAQ
 ### 개발은 어떡하죠? ###
 
 다양한 메일 종류를 지원할 수 있도록 최대한 구조를 맞춰 보았는데 아직 문서로 정리되지는 않았네요. 동일한 플러그인이라면 큰 수정 없이 지원될 가능성이 높기는 합니다. 혹시 헤더 정보만이라도 샘플을 제공해주실 수 있다면 직접 확인을 도와드릴 수도 있습니다~ 참고로 암호화 알고리즘은 [CryptoJS](https://github.com/tomyun/crypto-js)를 기반으로 SEED, PBKDF1 등을 추가하여 사용하고 있습니다.
+
+도와주신 분들
+-------------
+
+* [skyisle](https://github.com/skyisle): 크롬 이슈 수정
+* [RyanYoon](https://github.com/RyanYoon): 신규 메일 추가, 크롬 익스텐션 작업
+* [everclear--](https://github.com/everclear--): 메일 샘플 제공
+* [sbyoun](https://github.com/sbyoun): 다음 마이피플 봇 작업
