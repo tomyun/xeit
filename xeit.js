@@ -7,7 +7,7 @@ var xeit = (function () {
 
     var Vendor = function (product) {
         this.product = product || '';
-        this.sender = { name: '?', support: false, hint: '-', keylen: 0 };
+        this.sender = { name: '?', support: false, hint: '-' };
     };
 
     Vendor.prototype = {
