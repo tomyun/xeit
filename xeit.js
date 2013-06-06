@@ -121,6 +121,13 @@ var xeit = (function () {
                     keylen: 7
                 },
 
+                'SAMSUNG LIFE': {
+                    name: '삼성생명',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
                 'TRUEFRIEND': {
                     name: '한국투자증권',
                     support: true,
