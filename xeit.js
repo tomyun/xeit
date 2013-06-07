@@ -90,8 +90,10 @@ var xeit = (function () {
 
             //HACK: 구분자가 '보안메일'로 동일한 발송기관 강제 구분.
             var company = this.ui_desc;
-            if (company === '보안메일' || company === 'ｺｸｾﾈｸﾞﾀﾏ') {
-                if (this.html.indexOf('kbcard') > -1) {
+            if (company === '보안메일' || company === 'ｺｸｾﾈｸﾞﾀﾏ' || company === '���ȸ���') {
+                if (this.info_msg.indexOf('hanabank') > -1) {
+                    company = 'Xeit.hanabank';
+                } else if (this.html.indexOf('kbcard') > -1) {
                     company = 'Xeit.kbcard';
                 } else if (/(?=.*lottecard)(?=.*point)/.test(this.smime_header)) {
                     company = 'Xeit.lottepoint';
@@ -130,6 +132,13 @@ var xeit = (function () {
 
                 'TRUEFRIEND': {
                     name: '한국투자증권',
+                    support: true,
+                    hint: '주민등록번호 뒤',
+                    keylen: 7
+                },
+
+                'Xeit.hanabank': {
+                    name: '하나은행',
                     support: true,
                     hint: '주민등록번호 뒤',
                     keylen: 7
