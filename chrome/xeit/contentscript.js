@@ -1,6 +1,6 @@
 // derived from xeit.js
 function check() {
-    var html = document.body.innerHTML;
+    var html = document.head.innerHTML + document.body.innerHTML;
     return document.getElementById('XEIViewer') ||
            html.indexOf('IniMasPlugin') > -1 ||
            html.indexOf('IniCrossMailObj') > -1 ||
@@ -8,13 +8,14 @@ function check() {
            document.getElementById('MailDec');
 }
 
-// copy of link.js
+// (almost) copy of link.js
 function link() {
     var xeit = document.getElementById('xeit');
     if (xeit) {
         return;
     }
 
+    window.stop();
     var attachment = document.getElementsByTagName('html')[0].outerHTML;
 
     var _body = document.body;
