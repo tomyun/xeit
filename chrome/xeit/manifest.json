@@ -1,0 +1,32 @@
+{
+  "name": "Xeit",
+  "version": "1.0.0",
+  "manifest_version": 2,
+
+  "description": "ActiveX 없이 보안메일을 열어보자!",
+  "homepage_url": "http://tomyun.github.io/xeit/",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+
+  "page_action": {
+    "default_icon": {
+      "19": "icon19.png",
+      "38": "icon38.png"
+    },
+    "default_title": "Xeit"
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentscript.js"]
+    }
+  ]
+}
