@@ -1,4 +1,4 @@
-(function () {
+//(function () {
     "use strict";
 
     importScripts('deps/crypto-js/build/rollups/pbkdf1.js',
@@ -756,63 +756,30 @@
     });
 
     self.addEventListener('message', function (e) {
-        var data = e.data;
-        switch (data.cmd) {
-            case 'Vendor':
-                //FIXME
-                self.vendor = new (Function.prototype.bind.apply(Vendor, data.args));
-                self.vendor.init();
-                self.postMessage({
-                    cmd: data.cmd,
-                    sender: self.vendor.sender
-                });
-                break;
-
+        var cmd = e.data.cmd;
+        var args = e.data.args;
+        switch (cmd) {
             case 'SoftForum':
-                self.vendor = new SoftForum(data.args[0], data.args[1], data.args[2], data.args[3], data.args[4], data.args[5]);
-                self.vendor.init();
-                self.postMessage({
-                    cmd: data.cmd,
-                    sender: self.vendor.sender
-                });
-                break;
-
             case 'IniTech':
-                self.vendor = new IniTech(data.args[0], data.args[1], data.args[2]);
-                self.vendor.init();
-                self.postMessage({
-                    cmd: data.cmd,
-                    sender: self.vendor.sender
-                });
-                break;
-
             case 'Soft25':
-                self.vendor = new Soft25(data.args[0], data.args[1]);
-                self.vendor.init();
-                self.postMessage({
-                    cmd: data.cmd,
-                    sender: self.vendor.sender
-                });
-                break;
-
             case 'NaringTel':
-                self.vendor = new NaringTel(data.args[0], data.args[1]);
+            case 'Vendor':
+                self.vendor = new (Function.prototype.bind.apply(self[cmd], [null].concat(args)));
                 self.vendor.init();
-                self.postMessage({
-                    cmd: data.cmd,
+                var res = {
                     sender: self.vendor.sender
-                });
+                };
                 break;
 
             case 'load':
-                //FIXME
-                //var message = self.vendor.load.apply(this, data.args);
-                var message = self.vendor.load(data.args[0]);
-                self.postMessage({
-                    cmd: data.cmd,
-                    message: message
-                });
+                var res = {
+                    message: self.vendor.load.apply(self.vendor, args)
+                };
                 break;
         };
+        self.postMessage({
+            cmd: cmd,
+            res: res
+        });
     }, false);
-})();
+//})();

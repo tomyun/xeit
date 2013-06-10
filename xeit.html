@@ -61,9 +61,9 @@
                         var password = $('input#auth-password').val();
                         xeit.load(
                             password,
-                            function (e) {
+                            function (r) {
                                 $authDialog.on('hidden', function () {
-                                    showMail(e.data.message);
+                                    showMail(r.message);
                                 }).modal('hide');
                             },
                             displayError
@@ -97,10 +97,11 @@
 
             function loadMail() {
                 window.addEventListener('message', function (e) {
+                    var html = e.data;
                     xeit.init(
-                        e.data,
-                        function (e) {
-                            setupAuthDialog(e.data.sender);
+                        html,
+                        function (r) {
+                            setupAuthDialog(r.sender);
                         },
                         displayError
                     );
