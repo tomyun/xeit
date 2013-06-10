@@ -4,7 +4,7 @@
 	branch = seed-3.1.2
 [submodule "deps/asn1js"]
 	path = deps/asn1js
-	url = git://github.com/lapo-luchini/asn1js.git
+	url = https://github.com/tomyun/asn1js.git
 [submodule "deps/srcdoc-polyfill"]
 	path = deps/srcdoc-polyfill
 	url = git://github.com/jugglinmike/srcdoc-polyfill.git
