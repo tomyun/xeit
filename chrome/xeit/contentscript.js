@@ -2,8 +2,7 @@
 function check() {
     var html = document.head.innerHTML + document.body.innerHTML;
     return document.getElementById('XEIViewer') ||
-           html.indexOf('IniMasPlugin') > -1 ||
-           html.indexOf('IniCrossMailObj') > -1 ||
+           html.search(/IniMasPlugin|IniCrossMailObj/) > -1 ||
            document.getElementById('JXCEAL') ||
            document.getElementById('MailDec');
 }
