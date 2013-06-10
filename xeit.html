@@ -22,14 +22,20 @@
         <script src='deps/srcdoc-polyfill/srcdoc-polyfill.min.js'></script>
         <script src='xeit.js'></script>
         <script>
-            function setupAuthDialog() {
+            function displayError(e) {
+                $('#auth-password-group').addClass('error');
+                //HACK: Error와 ErrorEvent의 message가 조금 다름.
+                $('#auth-password-help').text(e.message.replace('Error: ', ''));
+                //throw e;
+            }
+
+            function setupAuthDialog(sender) {
                 $authDialog = $('#auth-dialog').modal({
                     backdrop: 'static',
                     keyboard: false
                 }).on('shown', function () {
                     $('input#auth-password').trigger('focus');
                 });
-                var sender = xeit.vendor.sender;
 
                 // 발송기관 표시.
                 $('#auth-sender-name').val(sender['name']);
@@ -53,16 +59,15 @@
                         e.preventDefault();
 
                         var password = $('input#auth-password').val();
-                        try {
-                            var message = xeit.load(password);
-                        } catch (err) {
-                            $('#auth-password-group').addClass('error');
-                            $('#auth-password-help').text(err.message);
-                            throw err;
-                        }
-                        $authDialog.on('hidden', function () {
-                            showMail(message);
-                        }).modal('hide');
+                        xeit.load(
+                            password,
+                            function (e) {
+                                $authDialog.on('hidden', function () {
+                                    showMail(e.data.message);
+                                }).modal('hide');
+                            },
+                            displayError
+                        );
                     });
                 } else {
                     $('#auth-sender-support').addClass('label-important').text('미지원');
@@ -92,8 +97,13 @@
 
             function loadMail() {
                 window.addEventListener('message', function (e) {
-                    xeit.init(e.data);
-                    setupAuthDialog();
+                    xeit.init(
+                        e.data,
+                        function (e) {
+                            setupAuthDialog(e.data.sender);
+                        },
+                        displayError
+                    );
                 }, false);
                 window.parent.postMessage('ready', '*');
             }
