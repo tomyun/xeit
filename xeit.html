@@ -56,13 +56,13 @@
             }
 
             function unlockAuthDialog() {
-                $('#auth-spinner').hide();
+                $('#auth-spinner').fadeOut();
                 $('input#auth-password').removeProp('disabled').focus();
                 setupAuthButton('open', true);
             }
 
             function lockAuthDialog() {
-                $('#auth-spinner').show();
+                $('#auth-spinner').fadeIn();
                 $('input#auth-password').blur();
                 $('input#auth-password').prop('disabled', true);
                 setupAuthButton('wait', false);

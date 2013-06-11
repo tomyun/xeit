@@ -34,6 +34,7 @@ html, body {
 
 #auth-spinner {
   display: none;
+  color: #ff9900;
 }
 
 #auth-info.alert {
