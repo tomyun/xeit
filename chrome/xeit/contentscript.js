@@ -17,6 +17,8 @@ function link() {
     window.stop();
     var attachment = document.getElementsByTagName('html')[0].outerHTML;
 
+    document.documentElement.style.height = '100%';
+
     var _body = document.body;
     document.body = document.createElement('body');
     document.body.style.margin = 0;
@@ -25,7 +27,7 @@ function link() {
 
     xeit = document.createElement('iframe');
     xeit.setAttribute('id', 'xeit');
-    xeit.setAttribute('src', 'http://tomyun.github.io/xeit/xeit.html');
+    xeit.setAttribute('src', 'http://tomyun.github.io/xeit/xeit.html?chrome');
     xeit.style.width = '100%';
     xeit.style.height = '100%';
     xeit.style.border = 0;

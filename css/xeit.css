@@ -32,6 +32,11 @@ html, body {
 
 /* Auth dialog */
 
+#auth-spinner {
+  display: none;
+  color: #ff9900;
+}
+
 #auth-info.alert {
   margin-bottom: 0;
 }

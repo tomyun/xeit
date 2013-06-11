@@ -1,10 +1,10 @@
-[submodule "deps/crypto-js"]
-	path = deps/crypto-js
+[submodule "js/deps/crypto-js"]
+	path = js/deps/crypto-js
 	url = git://github.com/tomyun/crypto-js.git
 	branch = seed-3.1.2
-[submodule "deps/asn1js"]
-	path = deps/asn1js
-	url = git://github.com/lapo-luchini/asn1js.git
-[submodule "deps/srcdoc-polyfill"]
-	path = deps/srcdoc-polyfill
+[submodule "js/deps/asn1js"]
+	path = js/deps/asn1js
+	url = https://github.com/tomyun/asn1js.git
+[submodule "js/deps/srcdoc-polyfill"]
+	path = js/deps/srcdoc-polyfill
 	url = git://github.com/jugglinmike/srcdoc-polyfill.git
