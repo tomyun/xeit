@@ -1,11 +1,9 @@
 var xeit = (function () {
     "use strict";
 
-    function check(html) {
-        //HACK: <object> 태그의 상위 노드로써 DOM에 임시로 추가하여 query 수행.
-        var $doc = $('<div>', { id: 'Xeit-temp' }).hide().appendTo($('body')).append($.parseHTML(html));
+    function parse($doc, html) {
         if ($('#XEIViewer').length) {
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'SoftForum' },
                 args: [
@@ -20,7 +18,7 @@ var xeit = (function () {
         } else if (/prtObj\(([\s\S])*\);/.test(html)) {
             //TODO: LGU+ 인식용으로 기존 로직과 병합 가능성 확인 필요. (by RyanYoon)
             var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'SoftForum' },
                 args: [
@@ -48,7 +46,7 @@ var xeit = (function () {
             );
             $doc.empty().append($.parseHTML(body, true));
 
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'IniTech' },
                 args: [
@@ -58,7 +56,7 @@ var xeit = (function () {
                 ]
             };
         } else if (html.indexOf('IniCrossMailObj') > -1) {
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'IniTech' },
                 args: [
@@ -69,7 +67,7 @@ var xeit = (function () {
                 ]
             };
         } else if ($('#JXCEAL').length) {
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'Soft25' },
                 args: [
@@ -78,7 +76,7 @@ var xeit = (function () {
                 ]
             };
         } else if ($('#MailDec').length) {
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'Natingtel' },
                 args: [
@@ -87,12 +85,18 @@ var xeit = (function () {
                 ]
             };
         } else {
-            var info = {
+            return {
                 func: 'init',
                 opts: { plugin: 'Vendor' },
                 args: []
             }
         }
+    }
+
+    function check(html) {
+        //HACK: <object> 태그의 상위 노드로써 DOM에 임시로 추가하여 query 수행.
+        var $doc = $('<div>', { id: 'Xeit-temp' }).hide().appendTo($('body')).append($.parseHTML(html));
+        var info = parse($doc, html);
         $doc.remove();
         return info;
     }
