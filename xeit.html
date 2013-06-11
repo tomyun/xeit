@@ -41,9 +41,9 @@
 
                 enable = (typeof enable !== 'undefined') ? enable : true;
                 if (enable) {
-                    $('#auth-submit').removeProp('disabled');
+                    $('#auth-submit').removeProp('disabled').removeClass('disabled');
                 } else {
-                    $('#auth-submit').prop('disabled', true);
+                    $('#auth-submit').prop('disabled', true).addClass('disabled');
                 }
             }
 
