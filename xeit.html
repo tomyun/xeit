@@ -29,6 +29,12 @@
                 $('#auth-password-help').text('');
             }
 
+            function setupAuthInfo(tone, message) {
+                $('#auth-info').removeClass(function (index, css) {
+                    return (css.match(/\balert-\S+/g) || []).join(' ');
+                }).addClass('alert-'+tone).html(message);
+            }
+
             function setupAuthButton(kind, enable) {
                 $('#auth-submit').removeClass('btn-primary btn-info btn-danger')
                 if (kind == 'open') {
@@ -77,7 +83,7 @@
 
                     $('input#auth-password').on('blur keyup', resetError)
 
-                    $('#auth-info').addClass('alert-info').html('<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
+                    setupAuthInfo('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
 
                     setupAuthButton('open');
                     $('#auth-form').on('submit', function (e) {
@@ -101,7 +107,7 @@
 
                     $('input#auth-password').prop('disabled', true);
 
-                    $('#auth-info').addClass('alert-error').html('<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
+                    setupAuthInfo('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
 
                     setupAuthButton('return');
                     $('#auth-form').on('submit', function (e) {
