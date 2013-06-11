@@ -22,11 +22,52 @@
         <script src='deps/srcdoc-polyfill/srcdoc-polyfill.min.js'></script>
         <script src='xeit.js'></script>
         <script>
-            function displayError(e) {
-                $('#auth-password-group').addClass('error');
+            function handleError(e) {
                 //HACK: Error와 ErrorEvent의 message가 조금 다름.
-                $('#auth-password-help').text(e.message.replace('Error: ', ''));
+                displayError(e.message.replace('Error: ', ''))
+                unlockAuthDialog();
                 //throw e;
+            }
+
+            function displayError(message) {
+                $('#auth-password-group').addClass('error');
+                $('#auth-password-help').text(message);
+            }
+
+            function resetError() {
+                $('#auth-password-group').removeClass('error');
+                $('#auth-password-help').text('');
+            }
+
+            function setupAuthButton(kind, enable) {
+                $('#auth-submit').removeClass('btn-primary btn-info btn-danger')
+                if (kind == 'open') {
+                    $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
+                } else if (kind == 'wait') {
+                    $('#auth-submit').addClass('btn-info').html('<i class="icon-eye-close icon-white"></i> 기다리기');
+                } else if (kind == 'return') {
+                    $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
+                }
+
+                enable = (typeof enable !== 'undefined') ? enable : true;
+                if (enable) {
+                    $('#auth-submit').removeProp('disabled');
+                } else {
+                    $('#auth-submit').prop('disabled', true);
+                }
+            }
+
+            function unlockAuthDialog() {
+                $('#auth-spinner').hide();
+                $('input#auth-password').removeProp('disabled').focus();
+                setupAuthButton('open', true);
+            }
+
+            function lockAuthDialog() {
+                $('#auth-spinner').show();
+                $('input#auth-password').blur();
+                $('input#auth-password').prop('disabled', true);
+                setupAuthButton('wait', false);
             }
 
             function setupAuthDialog(sender) {
@@ -44,19 +85,15 @@
                 if (sender['support']) {
                     $('#auth-sender-support').addClass('label-success').text('지원');
 
-                    $('input#auth-password').on('keyup', function (e) {
-                        //HACK: 엔터키로 폼 제출하는 경우 오류 메시지 초기화 방지.
-                        if (e.keyCode != 13) {
-                            $('#auth-password-group').removeClass('error');
-                            $('#auth-password-help').text('');
-                        }
-                    });
+                    $('input#auth-password').on('blur keyup', resetError)
 
                     $('#auth-info').addClass('alert-info').html('<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
 
-                    $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
+                    setupAuthButton('open');
                     $('#auth-form').on('submit', function (e) {
                         e.preventDefault();
+
+                        lockAuthDialog();
 
                         var password = $('input#auth-password').val();
                         xeit.load(
@@ -66,7 +103,7 @@
                                     showMail(r.message);
                                 }).modal('hide');
                             },
-                            displayError
+                            handleError
                         );
                     });
                 } else {
@@ -76,7 +113,7 @@
 
                     $('#auth-info').addClass('alert-error').html('<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
 
-                    $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
+                    setupAuthButton('return');
                     $('#auth-form').on('submit', function (e) {
                         e.preventDefault();
 
@@ -103,7 +140,7 @@
                         function (r) {
                             setupAuthDialog(r.sender);
                         },
-                        displayError
+                        handleError
                     );
                 }, false);
                 window.parent.postMessage('ready', '*');
@@ -157,7 +194,7 @@
                 <div id='auth' class='tab-pane active'>
                     <div id='auth-dialog' class='modal hide fade'>
                         <div class='modal-header'>
-                            <h3>보안메일</h3>
+                            <i id='auth-spinner' class='icon-asterisk icon-spin icon-2x pull-right'></i><h3>보안메일</h3>
                         </div>
                         <div class='modal-body'>
                             <form id='auth-form' class='form-horizontal'>
