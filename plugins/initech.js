@@ -12,6 +12,11 @@ extend(IniTech.prototype, {
     init: function () {
         var S = this.unpack();
 
+        this.recognize(S.company, {
+            name: S.company,
+            hint: S.keygen
+        });
+
         this.checkArea = S.checkArea;
         this.dataArea = S.dataArea;
 
@@ -33,63 +38,6 @@ extend(IniTech.prototype, {
             PKCS5Padding: CryptoJS.pad.Pkcs7
         }[S.crypto[2]];
 
-        this.sender = {
-            BC: {
-                name: 'NH농협카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: '7',
-                salt: 'nonghyup'
-            },
-
-            BO: {
-                name: '신한은행',
-                support: true,
-                hint: '보안메일 비밀번호',
-                keylen: '6,8',
-                salt: 'shinhanbank'
-            },
-
-            CC: {
-                name: 'BC카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7,
-                salt: 'bccard',
-                render_hack: function (f, m) {
-                    return {
-                        'frame': f.replace('id="objHeader"', '$& style="display:none"'),
-                        'message': m
-                    };
-                }
-            },
-
-            KA: {
-                name: 'Initech',
-                support: true,
-                hint: '보안메일 비밀번호',
-                salt: 'consulting'
-            },
-
-            TC: {
-                name: 'SKT',
-                support: true,
-                hint: '주민등록번호 앞 또는 뒤',
-                keylen: '6,7',
-                salt: 'SKT',
-                ignore_replacer: true
-            },
-
-            TH: {
-                name: 'KT',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7,
-                salt: 'ktbill'
-            }
-        }[S.company] || ((S.company) ? extend({}, this.sender, { name: S.company, hint: S.keygen })
-                                     : this.sender);
-
         if (S.keygen == 'INITECH') {
             this.iv = CryptoJS.enc.Latin1.parse(S.iv);
             this.salt = this.sender.salt;
@@ -108,6 +56,67 @@ extend(IniTech.prototype, {
             } else if (S.keygen == 'PBKDF2') {
                 this.keygen = this.keygenPBKDF2;
             }
+        }
+    },
+
+    supported_senders: {
+        BC: {
+            name: 'NH농협카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: '7',
+            salt: 'nonghyup'
+        },
+
+        BO: {
+            name: '신한은행',
+            support: true,
+            hint: '보안메일 비밀번호',
+            keylen: '6,8',
+            salt: 'shinhanbank'
+        },
+
+        CC: {
+            name: 'BC카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'bccard',
+        },
+
+        KA: {
+            name: 'Initech',
+            support: true,
+            hint: '보안메일 비밀번호',
+            salt: 'consulting'
+        },
+
+        TC: {
+            name: 'SKT',
+            support: true,
+            hint: '주민등록번호 앞 또는 뒤',
+            keylen: '6,7',
+            salt: 'SKT'
+        },
+
+        TH: {
+            name: 'KT',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'ktbill'
+        }
+    },
+
+    supported_fixers: {
+        CC: {
+            fix_frame: function (frame) {
+                return frame.replace('id="objHeader"', '$& style="display:none"');
+            }
+        },
+
+        TC: {
+            ignore_replacer: true
         }
     },
 
@@ -184,24 +193,8 @@ extend(IniTech.prototype, {
         }
     },
 
-    render: function (content) {
-        var message = this.encode(content);
-        var frame = this.html.replace(
-            /<object [\s\S]*<\/object>/ig,
-            ''
-        ).replace(
-            /activeControl\([\s\S]*\);?/,
-            ''
-        );
-
-        //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
-        if (this.sender.render_hack) {
-            var fm = this.sender.render_hack(frame, message);
-            frame = fm['frame'];
-            message = fm['message'];
-        }
-
-        if (this.sender.ignore_replacer) {
+    render_framed_message: function (frame, message) {
+        if (this.fixer.ignore_replacer) {
             var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
             if (offset) {
                 //HACK: 일부 메일 앞쪽의 알 수 없는 (암호화 관련?) 문자열 제거.

@@ -3,6 +3,7 @@
 var Vendor = function (product) {
     this.product = product || '';
     this.sender = { name: '?', support: false, hint: '-' };
+    this.fixer = {};
 };
 
 Vendor.prototype = {
@@ -29,6 +30,15 @@ Vendor.prototype = {
         };
     },
 
+    recognize: function (sign, shim) {
+        this.sender = this.supported_senders[sign] || ((sign) ? extend({}, this.sender, shim) : this.sender);
+        this.fixer = this.supported_fixers[sign] || this.fixer;
+    },
+
+    supported_senders: {},
+
+    supported_fixers: {},
+
     load: function (password) {
         return this.render(this.decrypt(password));
     },
@@ -49,7 +59,21 @@ Vendor.prototype = {
     },
 
     render: function (content) {
-        return this.encode(content);
+        var message = this.render_message(this.encode(content));
+        var frame = this.render_frame(this.html);
+        return this.render_framed_message(frame, message);
+    },
+
+    render_message: function (message) {
+        return (this.fixer.fix_message) ? this.fixer.fix_message(message) : message;
+    },
+
+    render_frame: function (frame) {
+        return (this.fixer.fix_frame) ? this.fixer.fix_frame(frame) : frame;
+    },
+
+    render_framed_message: function (frame, message) {
+        return message;
     }
 };
 

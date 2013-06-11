@@ -46,96 +46,102 @@ extend(SoftForum.prototype, {
             company = '동양생명 보안메일';
         }
 
-        this.sender = {
-            'HyundaiCard': {
-                name: '현대카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        this.recognize(company, {
+            name: company
+        });
+    },
 
-            'LG카드 보안메일': {
-                name: '신한카드 (구 LG카드)',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+    supported_senders: {
+        'HyundaiCard': {
+            name: '현대카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'SAMSUNG LIFE': {
-                name: '삼성생명',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'LG카드 보안메일': {
+            name: '신한카드 (구 LG카드)',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'TRUEFRIEND': {
-                name: '한국투자증권',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'SAMSUNG LIFE': {
+            name: '삼성생명',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'Xeit.hanabank': {
-                name: '하나은행',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'TRUEFRIEND': {
+            name: '한국투자증권',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'Xeit.kbcard': {
-                name: 'KB국민카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'Xeit.hanabank': {
+            name: '하나은행',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'Xeit.lottepoint': {
-                name: '롯데포인트카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'Xeit.kbcard': {
+            name: 'KB국민카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'Xeit.samsungcard': {
-                name: '삼성카드',
-                support: false,
-                hint: '-'
-            },
+        'Xeit.lottepoint': {
+            name: '롯데포인트카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            'Xeit.uplus': {
-                name: 'LG유플러스',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'Xeit.samsungcard': {
+            name: '삼성카드',
+            support: false,
+            hint: '-'
+        },
 
-            'Xeit.yescard': {
-                name: '외환카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7,
-                render_hack: function (f, m) {
-                    return {
-                        'frame': f,
-                        'message': m.replace(/href="#topmove"/g, '')
-                    };
-                }
-            },
+        'Xeit.uplus': {
+            name: 'LG유플러스',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            '동양생명 보안메일': {
-                name: '동양생명',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
-            },
+        'Xeit.yescard': {
+            name: '외환카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
 
-            '신한카드 보안메일': {
-                name: '신한카드',
-                support: true,
-                hint: '주민등록번호 뒤',
-                keylen: 7
+        '동양생명 보안메일': {
+            name: '동양생명',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
+
+        '신한카드 보안메일': {
+            name: '신한카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        }
+    },
+
+    supported_fixers: {
+        'Xeit.yescard': {
+            fix_message: function (message) {
+                return message.replace(/href="#topmove"/g, '');
             }
-        }[company] || ((company) ? extend({}, this.sender, { name: company }) : this.sender);
+        }
     },
 
     decryptSMIME: function (envelope, password) {
@@ -232,21 +238,9 @@ extend(SoftForum.prototype, {
         throw Error('다시 입력해보세요!');
     },
 
-    render: function (content) {
-        var message = this.encode(content);
-        var frame = this.html;
-
+    render_message: function (message) {
         //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
         var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-        message = (offset) ? message.slice(offset.index) : message;
-
-        //HACK: 제대로 표시하려면 HTML 조작이 필요한 일부를 위해.
-        if (this.sender.render_hack) {
-            var fm = this.sender.render_hack(frame, message);
-            frame = fm['frame'];
-            message = fm['message'];
-        }
-
-        return message;
+        return (offset) ? message.slice(offset.index) : message;
     }
 });
