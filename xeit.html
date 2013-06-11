@@ -14,7 +14,7 @@
         <script>
             function handleError(e) {
                 //HACK: Error와 ErrorEvent의 message가 조금 다름.
-                displayError(e.message.replace('Error: ', ''))
+                displayError(e.message.replace(/(Uncaught )?Error: /, ''))
                 unlockAuthDialog();
                 //throw e;
             }
