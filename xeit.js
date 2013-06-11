@@ -90,7 +90,6 @@ var xeit = (function () {
         return info;
     }
 
-    //var worker = new Worker('http://localhost:8080/vendor.js');
     var worker = new Worker('vendor.js');
     function work(cmd, args, success, failure) {
         worker.addEventListener('message', function (e) {
