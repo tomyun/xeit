@@ -1,6 +1,6 @@
 [submodule "js/deps/crypto-js"]
 	path = js/deps/crypto-js
-	url = git://github.com/tomyun/crypto-js.git
+	url = https://github.com/tomyun/crypto-js.git
 	branch = seed-3.1.2
 [submodule "js/deps/asn1js"]
 	path = js/deps/asn1js
