@@ -1,5 +1,8 @@
 "use strict";
 
+importScripts('deps/crypto-js/build/rollups/seed.js',
+              'deps/crypto-js/build/components/enc-cp949.js');
+
 var Vendor = function (product) {
     this.product = product || '';
     this.sender = { name: '?', support: false, hint: '-' };

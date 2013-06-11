@@ -6,7 +6,8 @@ var xeit = (function () {
         var $doc = $('<div>', { id: 'Xeit-temp' }).hide().appendTo($('body')).append($.parseHTML(html));
         if ($('#XEIViewer').length) {
             var info = {
-                cmd: 'SoftForum',
+                func: 'init',
+                opts: { plugin: 'SoftForum' },
                 args: [
                     html,
                     $('param[name="smime_header"]').val(),
@@ -20,7 +21,8 @@ var xeit = (function () {
             //TODO: LGU+ 인식용으로 기존 로직과 병합 가능성 확인 필요. (by RyanYoon)
             var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
             var info = {
-                cmd: 'SoftForum',
+                func: 'init',
+                opts: { plugin: 'SoftForum' },
                 args: [
                     html,
                     data[5],
@@ -47,7 +49,8 @@ var xeit = (function () {
             $doc.empty().append($.parseHTML(body, true));
 
             var info = {
-                cmd: 'IniTech',
+                func: 'init',
+                opts: { plugin: 'IniTech' },
                 args: [
                     html,
                     $('param[name="IniSMContents"]').val(),
@@ -56,7 +59,8 @@ var xeit = (function () {
             };
         } else if (html.indexOf('IniCrossMailObj') > -1) {
             var info = {
-                cmd: 'IniTech',
+                func: 'init',
+                opts: { plugin: 'IniTech' },
                 args: [
                     html,
                     $('param[name="IniSMContents"]').val(),
@@ -66,7 +70,8 @@ var xeit = (function () {
             };
         } else if ($('#JXCEAL').length) {
             var info = {
-                cmd: 'Soft25',
+                func: 'init',
+                opts: { plugin: 'Soft25' },
                 args: [
                     html,
                     $('#JSEncContents').val()
@@ -74,7 +79,8 @@ var xeit = (function () {
             };
         } else if ($('#MailDec').length) {
             var info = {
-                cmd: 'Natingtel',
+                func: 'init',
+                opts: { plugin: 'Natingtel' },
                 args: [
                     html,
                     $('param[name="DocumentMail"]').val()
@@ -82,7 +88,8 @@ var xeit = (function () {
             };
         } else {
             var info = {
-                cmd: 'Vendor',
+                func: 'init',
+                opts: { plugin: 'Vendor' },
                 args: []
             }
         }
@@ -91,29 +98,30 @@ var xeit = (function () {
     }
 
     var worker = new Worker('js/worker.js');
-    function work(cmd, args, success, failure) {
+    function work(func, opts, args, success, failure) {
         worker.addEventListener('message', function (e) {
-            if (e.data.cmd == cmd) {
-                success(e.data.res);
+            if (e.data.func == func) {
+                success(e.data.resp);
             }
         });
         worker.addEventListener('error', function (e) {
             failure(e);
         });
         worker.postMessage({
-            cmd: cmd,
+            func: func,
+            opts: opts,
             args: args
         });
     }
 
     return {
         init: function (html, success, failure) {
-            var info = check(html)
-            work(info.cmd, info.args, success, failure);
+            var info = check(html);
+            work(info.func, info.opts, info.args, success, failure);
         },
 
         load: function (password, success, failure) {
-            work('load', [password], success, failure);
+            work('load', {}, [password], success, failure);
         }
     };
 })();
