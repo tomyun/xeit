@@ -83,7 +83,7 @@
                 if (sender['support']) {
                     $('#auth-sender-support').addClass('label-success').text('지원');
 
-                    $('input#auth-password').on('blur keyup', resetError)
+                    $('input#auth-password').on('blur input', resetError)
 
                     setupAuthInfo('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
 
