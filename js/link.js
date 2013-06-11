@@ -6,6 +6,8 @@
 
     var attachment = document.getElementsByTagName('html')[0].outerHTML;
 
+    document.documentElement.style.height = '100%';
+
     var _body = document.body;
     document.body = document.createElement('body');
     document.body.style.margin = 0;

@@ -6,30 +6,75 @@
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <link href='http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css' rel='stylesheet'>
         <link href='http://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css' rel='stylesheet'>
-        <link href='xeit.css' rel='stylesheet'>
+        <link href='css/xeit.css' rel='stylesheet'>
         <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
         <script src='http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js'></script>
-        <script src='deps/crypto-js/build/rollups/pbkdf1.js'></script>
-        <script src='deps/crypto-js/build/rollups/pbkdf2.js'></script>
-        <script src='deps/crypto-js/build/rollups/tripledes.js'></script>
-        <script src='deps/crypto-js/build/rollups/rc4.js'></script>
-        <script src='deps/crypto-js/build/rollups/seed.js'></script>
-        <script src='deps/crypto-js/build/components/enc-cp949.js'></script>
-        <script src='deps/crypto-js/build/components/pad-nopadding-min.js'></script>
-        <script src='deps/asn1js/asn1.js'></script>
-        <script src='deps/asn1js/base64.js'></script>
-        <script src='deps/asn1js/oids.js'></script>
-        <script src='deps/srcdoc-polyfill/srcdoc-polyfill.min.js'></script>
-        <script src='xeit.js'></script>
+        <script src='js/deps/srcdoc-polyfill/srcdoc-polyfill.min.js'></script>
+        <script src='js/xeit.js'></script>
         <script>
-            function setupAuthDialog() {
+            function handleError(e) {
+                //HACK: Error와 ErrorEvent의 message가 조금 다름.
+                displayError(e.message.replace(/(Uncaught )?Error: /, ''))
+                unlockAuthDialog();
+                //throw e;
+            }
+
+            function displayError(message) {
+                $('#auth-password-group').addClass('error');
+                $('#auth-password-help').text(message);
+            }
+
+            function resetError() {
+                $('#auth-password-group').removeClass('error');
+                $('#auth-password-help').text('');
+            }
+
+            function setupAuthInfo(tone, message) {
+                $('#auth-info').removeClass(function (index, css) {
+                    return (css.match(/\balert-\S+/g) || []).join(' ');
+                }).addClass('alert-'+tone).html(message);
+            }
+
+            function setupAuthButton(kind, enable) {
+                $('#auth-submit').removeClass(function (index, css) {
+                    return (css.match(/\bbtn-\S+/g) || []).join(' ');
+                });
+                if (kind == 'open') {
+                    $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
+                } else if (kind == 'wait') {
+                    $('#auth-submit').addClass('btn-info').html('<i class="icon-eye-close icon-white"></i> 기다리기');
+                } else if (kind == 'return') {
+                    $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
+                }
+
+                enable = (typeof enable !== 'undefined') ? enable : true;
+                if (enable) {
+                    $('#auth-submit').removeProp('disabled').removeClass('disabled');
+                } else {
+                    $('#auth-submit').prop('disabled', true).addClass('disabled');
+                }
+            }
+
+            function unlockAuthDialog() {
+                $('#auth-spinner').fadeOut();
+                $('input#auth-password').removeProp('disabled').focus();
+                setupAuthButton('open', true);
+            }
+
+            function lockAuthDialog() {
+                $('#auth-spinner').fadeIn();
+                $('input#auth-password').blur();
+                $('input#auth-password').prop('disabled', true);
+                setupAuthButton('wait', false);
+            }
+
+            function setupAuthDialog(sender) {
                 $authDialog = $('#auth-dialog').modal({
                     backdrop: 'static',
                     keyboard: false
                 }).on('shown', function () {
                     $('input#auth-password').trigger('focus');
                 });
-                var sender = xeit.vendor.sender;
 
                 // 발송기관 표시.
                 $('#auth-sender-name').val(sender['name']);
@@ -38,40 +83,39 @@
                 if (sender['support']) {
                     $('#auth-sender-support').addClass('label-success').text('지원');
 
-                    $('input#auth-password').on('keyup', function (e) {
-                        //HACK: 엔터키로 폼 제출하는 경우 오류 메시지 초기화 방지.
-                        if (e.keyCode != 13) {
-                            $('#auth-password-group').removeClass('error');
-                            $('#auth-password-help').text('');
-                        }
-                    });
+                    $('input#auth-password').on('blur input', resetError)
 
-                    $('#auth-info').addClass('alert-info').html('<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
+                    if (window.chrome && location.search != '?chrome') {
+                        setupAuthInfo('success', '<strong>나왔습니다!</strong> 크롬에서는 <a href="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 더욱 쉽고 편하게 사용하세요.');
+                    } else {
+                        setupAuthInfo('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
+                    }
 
-                    $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
+                    setupAuthButton('open');
                     $('#auth-form').on('submit', function (e) {
                         e.preventDefault();
 
+                        lockAuthDialog();
+
                         var password = $('input#auth-password').val();
-                        try {
-                            var message = xeit.load(password);
-                        } catch (err) {
-                            $('#auth-password-group').addClass('error');
-                            $('#auth-password-help').text(err.message);
-                            throw err;
-                        }
-                        $authDialog.on('hidden', function () {
-                            showMail(message);
-                        }).modal('hide');
+                        xeit.load(
+                            password,
+                            function (r) {
+                                $authDialog.on('hidden', function () {
+                                    showMail(r.message);
+                                }).modal('hide');
+                            },
+                            handleError
+                        );
                     });
                 } else {
                     $('#auth-sender-support').addClass('label-important').text('미지원');
 
                     $('input#auth-password').prop('disabled', true);
 
-                    $('#auth-info').addClass('alert-error').html('<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
+                    setupAuthInfo('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
 
-                    $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
+                    setupAuthButton('return');
                     $('#auth-form').on('submit', function (e) {
                         e.preventDefault();
 
@@ -92,8 +136,14 @@
 
             function loadMail() {
                 window.addEventListener('message', function (e) {
-                    xeit.init(e.data);
-                    setupAuthDialog();
+                    var html = e.data;
+                    xeit.init(
+                        html,
+                        function (r) {
+                            setupAuthDialog(r.sender);
+                        },
+                        handleError
+                    );
                 }, false);
                 window.parent.postMessage('ready', '*');
             }
@@ -146,7 +196,7 @@
                 <div id='auth' class='tab-pane active'>
                     <div id='auth-dialog' class='modal hide fade'>
                         <div class='modal-header'>
-                            <h3>보안메일</h3>
+                            <i id='auth-spinner' class='icon-asterisk icon-spin icon-2x pull-right'></i><h3>보안메일</h3>
                         </div>
                         <div class='modal-body'>
                             <form id='auth-form' class='form-horizontal'>
@@ -197,13 +247,14 @@
                                     <dt>설치는 어찌하죠?</dt>
                                         <p>일단 웹 브라우저 상단에 북마클릿을 넣을 수 있는 공간이 있는지 확인해보세요. 사파리에서는 책갈피 막대(Bookmarks Bar), 크롬에서는 북마크바(Bookmarks Bar), 파이어폭스에서는 북마크 도구모음(Bookmarks Toolbar)이라고 부르는 곳입니다. 맥이라면 <span class='label'>⌥</span> + <span class='label'>⌘</span> + <span class='label'>B</span>를 눌러서 확인해볼 수도 있습니다. 그 다음에는 아래의 버튼을 끌어 넣으면 됩니다.</p>
                                         <div class='well'>
-                                            <p class='text-center'><a href="javascript:(function(){var%20xeit=document.getElementById('xeit');if(xeit){return;}var%20attachment=document.getElementsByTagName('html')[0].outerHTML;var%20_body=document.body;document.body=document.createElement('body');document.body.style.margin=0;document.body.style.padding=0;document.body.style.height='100%25';xeit=document.createElement('iframe');xeit.setAttribute('id','xeit');xeit.setAttribute('src','http://tomyun.github.io/xeit/xeit.html');xeit.style.width='100%25';xeit.style.height='100%25';xeit.style.border=0;document.body.appendChild(xeit);window.addEventListener('message',function(e){switch(e.data){case%20'ready':xeit.contentWindow.postMessage(attachment,'*');break;case%20'fallback':document.body=_body;break;}},false);})();"><button class='btn btn-info' type='button'><i class='icon-bookmark icon-white'></i> Xeit</button></a></p>
+                                            <p class='text-center'><a href="javascript:(function(){var%20xeit=document.getElementById('xeit');if(xeit){return;}var%20attachment=document.getElementsByTagName('html')[0].outerHTML;document.documentElement.style.height='100%25';var%20_body=document.body;document.body=document.createElement('body');document.body.style.margin=0;document.body.style.padding=0;document.body.style.height='100%25';xeit=document.createElement('iframe');xeit.setAttribute('id','xeit');xeit.setAttribute('src','http://tomyun.github.io/xeit/xeit.html');xeit.style.width='100%25';xeit.style.height='100%25';xeit.style.border=0;document.body.appendChild(xeit);window.addEventListener('message',function(e){switch(e.data){case%20'ready':xeit.contentWindow.postMessage(attachment,'*');break;case%20'fallback':document.body=_body;break;}},false);})();"><button class='btn btn-info' type='button'><i class='icon-bookmark icon-white'></i> Xeit</button></a></p>
                                             <p class='text-center text-info'>이 버튼을 브라우저 상단의 책갈피에 끌어 넣으세요!</p>
                                         </div>
                                     </dd>
                                     <dt>어디서 쓸 수 있죠?</dt>
                                     <dd>
                                         <p>맥에서 사파리(6)를 기준으로 만들었으며 크롬(26)과 파이어폭스(20)에서도 돌아가는 것을 확인하였습니다. 인터넷 익스플로러에서는 확인해보지 못 했네요.</p>
+                                        <p>참고로 크롬에서는 직접 북마클릿을 설치하거나 눌러줄 필요 없이 <a herf="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 보다 쉽고 편리하게 이용할 수 있습니다.</p>
                                     </dd>
                                     <dt>믿을 수 있나요?</dt>
                                     <dd>
