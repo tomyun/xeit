@@ -36,9 +36,9 @@ extend(Natingtel.prototype, {
     },
 
     decrypt: function (password) {
-        var self = this;
+        var that = this;
         var keyword = (function (password) {
-            var keygen = self.keygen(password),
+            var keygen = that.keygen(password),
                 key = keygen.next(),
                 i = 0;
             return {
