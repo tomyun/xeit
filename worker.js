@@ -16,7 +16,7 @@ importScripts('plugins/vendor.js',
               'plugins/softforum.js',
               'plugins/initech.js',
               'plugins/soft25.js',
-              'plugins/naringtel.js');
+              'plugins/natingtel.js');
 
 self.addEventListener('message', function (e) {
     var cmd = e.data.cmd;
