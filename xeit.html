@@ -36,7 +36,9 @@
             }
 
             function setupAuthButton(kind, enable) {
-                $('#auth-submit').removeClass('btn-primary btn-info btn-danger')
+                $('#auth-submit').removeClass(function (index, css) {
+                    return (css.match(/\bbtn-\S+/g) || []).join(' ');
+                });
                 if (kind == 'open') {
                     $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
                 } else if (kind == 'wait') {
