@@ -47,6 +47,8 @@ extend(SoftForum.prototype, {
                 company = 'Xeit.uplus';
             } else if (this.info_msg.indexOf('KEB') > -1) {
                 company = 'Xeit.yescard';
+            } else if (this.info_msg.indexOf('miraeassetlife.com') > -1) {
+                company = 'Xeit.miraeassetlife';
             }
         } else if (company === '悼剧积疙 焊救皋老') {
             company = '동양생명 보안메일';
@@ -136,6 +138,13 @@ extend(SoftForum.prototype, {
 
         '신한카드 보안메일': {
             name: '신한카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
+        },
+
+        'Xeit.miraeassetlife': {
+            name: '미래에셋생명',
             support: true,
             hint: '주민등록번호 뒤',
             keylen: 7
