@@ -154,7 +154,16 @@ extend(SoftForum.prototype, {
     decryptSMIME: function (envelope, password) {
         var ciphers = {
             desCBC: CryptoJS.DES,   // 1.3.14.3.2.7,
-            seedCBC: CryptoJS.SEED  // 1.2.410.200004.1.4
+            seedCBC: CryptoJS.SEED, // 1.2.410.200004.1.4
+            rc2CBC: CryptoJS.RC2    // 1.2.840.113549.3.2
+        };
+
+        var options = {
+            desCBC: {},
+            seedCBC: {},
+            rc2CBC: {
+                effectiveKeyBits: 0
+            }
         };
 
         ASN1.prototype.contentRaw = function () {
@@ -177,7 +186,9 @@ extend(SoftForum.prototype, {
         var decryptedKey = ciphers[keyEncryptionAlgorithm].decrypt(
             { ciphertext: encryptedKey },
             passwordKey,
-            { iv: iv }
+            extend({
+                iv: iv
+            }, options[keyEncryptionAlgorithm])
         );
 
         this.verify(decryptedKey);
@@ -185,11 +196,14 @@ extend(SoftForum.prototype, {
         // 대칭키로 암호화된 메일 본문 복호화.
         var encryptedContentInfo = envelopedData.sub[2],
             contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d,
+            algorithmParameter = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[1].sub[1].contentRaw()),
             encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
         var decryptedContent = ciphers[contentEncryptionAlgorithm].decrypt(
             { ciphertext: encryptedContent },
             decryptedKey,
-            { iv: iv }
+            extend({
+                iv: algorithmParameter
+            }, options[contentEncryptionAlgorithm])
         );
         return decryptedContent;
     },
