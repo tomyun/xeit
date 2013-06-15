@@ -2,7 +2,7 @@ var xeit = (function () {
     "use strict";
 
     function parse($doc, html) {
-        if ($('#XEIViewer').length) {
+        if ($('#XEIViewer').length || html.indexOf('XEIViewer') > -1) {
             return {
                 func: 'init',
                 opts: { plugin: 'SoftForum' },
