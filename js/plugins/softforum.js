@@ -1,6 +1,7 @@
 "use strict";
 
 importScripts('deps/crypto-js/build/rollups/tripledes.js',
+              'deps/crypto-js/build/rollups/rc2.js',
               'deps/crypto-js/build/components/sha1.js',
               'deps/asn1js/asn1.js',
               'deps/asn1js/base64.js',
