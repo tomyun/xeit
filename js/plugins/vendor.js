@@ -52,12 +52,10 @@ Vendor.prototype = {
 
     encode: function (content) {
         // 메일 본문 인코딩 변환.
-        var message = CryptoJS.enc.Latin1.stringify(content);
-        if (message.match(/utf-8/i)) {
+        try {
             return CryptoJS.enc.Utf8.stringify(content);
-        } else {
-            message = CryptoJS.enc.CP949.stringify(content);
-            return message.replace(/euc-kr/ig, 'utf-8');
+        } catch (e) {
+            return CryptoJS.enc.CP949.stringify(content).replace(/euc-kr/ig, 'utf-8');
         }
     },
 
