@@ -103,14 +103,20 @@ var xeit = (function () {
 
     var worker = new Worker('js/worker.js');
     function work(func, opts, args, success, failure) {
-        worker.addEventListener('message', function (e) {
+        var messageHandler = function (e) {
             if (e.data.func == func) {
                 success(e.data.resp);
+                worker.removeEventListener('message', messageHandler);
             }
-        });
-        worker.addEventListener('error', function (e) {
+        };
+        worker.addEventListener('message', messageHandler);
+
+        var errorHandler = function (e) {
             failure(e);
-        });
+            worker.removeEventListener('error', errorHandler);
+        };
+        worker.addEventListener('error', errorHandler);
+
         worker.postMessage({
             func: func,
             opts: opts,
