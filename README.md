@@ -31,3 +31,5 @@ FAQ
 * [RyanYoon](https://github.com/RyanYoon): 신규 메일 추가, 크롬 익스텐션 작업
 * [everclear--](https://github.com/everclear--): 메일 샘플 제공
 * [sbyoun](https://github.com/sbyoun): 다음 마이피플 봇 작업
+* [kkung](https://github.com/kkung): 신규 메일 추가
+* 
