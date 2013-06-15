@@ -1,6 +1,7 @@
 "use strict";
 
 importScripts('deps/crypto-js/build/rollups/tripledes.js',
+              'deps/crypto-js/build/rollups/rc2.js',
               'deps/crypto-js/build/components/sha1.js',
               'deps/asn1js/asn1.js',
               'deps/asn1js/base64.js',
@@ -35,7 +36,9 @@ extend(SoftForum.prototype, {
         //HACK: 구분자가 '보안메일'로 동일한 발송기관 강제 구분.
         var company = this.ui_desc;
         if (company === '보안메일' || company === 'ｺｸｾﾈｸﾞﾀﾏ' || company === '���ȸ���') {
-            if (this.info_msg.indexOf('hanabank') > -1) {
+            if (this.smime_header.indexOf('esero.go.kr') > -1) {
+                company = 'Xeit.esero';
+            } else if (this.info_msg.indexOf('hanabank') > -1) {
                 company = 'Xeit.hanabank';
             } else if (this.html.indexOf('kbcard') > -1) {
                 company = 'Xeit.kbcard';
@@ -84,6 +87,13 @@ extend(SoftForum.prototype, {
             support: true,
             hint: '주민등록번호 뒤',
             keylen: 7
+        },
+
+        'Xeit.esero': {
+            name: '국세청',
+            support: true,
+            hint: '사업자등록번호',
+            keylen: 10
         },
 
         'Xeit.hanabank': {
@@ -153,7 +163,16 @@ extend(SoftForum.prototype, {
     decryptSMIME: function (envelope, password) {
         var ciphers = {
             desCBC: CryptoJS.DES,   // 1.3.14.3.2.7,
-            seedCBC: CryptoJS.SEED  // 1.2.410.200004.1.4
+            seedCBC: CryptoJS.SEED, // 1.2.410.200004.1.4
+            rc2CBC: CryptoJS.RC2    // 1.2.840.113549.3.2
+        };
+
+        var options = {
+            desCBC: {},
+            seedCBC: {},
+            rc2CBC: {
+                effectiveKeyBits: 0
+            }
         };
 
         ASN1.prototype.contentRaw = function () {
@@ -176,7 +195,9 @@ extend(SoftForum.prototype, {
         var decryptedKey = ciphers[keyEncryptionAlgorithm].decrypt(
             { ciphertext: encryptedKey },
             passwordKey,
-            { iv: iv }
+            extend({
+                iv: iv
+            }, options[keyEncryptionAlgorithm])
         );
 
         this.verify(decryptedKey);
@@ -184,11 +205,14 @@ extend(SoftForum.prototype, {
         // 대칭키로 암호화된 메일 본문 복호화.
         var encryptedContentInfo = envelopedData.sub[2],
             contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d,
+            algorithmParameter = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[1].sub[1].contentRaw()),
             encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
         var decryptedContent = ciphers[contentEncryptionAlgorithm].decrypt(
             { ciphertext: encryptedContent },
             decryptedKey,
-            { iv: iv }
+            extend({
+                iv: algorithmParameter
+            }, options[contentEncryptionAlgorithm])
         );
         return decryptedContent;
     },
@@ -247,6 +271,10 @@ extend(SoftForum.prototype, {
     render_message: function (message) {
         //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
         var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-        return (offset) ? message.slice(offset.index) : message;
+        if (offset) {
+            message = message.slice(offset.index);
+        }
+        //HACK: 뒷 부분의 multipart 메일 본문도 잘라냄.
+        return message.replace(/(<\/html>)[\s\S]*/i, '$1')
     }
 });
