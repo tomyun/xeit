@@ -284,6 +284,6 @@ extend(SoftForum.prototype, {
             message = message.slice(offset.index);
         }
         //HACK: 뒷 부분의 multipart 메일 본문도 잘라냄.
-        return message.replace(/(<\/html>)[\s\S]*/i, '$1')
+        return message.replace(/(<\/html>)(?![\s\S]*<\/html>)[\s\S]*/i, '$1');
     }
 });
