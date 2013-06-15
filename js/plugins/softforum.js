@@ -262,6 +262,10 @@ extend(SoftForum.prototype, {
     render_message: function (message) {
         //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
         var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-        return (offset) ? message.slice(offset.index) : message;
+        if (offset) {
+            message = message.slice(offset.index);
+        }
+        //HACK: 뒷 부분의 multipart 메일 본문도 잘라냄.
+        return message.replace(/(<\/html>)[\s\S]*/i, '$1')
     }
 });
