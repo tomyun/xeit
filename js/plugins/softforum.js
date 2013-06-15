@@ -36,7 +36,9 @@ extend(SoftForum.prototype, {
         //HACK: 구분자가 '보안메일'로 동일한 발송기관 강제 구분.
         var company = this.ui_desc;
         if (company === '보안메일' || company === 'ｺｸｾﾈｸﾞﾀﾏ' || company === '���ȸ���') {
-            if (this.info_msg.indexOf('hanabank') > -1) {
+            if (this.smime_header.indexOf('esero.go.kr') > -1) {
+                company = 'Xeit.esero';
+            } else if (this.info_msg.indexOf('hanabank') > -1) {
                 company = 'Xeit.hanabank';
             } else if (this.html.indexOf('kbcard') > -1) {
                 company = 'Xeit.kbcard';
@@ -85,6 +87,13 @@ extend(SoftForum.prototype, {
             support: true,
             hint: '주민등록번호 뒤',
             keylen: 7
+        },
+
+        'Xeit.esero': {
+            name: '국세청',
+            support: true,
+            hint: '사업자등록번호',
+            keylen: 10
         },
 
         'Xeit.hanabank': {
