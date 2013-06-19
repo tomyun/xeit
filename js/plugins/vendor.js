@@ -35,12 +35,14 @@ Vendor.prototype = {
 
     recognize: function (sign, shim) {
         this.sender = this.supported_senders[sign] || ((sign) ? extend({}, this.sender, shim) : this.sender);
-        this.fixer = this.supported_fixers[sign] || this.fixer;
+        this.fixer = extend({}, this.supported_fixers.common, this.supported_fixers[sign] || {});
     },
 
     supported_senders: {},
 
-    supported_fixers: {},
+    supported_fixers: {
+        common: {}
+    },
 
     load: function (password) {
         return this.render(this.decrypt(password));
@@ -74,7 +76,7 @@ Vendor.prototype = {
     },
 
     render_framed_message: function (frame, message) {
-        return message;
+        return (this.fixer.weave) ? this.fixer.weave(frame, message) : message;
     }
 };
 
