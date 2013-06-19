@@ -121,8 +121,9 @@ extend(SoftForum.prototype, {
 
         'Xeit.samsungcard': {
             name: '삼성카드',
-            support: false,
-            hint: '-'
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
         },
 
         'Xeit.uplus': {
@@ -165,6 +166,18 @@ extend(SoftForum.prototype, {
         'Xeit.yescard': {
             fix_message: function (message) {
                 return message.replace(/href="#topmove"/g, '');
+            }
+        },
+        'Xeit.samsungcard': {
+            fix_frame: function (frame) {
+                var re = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+                var script = {};
+                while (script = re.exec(frame)) {
+                    if (script[0].indexOf('gowbill') > 0) {
+                        return script[0];
+                    }
+                }
+                return "";
             }
         }
     },
@@ -285,5 +298,14 @@ extend(SoftForum.prototype, {
         }
         //HACK: 뒷 부분의 multipart 메일 본문도 잘라냄.
         return message.replace(/(<\/html>)(?![\s\S]*<\/html>)[\s\S]*/i, '$1');
+    },
+
+    render_framed_message: function (frame, message) {
+        // HACK: 삼성카드 메일의 경우 비암호화 부분에 있는 스크립트에 의존
+        if (this.sender.name == '삼성카드') {
+            return frame + message;
+        } else {
+            return message;
+        }
     }
 });
