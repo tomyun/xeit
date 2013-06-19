@@ -112,17 +112,40 @@ extend(IniTech.prototype, {
         }
     },
 
-    supported_fixers: {
-        CC: {
-            fix_frame: function (frame) {
-                return frame.replace('id="objHeader"', '$& style="display:none"');
+    supported_fixers: function (fixer) {
+        return {
+            common: fixer,
+
+            CC: {
+                fix_frame: function (frame) {
+                    return frame.replace('id="objHeader"', '$& style="display:none"');
+                }
+            },
+
+            TC: {
+                ignore_replacer: true
+            },
+        };
+    }({
+        weave: function (frame, message) {
+            if (this.ignore_replacer) {
+                var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
+                if (offset) {
+                    //HACK: 일부 메일 앞쪽의 알 수 없는 (암호화 관련?) 문자열 제거.
+                    return message.slice(offset.index);
+                } else {
+                    return message;
+                }
+            } else {
+                return frame.replace(
+                    /id=['"]InitechSMMsgToReplace['"]>/,
+                    '>' + message.replace(/\$/g, '$$$$')
+                );
             }
         },
 
-        TC: {
-            ignore_replacer: true
-        }
-    },
+        ignore_replacer: false
+    }),
 
     unpack: function () {
         var blob = this.blob(this.contents);
@@ -194,23 +217,6 @@ extend(IniTech.prototype, {
             }
         ).toString(CryptoJS.enc.Latin1) != secret) {
             throw Error('다시 입력해보세요!');
-        }
-    },
-
-    render_framed_message: function (frame, message) {
-        if (this.fixer.ignore_replacer) {
-            var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-            if (offset) {
-                //HACK: 일부 메일 앞쪽의 알 수 없는 (암호화 관련?) 문자열 제거.
-                return message.slice(offset.index);
-            } else {
-                return message;
-            }
-        } else {
-            return frame.replace(
-                /id=['"]InitechSMMsgToReplace['"]>/,
-                '>' + message.replace(/\$/g, '$$$$')
-            );
         }
     }
 });

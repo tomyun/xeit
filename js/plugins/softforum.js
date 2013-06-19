@@ -121,8 +121,9 @@ extend(SoftForum.prototype, {
 
         'Xeit.samsungcard': {
             name: '삼성카드',
-            support: false,
-            hint: '-'
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
         },
 
         'Xeit.uplus': {
@@ -161,13 +162,33 @@ extend(SoftForum.prototype, {
         }
     },
 
-    supported_fixers: {
-        'Xeit.yescard': {
-            fix_message: function (message) {
-                return message.replace(/href="#topmove"/g, '');
+    supported_fixers: function (fixer) {
+        return {
+            common: fixer,
+
+            'Xeit.yescard': {
+                fix_message: function (message) {
+                    return fixer.fix_message(message).replace(/href="#topmove"/g, '');
+                }
+            },
+
+            'Xeit.samsungcard': {
+                weave: function (frame, message) {
+                    return frame.replace(/<object id="XEIViewer"[\s\S]*<\/object>/i, message.replace(/\$/g, '$$$$'));
+                }
             }
+        };
+    }({
+        fix_message: function (message) {
+            //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
+            var offset = /(<!DOCTYPE|<html|<head|<meta|<body)/i.exec(message);
+            if (offset) {
+                message = message.slice(offset.index);
+            }
+            //HACK: 뒷 부분의 multipart 메일 본문도 잘라냄.
+            return message.replace(/(<\/html>)(?![\s\S]*<\/html>)[\s\S]*/i, '$1');
         }
-    },
+    }),
 
     decryptSMIME: function (envelope, password) {
         var ciphers = {
@@ -275,15 +296,5 @@ extend(SoftForum.prototype, {
 
         // PKCS#5/#7 padding이 잘못 되어 있으면 비밀번호 오류로 간주.
         throw Error('다시 입력해보세요!');
-    },
-
-    render_message: function (message) {
-        //HACK: 남아 있는 email header 제거하여 HTML 시작 직전까지 잘라냄.
-        var offset = /(<!DOCTYPE|<html|<head|<body)/i.exec(message);
-        if (offset) {
-            message = message.slice(offset.index);
-        }
-        //HACK: 뒷 부분의 multipart 메일 본문도 잘라냄.
-        return message.replace(/(<\/html>)(?![\s\S]*<\/html>)[\s\S]*/i, '$1');
     }
 });
