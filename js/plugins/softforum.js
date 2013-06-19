@@ -167,7 +167,7 @@ extend(SoftForum.prototype, {
 
             'Xeit.yescard': {
                 fix_message: function (message) {
-                    return message.replace(/href="#topmove"/g, '');
+                    return fixer.fix_message(message).replace(/href="#topmove"/g, '');
                 }
             }
         };
