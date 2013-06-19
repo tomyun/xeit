@@ -121,8 +121,9 @@ extend(SoftForum.prototype, {
 
         'Xeit.samsungcard': {
             name: '삼성카드',
-            support: false,
-            hint: '-'
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7
         },
 
         'Xeit.uplus': {
@@ -168,6 +169,12 @@ extend(SoftForum.prototype, {
             'Xeit.yescard': {
                 fix_message: function (message) {
                     return fixer.fix_message(message).replace(/href="#topmove"/g, '');
+                }
+            },
+
+            'Xeit.samsungcard': {
+                weave: function (frame, message) {
+                    return frame.replace(/<object id="XEIViewer"[\s\S]*<\/object>/i, message.replace(/\$/g, '$$$$'));
                 }
             }
         };
