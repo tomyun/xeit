@@ -48,17 +48,13 @@
                     $auth_submit.addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
                 }
 
-                enable = (typeof enable !== 'undefined') ? enable : true;
-                if (enable) {
-                    $auth_submit.removeProp('disabled').removeClass('disabled');
-                } else {
-                    $auth_submit.prop('disabled', true).addClass('disabled');
-                }
+                disable = (typeof enable !== 'undefined') ? !enable : false;
+                $auth_submit.prop('disabled', disable).toggleClass('disabled', disable);
             }
 
             function unlockAuthDialog() {
                 $('#auth-spinner').fadeOut();
-                $('input#auth-password').removeProp('disabled').focus();
+                $('input#auth-password').prop('disabled', false).focus();
                 setupAuthButton('open', true);
             }
 
@@ -92,11 +88,7 @@
                 $auth_password.off('blur input').on('blur input', resetError);
 
                 support = support || false;
-                if (support) {
-                    $auth_password.removeProp('disabled');
-                } else {
-                    $auth_password.prop('disabled', true);
-                }
+                $auth_password.prop('disabled', !support);
 
                 hint = hint || '';
                 if (typeof keylen !== 'undefined') {
