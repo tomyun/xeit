@@ -36,22 +36,23 @@
             }
 
             function setupAuthButton(kind, enable) {
-                $('#auth-submit').removeClass(function (index, css) {
+                $auth_submit = $('#auth-submit');
+                $auth_submit.removeClass(function (index, css) {
                     return (css.match(/\bbtn-\S+/g) || []).join(' ');
                 });
                 if (kind == 'open') {
-                    $('#auth-submit').addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
+                    $auth_submit.addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
                 } else if (kind == 'wait') {
-                    $('#auth-submit').addClass('btn-info').html('<i class="icon-eye-close icon-white"></i> 기다리기');
+                    $auth_submit.addClass('btn-info').html('<i class="icon-eye-close icon-white"></i> 기다리기');
                 } else if (kind == 'return') {
-                    $('#auth-submit').addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
+                    $auth_submit.addClass('btn-danger').html('<i class="icon-ban-circle icon-white"></i> 돌아가기');
                 }
 
                 enable = (typeof enable !== 'undefined') ? enable : true;
                 if (enable) {
-                    $('#auth-submit').removeProp('disabled').removeClass('disabled');
+                    $auth_submit.removeProp('disabled').removeClass('disabled');
                 } else {
-                    $('#auth-submit').prop('disabled', true).addClass('disabled');
+                    $auth_submit.prop('disabled', true).addClass('disabled');
                 }
             }
 
