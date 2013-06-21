@@ -13,10 +13,18 @@ extend(Soft25.prototype, {
         var S = this.unpack();
         extend(this, S);
 
-        this.recognize(S.Sender, {
+        this.recognize(this.normalize(S.Sender), {
             name: S.Sender,
             hint: S.ContentEncryptionAlgorithm
         });
+    },
+
+    normalize: function (name) {
+        if (name.search(/(kt|olleh.com|show.co.kr|ktfreetel.com)/i) > -1) {
+            return 'KT';
+        } else {
+            return name;
+        }
     },
 
     supported_senders: {
@@ -26,8 +34,8 @@ extend(Soft25.prototype, {
             hint: '-'
         },
 
-        'KTF<cyberbill@ebill.ktfreetel.com>': {
-            name: 'KTF',
+        'KT': {
+            name: 'KT',
             support: true,
             hint: '주민등록번호 뒤',
             keylen: 7
