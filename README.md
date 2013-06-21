@@ -32,4 +32,4 @@ FAQ
 * [everclear--](https://github.com/everclear--): 메일 샘플 제공
 * [sbyoun](https://github.com/sbyoun): 다음 마이피플 봇 작업
 * [kkung](https://github.com/kkung): 신규 메일 추가
-* 
+* [Koasing](https://github.com/Koasing): 신규 메일 추가
