@@ -64,8 +64,7 @@
 
             function lockAuthDialog() {
                 $('#auth-spinner').fadeIn();
-                $('input#auth-password').blur();
-                $('input#auth-password').prop('disabled', true);
+                $('input#auth-password').prop('disabled', true).blur();
                 setupAuthButton('wait', false);
             }
 
