@@ -68,84 +68,127 @@
                 setupAuthButton('wait', false);
             }
 
-            function setupAuthDialog(sender) {
-                $authDialog = $('#auth-dialog').modal({
+            function setupSenderBox(name, support) {
+                name = name || '';
+                $('#auth-sender-name').val(name);
+
+                $auth_sender_support = $('#auth-sender-support');
+                $auth_sender_support.removeClass(function (index, css) {
+                    return (css.match(/\blabel-\S+/g) || []).join(' ');
+                });
+                if (typeof support === 'undefined') {
+                    $auth_sender_support.text('');
+                } else {
+                    if (support) {
+                        $auth_sender_support.addClass('label-success').text('지원');
+                    } else {
+                        $auth_sender_support.addClass('label-important').text('미지원');
+                    }
+                }
+            }
+
+            function setupPasswordBox(support, hint, keylen) {
+                $auth_password = $('input#auth-password');
+                $auth_password.off('blur input').on('blur input', resetError);
+
+                support = support || false;
+                if (support) {
+                    $auth_password.removeProp('disabled');
+                } else {
+                    $auth_password.prop('disabled', true);
+                }
+
+                hint = hint || '';
+                if (typeof keylen !== 'undefined') {
+                    var placeholder = hint + ' (' + keylen.toString().replace(',', '~') + '자리)';
+                    var pattern = '[0-9]{' + keylen + '}';
+                } else {
+                    var placeholder = hint;
+                    var pattern = '';
+                }
+                $auth_password.prop('placeholder', placeholder).prop('pattern', pattern);
+            }
+
+            function showAuthDialog() {
+                $auth_dialog = $('#auth-dialog');
+                $auth_dialog.modal({
                     backdrop: 'static',
                     keyboard: false
-                }).on('shown', function () {
-                    $('input#auth-password').trigger('focus');
                 });
 
+                setupSenderBox();
+                setupPasswordBox(false);
+
+                if (window.chrome && location.search != '?chrome') {
+                    setupAuthInfo('success', '<strong>나왔습니다!</strong> 크롬에서는 <a href="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 더욱 쉽고 편하게 사용하세요.');
+                } else {
+                    setupAuthInfo('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
+                }
+
+                lockAuthDialog();
+                return $auth_dialog;
+            }
+
+            function hideAuthDialog(callback) {
+                return $('#auth-dialog').on('hidden', callback).modal('hide');
+            }
+
+            function setupAuthDialog(sender) {
+                unlockAuthDialog();
+
                 // 발송기관 표시.
-                $('#auth-sender-name').val(sender['name']);
+                setupSenderBox(sender.name, sender.support);
+
+                // 비밀번호 설명 표시.
+                setupPasswordBox(sender.support, sender.hint, sender.keylen);
 
                 // 지원여부에 따른 인증화면 구성.
-                if (sender['support']) {
-                    $('#auth-sender-support').addClass('label-success').text('지원');
-
-                    $('input#auth-password').on('blur input', resetError)
-
-                    if (window.chrome && location.search != '?chrome') {
-                        setupAuthInfo('success', '<strong>나왔습니다!</strong> 크롬에서는 <a href="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 더욱 쉽고 편하게 사용하세요.');
-                    } else {
-                        setupAuthInfo('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
-                    }
-
+                if (sender.support) {
                     setupAuthButton('open');
-                    $('#auth-form').on('submit', function (e) {
-                        e.preventDefault();
+                } else {
+                    setupAuthInfo('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
+                    setupAuthButton('return');
+                }
 
+                // 버튼 동작 설정.
+                $('#auth-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    if (sender.support) {
                         lockAuthDialog();
 
                         var password = $('input#auth-password').val();
                         xeit.load(
                             password,
                             function (r) {
-                                $authDialog.on('hidden', function () {
+                                hideAuthDialog(function () {
                                     showMail(r.message);
-                                }).modal('hide');
+                                });
                             },
                             handleError
                         );
-                    });
-                } else {
-                    $('#auth-sender-support').addClass('label-important').text('미지원');
-
-                    $('input#auth-password').prop('disabled', true);
-
-                    setupAuthInfo('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
-
-                    setupAuthButton('return');
-                    $('#auth-form').on('submit', function (e) {
-                        e.preventDefault();
-
-                        $authDialog.on('hidden', function () {
+                    } else {
+                        hideAuthDialog(function () {
                             parent.postMessage('fallback', '*');
-                        }).modal('hide');
-                    });
-                }
-
-                // 비밀번호 설명 표시.
-                if (typeof sender['keylen'] !== 'undefined') {
-                    $('input#auth-password').prop('placeholder', sender['hint'] + ' (' + sender['keylen'].toString().replace(',', '~') + '자리)')
-                                            .prop('pattern', '[0-9]{' + sender['keylen'] + '}');
-                } else {
-                    $('input#auth-password').prop('placeholder', sender['hint']);
-                }
+                        });
+                    }
+                });
             }
 
             function loadMail() {
-                window.addEventListener('message', function (e) {
-                    var html = e.data;
-                    xeit.init(
-                        html,
-                        function (r) {
-                            setupAuthDialog(r.sender);
-                        },
-                        handleError
-                    );
-                }, false);
-                window.parent.postMessage('ready', '*');
+                showAuthDialog().on('shown', function () {
+                    window.addEventListener('message', function (e) {
+                        var html = e.data;
+                        xeit.init(
+                            html,
+                            function (r) {
+                                setupAuthDialog(r.sender);
+                            },
+                            handleError
+                        );
+                    }, false);
+                    window.parent.postMessage('ready', '*');
+                });
             }
 
             function showMail(message) {
