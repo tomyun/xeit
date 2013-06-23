@@ -2,11 +2,13 @@
 
 importScripts('plugins/vendor.js');
 
-self.addEventListener('message', function (e) {
+//HACK: 진짜 Web Worker인가, FakeWorker인가~
+var worker = (typeof window === 'undefined') ? self : self.worker;
+worker.addEventListener('message', function (e) {
     var func = e.data.func,
         opts = e.data.opts,
         args = e.data.args;
-    self.postMessage({
+    worker.postMessage({
         func: func,
         opts: opts,
         resp: {

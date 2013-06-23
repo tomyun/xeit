@@ -101,7 +101,58 @@ var xeit = (function () {
         return info;
     }
 
+    window.importScripts = function () {
+        $.ajaxSetup({ async: false });
+        $.each(arguments, function (i, path) {
+            if (!/^js\//.test(path)) {
+                path = 'js/' + path;
+            }
+            $.getScript(path);
+        });
+        $.ajaxSetup({ async: true });
+    };
+
+    function Werker(path) {
+        this.listeners = {};
+
+        this.worker = new function (path, parent) {
+            this.parent = parent;
+            window.worker = this;
+
+            this.listeners = {};
+            this.addEventListener = function (type, listener) {
+                this.listeners[type] = listener;
+            };
+            this.postMessage = function (message) {
+                this.parent.listeners.message({ data: message });
+            };
+            
+            importScripts(path);
+        }(path, this);
+
+        this.addEventListener = function (type, listener) {
+            this.listeners[type] = listener;
+        }
+        this.removeEventListener = function (type, listener) {
+            this.listeners[type] = null;
+        }
+        this.postMessage = function (message) {
+            var self = this;
+            setTimeout(function () {
+                try {
+                    self.worker.listeners.message({ data: message });
+                } catch (e) {
+                    self.listeners.error(e);
+                }
+            }, 1);
+        }
+
+        return this;
+    }
+
     var worker = new Worker('js/worker.js');
+    var worker = new Werker('js/worker.js');
+
     function work(func, opts, args, success, failure) {
         var messageHandler = function (e) {
             if (e.data.func == func) {
