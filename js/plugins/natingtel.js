@@ -2,7 +2,7 @@
 
 importScripts('deps/crypto-js/build/components/pad-nopadding-min.js');
 
-var Natingtel = function (html, document_mail) {
+self.Natingtel = function (html, document_mail) {
     this.html = html || '';
     this.document_mail = this.peel(document_mail);
 };

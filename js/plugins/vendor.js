@@ -3,7 +3,7 @@
 importScripts('deps/crypto-js/build/rollups/seed.js',
               'deps/crypto-js/build/components/enc-cp949.js');
 
-var Vendor = function (product) {
+self.Vendor = function (product) {
     this.product = product || '';
     this.sender = { name: '?', support: false, hint: '-' };
     this.fixer = {};
@@ -80,7 +80,7 @@ Vendor.prototype = {
     }
 };
 
-function extend() {
+self.extend = function () {
     for (var i = 1; i < arguments.length; i++) {
         for (var key in arguments[i]) {
             if (arguments[i].hasOwnProperty(key)) {

@@ -4,7 +4,7 @@ importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/crypto-js/build/rollups/pbkdf1.js',
               'deps/crypto-js/build/rollups/pbkdf2.js');
 
-var IniTech = function (html, contents, attachedFile, optData) {
+self.IniTech = function (html, contents, attachedFile, optData) {
     this.html = html || '';
     this.contents = this.peel(contents);
     this.attachedFile = attachedFile || '';

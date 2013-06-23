@@ -7,7 +7,7 @@ importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/asn1js/base64.js',
               'deps/asn1js/oids.js');
 
-var SoftForum = function (html, smime_header, smime_body, info_msg, ui_option, ui_desc) {
+self.SoftForum = function (html, smime_header, smime_body, info_msg, ui_option, ui_desc) {
     this.html = html || '';
     this.smime_header = this.peel(smime_header, true);
     this.smime_body = this.peel(smime_body);

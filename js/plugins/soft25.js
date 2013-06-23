@@ -2,7 +2,7 @@
 
 importScripts('deps/crypto-js/build/rollups/rc4.js');
 
-var Soft25 = function (html, contents) {
+self.Soft25 = function (html, contents) {
     this.html = html || '';
     this.contents = this.peel(contents);
 };
