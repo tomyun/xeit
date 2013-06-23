@@ -89,6 +89,11 @@
 
                 support = support || false;
                 $auth_password.prop('disabled', !support);
+                if (support) {
+                    $auth_password.focus();
+                } else {
+                    $auth_password.blur();
+                }
 
                 hint = hint || '';
                 if (typeof keylen !== 'undefined') {
