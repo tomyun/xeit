@@ -97,6 +97,87 @@ extend(IniTech.prototype, {
             salt: 'bccard'
         },
 
+        IA: {
+            name: '신한생명',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'shinhanlife'
+        },        
+
+        IB: {
+            name: '한화생명',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'korealife'
+        },
+
+        IC: {
+            name: '푸르덴셜생명',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'prudentiallife'
+        },
+
+        ID: {
+            name: 'The-K손해보험',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'kyowonnara'
+        },
+
+        IE: {
+            name: '교보생명',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'kyobolife'
+        },
+
+        IF: {
+            name: 'MG손해보험',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'greenfire'
+        },
+
+        IG: {
+            name: '동부화재',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'dongbufire'
+        },
+
+        IH: {
+            name: '현대해상',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'hicokr'
+        },
+
+        IK: {
+            name: '한화생명',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'korealife2'
+        },
+
         KA: {
             name: 'Initech',
             support: true,
