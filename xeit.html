@@ -21,18 +21,43 @@
 
             function displayError(message) {
                 $('#auth-password-group').addClass('error');
-                $('#auth-password-help').text(message);
+                setupAuthAlert('error', '<strong>앗!</strong> ' + message);
             }
 
             function resetError() {
                 $('#auth-password-group').removeClass('error');
-                $('#auth-password-help').text('');
+                setupAuthAlert('error');
             }
 
-            function setupAuthInfo(tone, message) {
-                $('#auth-info').removeClass(function (index, css) {
-                    return (css.match(/\balert-\S+/g) || []).join(' ');
-                }).addClass('alert-'+tone).html(message);
+            function setupAuthAlert(tone, message) {
+                var $auth_alert = $('#auth-alert');
+                tone = tone || '';
+                if (message) {
+                    if ($auth_alert.length == 0) {
+                        $auth_alert = $('<div>', {
+                            id: 'auth-alert',
+                            class: 'alert fade in'
+                        }).appendTo($('.modal-body'));
+                    }
+
+                    $auth_alert.removeClass(function (index, css) {
+                        return (css.match(/\balert-\S+/g) || []).join(' ');
+                    });
+                    if (tone) {
+                        $auth_alert.addClass('alert-'+tone);
+                    }
+
+                    $auth_alert.html(message).append($('<a>', {
+                        class: 'close',
+                        href: '#',
+                        html: '&times;',
+                        'data-dismiss': 'alert'
+                    }));
+                } else {
+                    if ($auth_alert.hasClass('alert-'+tone)) {
+                        $auth_alert.alert('close');
+                    }
+                }
             }
 
             function setupAuthButton(kind, enable) {
@@ -121,9 +146,9 @@
                 setupPasswordBox(false);
 
                 if (window.chrome && location.search != '?chrome') {
-                    setupAuthInfo('success', '<strong>나왔습니다!</strong> 크롬에서는 <a href="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 더욱 쉽고 편하게 사용하세요.');
+                    setupAuthAlert('success', '<strong>나왔습니다!</strong> 크롬에서는 <a href="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 더욱 쉽고 편하게 사용하세요.');
                 } else {
-                    setupAuthInfo('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
+                    setupAuthAlert('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
                 }
 
                 lockAuthDialog();
@@ -147,7 +172,7 @@
                 if (sender.support) {
                     setupAuthButton('open');
                 } else {
-                    setupAuthInfo('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
+                    setupAuthAlert('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
                     setupAuthButton('return');
                 }
 
@@ -248,7 +273,7 @@
                                     <div class='controls'>
                                         <div class='input-prepend'>
                                             <a href='#' id='sender-button' class='btn disabled'><i class='icon-envelope-alt'></i></a>
-                                            <input class='span2' type='text' id='auth-sender-name' disabled>
+                                            <input type='text' id='auth-sender-name' disabled>
                                         </div>
                                         <span class='help-inline'><span id='auth-sender-support' class='label'></span></span>
                                     </div>
@@ -257,13 +282,11 @@
                                     <div class='controls'>
                                         <div class='input-prepend'>
                                             <a href='#' id='password-button' class='btn disabled'><i class='icon-key'></i></a>
-                                            <input class='span2' type='password' id='auth-password' placeholder='비밀번호' required>
+                                            <input type='password' id='auth-password' placeholder='비밀번호' required>
                                         </div>
-                                        <span id='auth-password-help' class='help-inline'></span>
                                     </div>
                                 </div>
                             </form>
-                            <div id='auth-info' class='alert'></div>
                         </div>
                         <div class='modal-footer'>
                             <button type='submit' form='auth-form' id='auth-submit' class='btn'></button>
