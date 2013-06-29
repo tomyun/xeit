@@ -37,6 +37,10 @@ html, body {
   color: #ff9900;
 }
 
+#auth-form .controls {
+  margin-left: 140px;
+}
+
 #auth-info.alert {
   margin-bottom: 0;
 }
