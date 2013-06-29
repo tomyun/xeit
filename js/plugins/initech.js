@@ -64,6 +64,15 @@ extend(IniTech.prototype, {
     },
 
     supported_senders: {
+        BA: {
+            name: '한국씨티은행',
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'goodbank'
+        },
+
         BC: {
             name: 'NH농협카드',
             support: true,
