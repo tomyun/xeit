@@ -61,7 +61,7 @@
             }
 
             function setupAuthButton(kind, enable) {
-                $auth_submit = $('#auth-submit');
+                var $auth_submit = $('#auth-submit');
                 $auth_submit.removeClass(function (index, css) {
                     return (css.match(/\bbtn-\S+/g) || []).join(' ');
                 });
@@ -93,7 +93,7 @@
                 name = name || '';
                 $('#auth-sender-name').val(name);
 
-                $auth_sender_support = $('#auth-sender-support');
+                var $auth_sender_support = $('#auth-sender-support');
                 $auth_sender_support.removeClass(function (index, css) {
                     return (css.match(/\blabel-\S+/g) || []).join(' ');
                 });
@@ -113,7 +113,7 @@
             }
 
             function setupPasswordBox(support, hint, keylen) {
-                $auth_password = $('input#auth-password');
+                var $auth_password = $('input#auth-password');
                 $auth_password.off('blur input').on('blur input', resetError);
 
                 support = support || false;
@@ -136,7 +136,7 @@
             }
 
             function showAuthDialog() {
-                $auth_dialog = $('#auth-dialog');
+                var $auth_dialog = $('#auth-dialog');
                 $auth_dialog.modal({
                     backdrop: 'static',
                     keyboard: false
