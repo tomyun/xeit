@@ -93,23 +93,36 @@
                 name = name || '';
                 $('#auth-sender-name').val(name);
 
-                var $auth_sender_support = $('#auth-sender-support');
-                $auth_sender_support.removeClass(function (index, css) {
-                    return (css.match(/\blabel-\S+/g) || []).join(' ');
-                });
-                if (typeof support === 'undefined') {
-                    $auth_sender_support.text('');
-                } else {
+                if (typeof support !== 'undefined') {
                     if (support) {
                         if (experimental) {
-                            $auth_sender_support.addClass('label-warning').text('확인필요');
+                            var icon_class = 'text-warning';
+                            var content = '<span class="label label-warning">확인필요</span> 제대로 열릴지 모르겠네요.';
                         } else {
-                            $auth_sender_support.addClass('label-success').text('지원');
+                            var icon_class = 'text-success';
+                            var content = '<span class="label label-success">지원</span> 아마 열 수 있을 거예요.'
                         }
                     } else {
-                        $auth_sender_support.addClass('label-important').text('미지원');
+                        var icon_class = 'text-error';
+                        var content = '<span class="label label-important">미지원</span> 지금은 열 수가 없어요.';
                     }
+                } else {
+                    var icon_class = 'muted';
+                    var content = '';
                 }
+
+                $('#sender-button > i').removeClass(function (index, css) {
+                    return (css.match(/\btext-\S+/g) || []).join(' ');
+                }).addClass(icon_class);
+
+                $('#sender-button').popover({
+                    html: true,
+                    placement: 'top',
+                    trigger: 'click | hover'
+                }).on('shown', function (e) {
+                    //HACK: modal의 shown이 호출되는 것 방지.
+                    e.stopPropagation();
+                }).data('popover').options.content = content;
             }
 
             function setupPasswordBox(support, hint, keylen) {
@@ -172,7 +185,7 @@
                 if (sender.support) {
                     setupAuthButton('open');
                 } else {
-                    setupAuthAlert('error', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
+                    setupAuthAlert('warning', '<strong>모르겠어요!</strong> 보안메일이 아니거나 아직 지원하지 않는 형식인 것 같아요.');
                     setupAuthButton('return');
                 }
 
@@ -272,10 +285,9 @@
                                 <div class='control-group'>
                                     <div class='controls'>
                                         <div class='input-prepend'>
-                                            <a href='#' id='sender-button' class='btn disabled'><i class='icon-envelope-alt'></i></a>
+                                            <a href='#' id='sender-button' class='btn'><i class='icon-envelope'></i></a>
                                             <input type='text' id='auth-sender-name' disabled>
                                         </div>
-                                        <span class='help-inline'><span id='auth-sender-support' class='label'></span></span>
                                     </div>
                                 </div>
                                 <div id='auth-password-group' class='control-group'>

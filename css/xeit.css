@@ -37,6 +37,16 @@ html, body {
   color: #ff9900;
 }
 
+/* HACK: popover 잘림 방지. (https://github.com/twitter/bootstrap/issues/6344) */
+#auth-dialog .modal-header,
+#auth-dialog .modal-footer {
+  position: relative;
+  z-index: 1;
+}
+#auth-dialog .modal-body {
+  overflow: visible;
+}
+
 #auth-alert.alert {
   margin-bottom: 0;
 }
