@@ -71,7 +71,7 @@ extend(Natingtel.prototype, {
     verify: function (content, password) {
         //HACK: encode()의 stringify()와 중복.
         if (CryptoJS.enc.CP949.stringify(content).slice(-password.length) != password) {
-            throw Error('다시 입력해보세요!');
+            throw Error('비밀번호가 틀린 것 같은데 다시 한번 입력해주시겠어요?');
         }
     }
 });
