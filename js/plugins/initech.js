@@ -306,7 +306,7 @@ extend(IniTech.prototype, {
                 padding: this.padding
             }
         ).toString(CryptoJS.enc.Latin1) != secret) {
-            throw Error('다시 입력해보세요!');
+            throw Error('비밀번호가 틀린 것 같은데 다시 한번 입력해주시겠어요?');
         }
     }
 });
