@@ -64,7 +64,7 @@
                 setupAuthButton('wait', false);
             }
 
-            function setupSenderBox(name, support) {
+            function setupSenderBox(name, support, experimental) {
                 name = name || '';
                 $('#auth-sender-name').val(name);
 
@@ -76,7 +76,11 @@
                     $auth_sender_support.text('');
                 } else {
                     if (support) {
-                        $auth_sender_support.addClass('label-success').text('지원');
+                        if (experimental) {
+                            $auth_sender_support.addClass('label-warning').text('확인필요');
+                        } else {
+                            $auth_sender_support.addClass('label-success').text('지원');
+                        }
                     } else {
                         $auth_sender_support.addClass('label-important').text('미지원');
                     }
@@ -134,7 +138,7 @@
                 unlockAuthDialog();
 
                 // 발송기관 표시.
-                setupSenderBox(sender.name, sender.support);
+                setupSenderBox(sender.name, sender.support, sender.experimental);
 
                 // 비밀번호 설명 표시.
                 setupPasswordBox(sender.support, sender.hint, sender.keylen);
