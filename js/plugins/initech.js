@@ -85,7 +85,7 @@ extend(IniTech.prototype, {
             support: true,
             hint: '주민등록번호 뒤',
             keylen: 7,
-            salt: 'bccard',
+            salt: 'bccard'
         },
 
         KA: {
