@@ -120,8 +120,7 @@
             }
 
             function setupPasswordBox(support, hint, keylen) {
-                var $auth_password = $('input#auth-password');
-                $auth_password.off('blur input').on('blur input', resetError);
+                var $auth_password = $('input#auth-password').off('blur input').on('blur input', resetError);
 
                 support = support || false;
                 $auth_password.prop('disabled', !support);
@@ -143,8 +142,7 @@
             }
 
             function showAuthDialog() {
-                var $auth_dialog = $('#auth-dialog');
-                $auth_dialog.modal({
+                var $auth_dialog = $('#auth-dialog').modal({
                     backdrop: 'static',
                     keyboard: false
                 });
@@ -233,8 +231,7 @@
                 srcDoc.set(content, message);
 
                 //HACK: 로딩 지연시 프레임 잘리는 현상 방지.
-                $content.height(window.innerHeight);
-                $content.load(function () {
+                $content.height(window.innerHeight).load(function () {
                     $content.height(content.contentDocument.documentElement.scrollHeight);
                 });
 
