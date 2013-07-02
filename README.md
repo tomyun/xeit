@@ -28,8 +28,9 @@ FAQ
 -------------
 
 * [skyisle](https://github.com/skyisle): 크롬 이슈 수정
-* [RyanYoon](https://github.com/RyanYoon): 신규 메일 추가, 크롬 익스텐션 작업
-* [everclear--](https://github.com/everclear--): 메일 샘플 제공
+* [RyanYoon](https://github.com/RyanYoon): 메일 추가 (LG U+, 롯데멤버스카드), 크롬 익스텐션 작업
+* [everclear--](https://github.com/everclear--): 샘플 제공 (동양생명)
 * [sbyoun](https://github.com/sbyoun): 다음 마이피플 봇 작업
-* [kkung](https://github.com/kkung): 신규 메일 추가
-* [Koasing](https://github.com/Koasing): 신규 메일 추가
+* [kkung](https://github.com/kkung): 메일 추가 (미래에셋생명, 삼성카드)
+* [Koasing](https://github.com/Koasing): 메일 추가 (KT)
+* [teslamint](https://github.com/teslamint): 메일 추가 (하나SK카드)
