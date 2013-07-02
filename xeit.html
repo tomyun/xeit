@@ -39,13 +39,6 @@
                 var $auth_alert = $('#auth-alert');
                 tone = tone || '';
                 if (message) {
-                    if ($auth_alert.length == 0) {
-                        $auth_alert = $('<div>', {
-                            id: 'auth-alert',
-                            class: 'alert fade in'
-                        }).appendTo($('.modal-body'));
-                    }
-
                     $auth_alert.removeClassByPrefix('alert-');
                     if (tone) {
                         $auth_alert.addClass('alert-'+tone);
@@ -54,12 +47,14 @@
                     $auth_alert.html(message).append($('<a>', {
                         class: 'close',
                         href: '#',
-                        html: '&times;',
-                        'data-dismiss': 'alert'
-                    }));
+                        html: '&times;'
+                    }).on('click', function (e) {
+                        $auth_alert.fadeOut();
+                        $('input#auth-password').focus();
+                    })).fadeIn();
                 } else {
                     if ($auth_alert.hasClass('alert-'+tone)) {
-                        $auth_alert.alert('close');
+                        $auth_alert.fadeOut();
                     }
                 }
             }
@@ -295,6 +290,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div id='auth-alert' class='alert'></div>
                             </div>
                             <div class='modal-footer'>
                                 <button type='submit' id='auth-submit' class='btn'></button>
