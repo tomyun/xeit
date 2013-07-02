@@ -98,6 +98,14 @@ extend(IniTech.prototype, {
             salt: 'bccard'
         },
 
+        DI: {
+            name: '하나SK카드',
+            support: true,
+            hint: '주민등록번호 뒤',
+            keylen: 7,
+            salt: 'defaultmailid'
+        },
+
         IA: {
             name: '신한생명',
             support: true,
@@ -211,6 +219,14 @@ extend(IniTech.prototype, {
                 fix_frame: function (frame) {
                     return frame.replace('id="objHeader"', '$& style="display:none"');
                 }
+            },
+
+            DI: {
+                fix_message: function (message) {
+                    return message.replace(/href="#"/g, '').replace(".getElementById('tab_img').", '.');
+                },
+
+                ignore_replacer: true
             },
 
             TC: {
