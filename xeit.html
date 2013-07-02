@@ -12,6 +12,12 @@
         <script src='js/deps/srcdoc-polyfill/srcdoc-polyfill.min.js'></script>
         <script src='js/xeit.js'></script>
         <script>
+            $.fn.removeClassByPrefix = function (prefix) {
+                return this.removeClass(function (index, css) {
+                    return (css.match(RegExp('\\b'+prefix+'\\S+', 'g')) || []).join(' ');
+                });
+            };
+
             function handleError(e) {
                 //HACK: Error와 ErrorEvent의 message가 조금 다름.
                 displayError(e.message.replace(/(Uncaught )?Error: /, ''))
@@ -40,9 +46,7 @@
                         }).appendTo($('.modal-body'));
                     }
 
-                    $auth_alert.removeClass(function (index, css) {
-                        return (css.match(/\balert-\S+/g) || []).join(' ');
-                    });
+                    $auth_alert.removeClassByPrefix('alert-');
                     if (tone) {
                         $auth_alert.addClass('alert-'+tone);
                     }
@@ -61,10 +65,7 @@
             }
 
             function setupAuthButton(kind, enable) {
-                var $auth_submit = $('#auth-submit');
-                $auth_submit.removeClass(function (index, css) {
-                    return (css.match(/\bbtn-\S+/g) || []).join(' ');
-                });
+                var $auth_submit = $('#auth-submit').removeClassByPrefix('btn-');
                 if (kind == 'open') {
                     $auth_submit.addClass('btn-primary').html('<i class="icon-eye-open icon-white"></i> 열어보기');
                 } else if (kind == 'wait') {
@@ -110,11 +111,7 @@
                     var icon_class = 'muted';
                     var content = '';
                 }
-
-                $('#sender-button > i').removeClass(function (index, css) {
-                    return (css.match(/\btext-\S+/g) || []).join(' ');
-                }).addClass(icon_class);
-
+                $('#sender-button > i').removeClassByPrefix('text-').addClass(icon_class);
                 $('#sender-button').popover({
                     html: true,
                     placement: 'top',
