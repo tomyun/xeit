@@ -274,11 +274,11 @@
             <div class='tab-content'>
                 <div id='auth' class='tab-pane active'>
                     <div id='auth-dialog' class='modal hide fade'>
-                        <div class='modal-header'>
-                            <i id='auth-spinner' class='icon-asterisk icon-spin icon-2x pull-right'></i><h3>보안메일</h3>
-                        </div>
-                        <div class='modal-body'>
-                            <form id='auth-form' class='form-horizontal'>
+                        <form id='auth-form' class='form-horizontal modal-form'>
+                            <div class='modal-header'>
+                                <i id='auth-spinner' class='icon-asterisk icon-spin icon-2x pull-right'></i><h3>보안메일</h3>
+                            </div>
+                            <div class='modal-body'>
                                 <div class='control-group'>
                                     <div class='controls'>
                                         <div class='input-prepend'>
@@ -295,11 +295,11 @@
                                         </div>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class='modal-footer'>
-                            <button type='submit' form='auth-form' id='auth-submit' class='btn'></button>
-                        </div>
+                            </div>
+                            <div class='modal-footer'>
+                                <button type='submit' id='auth-submit' class='btn'></button>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div id='mail' class='tab-pane'>
