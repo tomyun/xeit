@@ -18,7 +18,8 @@ extend(IniTech.prototype, {
 
         this.recognize(S.company, {
             name: S.company,
-            hint: S.keygen
+            hint: S.keygen,
+            salt: ''
         });
 
         this.checkArea = S.checkArea;
