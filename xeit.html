@@ -18,19 +18,21 @@
                 });
             };
 
-            function handleError(e) {
-                //HACK: Error와 ErrorEvent의 message가 조금 다름.
-                displayError(e.message.replace(/(Uncaught )?Error: /, ''))
-                unlockAuthDialog();
-                //throw e;
-            }
+            function displayError(e) {
+                e.preventDefault();
 
-            function displayError(message) {
+                //HACK: Error와 ErrorEvent의 message가 조금 다름.
+                message = e.message.replace(/(Uncaught )?Error: /, '');
+
                 $('#auth-password-group').addClass('error');
                 setupAuthAlert('error', '<strong>앗!</strong> ' + message);
+
+                unlockAuthDialog();
             }
 
-            function resetError() {
+            function resetError(e) {
+                e.preventDefault();
+
                 $('#auth-password-group').removeClass('error');
                 setupAuthAlert('error');
             }
@@ -196,7 +198,7 @@
                                     showMail(r.message);
                                 });
                             },
-                            handleError
+                            displayError
                         );
                     } else {
                         hideAuthDialog(function () {
@@ -215,7 +217,7 @@
                             function (r) {
                                 setupAuthDialog(r.sender);
                             },
-                            handleError
+                            displayError
                         );
                     }, false);
                     window.parent.postMessage('ready', '*');
