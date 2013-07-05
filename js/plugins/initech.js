@@ -86,7 +86,7 @@ extend(IniTech.prototype, {
             name: '신한은행',
             support: true,
             hint: '보안메일 비밀번호',
-            keylen: '6,8',
+            keylen: '6~8',
             salt: 'shinhanbank'
         },
 

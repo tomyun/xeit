@@ -132,8 +132,10 @@
 
                 hint = hint || '';
                 if (typeof keylen !== 'undefined') {
-                    var placeholder = hint + ' (' + keylen.toString().replace(',', '~') + '자리)';
-                    var pattern = '[0-9]{' + keylen + '}';
+                    var placeholder = hint + ' (' + keylen + '자리)';
+                    var pattern = $.map(keylen.toString().split(','), function (v, i) {
+                        return '\\d{' + $.trim(v).replace('~', ',') + '}';
+                    }).join('|');
                 } else {
                     var placeholder = hint;
                     var pattern = '.*';
