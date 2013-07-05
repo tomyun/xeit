@@ -58,7 +58,10 @@ extend(SoftForum.prototype, {
         }
 
         this.recognize(company, {
-            name: company
+            name: company,
+            support: true,
+            experimental: true,
+            hint: '주민등록번호 뒤?'
         });
     },
 
