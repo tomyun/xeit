@@ -136,7 +136,7 @@
                     var pattern = '[0-9]{' + keylen + '}';
                 } else {
                     var placeholder = hint;
-                    var pattern = '';
+                    var pattern = '.*';
                 }
                 $auth_password.prop('placeholder', placeholder).prop('pattern', pattern);
             }
