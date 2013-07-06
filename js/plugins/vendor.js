@@ -33,8 +33,9 @@ Vendor.prototype = {
         };
     },
 
-    recognize: function (sign, shim) {
+    recognize: function (sign, notice, shim) {
         this.sender = this.supported_senders[sign] || ((sign) ? extend({}, this.sender, shim) : this.sender);
+        this.sender.notice = notice || '';
         this.fixer = extend({}, this.supported_fixers.common, this.supported_fixers[sign] || {});
     },
 

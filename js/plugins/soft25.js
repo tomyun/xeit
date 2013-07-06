@@ -13,7 +13,7 @@ extend(Soft25.prototype, {
         var S = this.unpack();
         extend(this, S);
 
-        this.recognize(this.normalize(S.Sender), {
+        this.recognize(this.normalize(S.Sender), S.HintKey, {
             name: S.Sender,
             hint: S.ContentEncryptionAlgorithm
         });

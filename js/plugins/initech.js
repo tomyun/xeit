@@ -4,9 +4,10 @@ importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/crypto-js/build/rollups/pbkdf1.js',
               'deps/crypto-js/build/rollups/pbkdf2.js');
 
-var IniTech = function (html, contents, attachedFile, optData) {
+var IniTech = function (html, contents, question, attachedFile, optData) {
     this.html = html || '';
     this.contents = this.peel(contents);
+    this.question = this.peel(question, true);
     this.attachedFile = attachedFile || '';
     this.optData = this.peel(optData);
 };
@@ -16,7 +17,7 @@ extend(IniTech.prototype, {
     init: function () {
         var S = this.unpack();
 
-        this.recognize(S.company, {
+        this.recognize(S.company, this.question, {
             name: S.company,
             hint: S.keygen,
             salt: ''

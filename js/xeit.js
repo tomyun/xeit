@@ -52,6 +52,7 @@ var xeit = (function () {
                 args: [
                     html,
                     $('param[name="IniSMContents"]').val(),
+                    $('param[name="Question"]').val(),
                     $('param[name="AttachedFile"]').val()
                 ]
             };
@@ -62,6 +63,7 @@ var xeit = (function () {
                 args: [
                     html,
                     $('param[name="IniSMContents"]').val(),
+                    $('param[name="Question"]').val(),
                     $('param[name="AttachedFile"]').val(),
                     $('param[name="OptData"]').val()
                 ]

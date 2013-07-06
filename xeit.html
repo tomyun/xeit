@@ -119,7 +119,7 @@
                 }).data('popover').options.content = content;
             }
 
-            function setupPasswordBox(support, hint, keylen) {
+            function setupPasswordBox(support, hint, keylen, notice) {
                 var $auth_password = $('input#auth-password').off('blur input').on('blur input', resetError);
 
                 support = support || false;
@@ -140,7 +140,22 @@
                     var placeholder = hint;
                     var pattern = '.*';
                 }
+                
+                notice = notice || '';
+                if (notice) {
+                    var content = '<div class="well well-small">' + notice + '</div>';
+                } else {
+                    var content = placeholder;
+                }
+
                 $auth_password.prop('placeholder', placeholder).prop('pattern', pattern);
+                $('#password-button').popover({
+                    html: true,
+                    placement: 'bottom',
+                    trigger: 'click | hover'
+                }).on('shown', function (e) {
+                    e.stopPropagation();
+                }).data('popover').options.content = content;
             }
 
             function showAuthDialog() {
@@ -173,7 +188,7 @@
                 setupSenderBox(sender.name, sender.support, sender.experimental);
 
                 // 비밀번호 설명 표시.
-                setupPasswordBox(sender.support, sender.hint, sender.keylen);
+                setupPasswordBox(sender.support, sender.hint, sender.keylen, sender.notice);
 
                 // 지원여부에 따른 인증화면 구성.
                 if (sender.support) {

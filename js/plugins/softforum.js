@@ -57,7 +57,9 @@ extend(SoftForum.prototype, {
             company = '동양생명 보안메일';
         }
 
-        this.recognize(company, {
+        var notice = this.smime_header.match(/X-XEI_PWD_MSG: \s*(.+)/i)[1].replace(/0x0(A|D)/gi, '');
+
+        this.recognize(company, notice, {
             name: company,
             support: true,
             experimental: true,
