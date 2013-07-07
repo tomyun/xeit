@@ -22,7 +22,7 @@
                 e.preventDefault();
 
                 //HACK: Error와 ErrorEvent의 message가 조금 다름.
-                message = e.message.replace(/(Uncaught )?Error: /, '');
+                message = e.message.replace(/(Uncaught )?(.*)Error: /, '');
 
                 $('#auth-password-group').addClass('error');
                 setupAuthAlert('error', '<strong>앗!</strong> ' + message);
