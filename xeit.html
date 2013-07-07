@@ -130,7 +130,8 @@
                     $auth_password.blur();
                 }
 
-                function describe(rule) {
+                rule = rule || [];
+                var ruler = function (rule) {
                     function flatten(array) {
                         return [].concat.apply([], array);
                     }
@@ -143,94 +144,132 @@
                         });
                     }
 
-                    function shorten(hints) {
-                        return hints.map(function (v) {
-                            return v.replace(/\s+.*/, '');
-                        });
-                    }
+                    var hinter = {
+                        init: function (hints) {
+                            this.hints = hints;
+                            return this;
+                        },
 
-                    function longest(hints) {
-                        return Math.max.apply(null, hints.map(function (v, i) {
-                            return v.length;
-                        }));
-                    }
-
-                    function combine(hints) {
-                        var r = [];
-                        var length = longest(hints);
-                        for (var i = 1; i <= length; i++) {
-                            var char = hints.map(function (v) {
-                                return v[v.length-i];
-                            }).reduce(function (p, c) {
-                                return (p == c) ? c : '';
-                            });
-                            if (char) {
-                                r.unshift(char);
+                        shorten: function () {
+                            var a = this.hints;
+                            if (a.length > 1) {
+                                return a.map(function (v) {
+                                    return v.replace(/\s+.*/, '');
+                                });
                             } else {
-                                if (i == 1 && hints.length == 2) {
-                                    r.unshift(hints.join('/'));
+                                return a;
+                            }
+                        },
+
+                        longest: function (array) {
+                            return Math.max.apply(null, array.map(function (v, i) {
+                                return v.length;
+                            }));
+                        },
+
+                        combine: function (array) {
+                            var r = [];
+                            var length = this.longest(array);
+                            for (var i = 1; i <= length; i++) {
+                                var char = array.map(function (v) {
+                                    return v[v.length-i];
+                                }).reduce(function (p, c) {
+                                    return (p == c) ? c : '';
+                                });
+                                if (char) {
+                                    r.unshift(char);
                                 } else {
-                                    r.unshift(hints.map(function (v) {
-                                        return v.substring(0, v.length-i+1);
-                                    }).reduce(function (p, c) {
-                                        return combine([p, c]);
-                                    }));
+                                    if (i == 1 && array.length == 2) {
+                                        r.unshift(array.join('/'));
+                                    } else {
+                                        r.unshift(array.map(function (v) {
+                                            return v.substring(0, v.length-i+1);
+                                        }).reduce(function (p, c) {
+                                            return hinter.combine([p, c]);
+                                        }));
+                                    }
+                                    break;
                                 }
-                                break;
                             }
+                            return r.join('');
+                        },
+
+                        hint: function () {
+                            return this.combine(this.shorten());
                         }
-                        return r.join('');
-                    }
+                    }.init(flatten(extract(rule, 'hint')));
 
-                    function hint(rule) {
-                        return combine(shorten(flatten(extract(rule, 'hint'))));
-                    }
+                    var sizer = {
+                        init: function (sizes) {
+                            this.sizes = sizes;
+                            return this;
+                        },
 
-                    function size(rule) {
-                        var a = flatten(extract(rule, 'size').map(function (v) {
-                            return v.toString().split(/[,~]/);
-                        })).sort();
-                        if (a.length > 0) {
-                            var max = a[0],
-                                min = a[a.length-1];
-                            if (min == max) {
-                                return ' ('+min+'자리)';
+                        size: function () {
+                            var a = flatten(this.sizes.map(function (v) {
+                                return v.toString().split(/~/);
+                            })).sort(function (a, b) {
+                                return a - b;
+                            });
+                            if (a.length > 0) {
+                                var min = a[0],
+                                    max = a[a.length-1];
+                                if (min == max) {
+                                    return '('+min+'자리)';
+                                } else {
+                                    return '('+min+'~'+max+'자리)';
+                                }
                             } else {
-                                return ' ('+min+'~'+max+'자리)';
+                                return '';
                             }
-                        } else {
-                            return '';
-                        }
-                    }
+                        },
 
-                    return function (rule) {
-                        var d = hint(rule);
-                        if (d.length < 15) {
-                            d += size(rule);
+                        pattern: function () {
+                            var a = this.sizes;
+                            if (a.length > 0) {
+                                return a.map(function (v) {
+                                    return '\\d{' + v.toString().replace(/~/, ',') + '}';
+                                }).join('|');
+                            } else {
+                                return '.*';
+                            }
                         }
-                        return d;
-                    }(rule);
-                }
+                    }.init(extract(rule, 'size'));
 
-                hint = hint || '';
-                if (typeof keylen !== 'undefined') {
-                    var placeholder = hint + ' (' + keylen + '자리)';
-                    var pattern = $.map(keylen.toString().split(','), function (v, i) {
-                        return '\\d{' + $.trim(v).replace('~', ',') + '}';
-                    }).join('|');
-                } else {
-                    var placeholder = hint;
-                    var pattern = '.*';
-                }
-                
+                    return {
+                        placeholder: function () {
+                            return hinter.hint() + ' ' + sizer.size();
+                        },
+
+                        pattern: function () {
+                            return sizer.pattern();
+                        },
+
+                        label: function () {
+                            function span(hint, size) {
+                                size = size || '';
+                                return '<span class="badge badge-inverse">'+size+'</span> <span class="label">'+hint+'</span>';
+                            }
+                            return rule.map(function (v) {
+                                if (v.hint instanceof Array) {
+                                    return v.hint.map(function (w) {
+                                        return span(w, v.size);
+                                    }).join('<br>');
+                                } else {
+                                    return span(v.hint, v.size);
+                                }
+                            }).join('<br>');
+                        }
+                    };
+                }(rule);
+
                 notice = notice || '';
+                var content = '<p>' + ruler.label() + '</p>';
                 if (notice) {
-                    var content = '<div class="well well-small">' + notice + '</div>';
-                } else {
-                    var content = placeholder;
+                    content += '<div class="well well-small">' + notice + '</div>';
                 }
 
-                $auth_password.prop('placeholder', placeholder).prop('pattern', pattern);
+                $auth_password.prop('placeholder', ruler.placeholder()).prop('pattern', ruler.pattern());
                 $('#password-button').popover({
                     html: true,
                     placement: 'bottom',
