@@ -19,7 +19,9 @@ extend(IniTech.prototype, {
 
         this.recognize(S.company, this.question, {
             name: S.company,
-            hint: S.keygen,
+            rule: [{
+                hint: S.keygen
+            }],
             salt: ''
         });
 
@@ -70,40 +72,59 @@ extend(IniTech.prototype, {
             name: '한국씨티은행',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: ['주민등록번호 뒤', '사업자등록번호 뒤'],
+                size: 7
+            }],
             salt: 'goodbank'
         },
 
         BC: {
             name: 'NH농협카드',
             support: true,
-            hint: '주민등록번호 뒤',
-            keylen: '7',
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'nonghyup'
         },
 
         BO: {
             name: '신한은행',
             support: true,
-            hint: '보안메일 비밀번호',
-            keylen: '6~8',
+            rule: [{
+                hint: '보안메일 비밀번호',
+                size: '6~8'
+            }],
             salt: 'shinhanbank'
         },
 
         CC: {
             name: 'BC카드',
             support: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'bccard'
         },
 
         DI: {
             name: '하나SK카드',
             support: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'defaultmailid'
         },
 
@@ -111,8 +132,13 @@ extend(IniTech.prototype, {
             name: '신한생명',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'shinhanlife'
         },        
 
@@ -120,8 +146,10 @@ extend(IniTech.prototype, {
             name: '한화생명',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }],
             salt: 'korealife'
         },
 
@@ -129,8 +157,10 @@ extend(IniTech.prototype, {
             name: '푸르덴셜생명',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }],
             salt: 'prudentiallife'
         },
 
@@ -138,8 +168,9 @@ extend(IniTech.prototype, {
             name: 'The-K손해보험',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '확인코드'
+            }],
             salt: 'kyowonnara'
         },
 
@@ -147,8 +178,13 @@ extend(IniTech.prototype, {
             name: '교보생명',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호 뒤',
+                size: 5
+            }],
             salt: 'kyobolife'
         },
 
@@ -156,8 +192,13 @@ extend(IniTech.prototype, {
             name: 'MG손해보험',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호 뒤',
+                size: 4
+            }],
             salt: 'greenfire'
         },
 
@@ -165,8 +206,13 @@ extend(IniTech.prototype, {
             name: '동부화재',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'dongbufire'
         },
 
@@ -174,8 +220,13 @@ extend(IniTech.prototype, {
             name: '현대해상',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호 뒤',
+                size: 5
+            }],
             salt: 'hicokr'
         },
 
@@ -183,31 +234,54 @@ extend(IniTech.prototype, {
             name: '한화생명',
             support: true,
             experimental: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'korealife2'
         },
 
         KA: {
             name: 'Initech',
             support: true,
-            hint: '보안메일 비밀번호',
+            rule: [{
+                hint: '확인코드'
+            }],
             salt: 'consulting'
         },
 
         TC: {
             name: 'SKT',
             support: true,
-            hint: '주민등록번호 앞 또는 뒤',
-            keylen: '6,7',
+            rule: [{
+                hint: '생년월일',
+                size: 6
+            }, {
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '법인등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
             salt: 'SKT'
         },
 
         TH: {
             name: 'KT',
             support: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '법인등록번호 뒤',
+                size: 7
+            }],
             salt: 'ktbill'
         }
     },

@@ -13,8 +13,10 @@ extend(Natingtel.prototype, {
         this.sender = {
             name: '대신증권',
             support: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }]
         };
     },
 

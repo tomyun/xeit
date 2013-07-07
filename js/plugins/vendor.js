@@ -5,7 +5,13 @@ importScripts('deps/crypto-js/build/rollups/seed.js',
 
 var Vendor = function (product) {
     this.product = product || '';
-    this.sender = { name: '?', support: false, hint: '-' };
+    this.sender = {
+        name: '?',
+        support: false,
+        rule: [{
+            hint: '비밀번호'
+        }]
+    };
     this.fixer = {};
 };
 
