@@ -119,7 +119,7 @@
                 }).data('popover').options.content = content;
             }
 
-            function setupPasswordBox(support, hint, keylen) {
+            function setupPasswordBox(support, rule, notice) {
                 var $auth_password = $('input#auth-password').off('blur input').on('blur input', resetError);
 
                 support = support || false;
@@ -130,15 +130,157 @@
                     $auth_password.blur();
                 }
 
-                hint = hint || '';
-                if (typeof keylen !== 'undefined') {
-                    var placeholder = hint + ' (' + keylen.toString().replace(',', '~') + '자리)';
-                    var pattern = '[a-zA-Z0-9]{' + keylen + '}';
-                } else {
-                    var placeholder = hint;
-                    var pattern = '';
+                rule = rule || [];
+                var ruler = function (rule) {
+                    function flatten(array) {
+                        return [].concat.apply([], array);
+                    }
+
+                    function extract(rule, key) {
+                        return rule.map(function (v) {
+                            return v[key];
+                        }).filter(function (v) {
+                            return typeof v !== 'undefined';
+                        });
+                    }
+
+                    var hinter = {
+                        init: function (hints) {
+                            this.hints = hints;
+                            return this;
+                        },
+
+                        shorten: function () {
+                            var a = this.hints;
+                            if (a.length > 1) {
+                                return a.map(function (v) {
+                                    return v.replace(/\s+.*/, '');
+                                });
+                            } else {
+                                return a;
+                            }
+                        },
+
+                        longest: function (array) {
+                            return Math.max.apply(null, array.map(function (v, i) {
+                                return v.length;
+                            }));
+                        },
+
+                        combine: function (array) {
+                            var r = [];
+                            var length = this.longest(array);
+                            for (var i = 1; i <= length; i++) {
+                                var char = array.map(function (v) {
+                                    return v[v.length-i];
+                                }).reduce(function (p, c) {
+                                    return (p == c) ? c : '';
+                                });
+                                if (char) {
+                                    r.unshift(char);
+                                } else {
+                                    if (i == 1 && array.length == 2) {
+                                        r.unshift(array.join('/'));
+                                    } else {
+                                        r.unshift(array.map(function (v) {
+                                            return v.substring(0, v.length-i+1);
+                                        }).reduce(function (p, c) {
+                                            return hinter.combine([p, c]);
+                                        }));
+                                    }
+                                    break;
+                                }
+                            }
+                            return r.join('');
+                        },
+
+                        hint: function () {
+                            return this.combine(this.shorten());
+                        }
+                    }.init(flatten(extract(rule, 'hint')));
+
+                    var sizer = {
+                        init: function (sizes) {
+                            this.sizes = sizes;
+                            return this;
+                        },
+
+                        sanitize: function (size) {
+                            return size.toString().replace(/\\\w+/, '');
+                        },
+
+                        size: function () {
+                            var a = flatten(this.sizes.map(function (v) {
+                                return sizer.sanitize(v).split(/~/);
+                            })).sort(function (a, b) {
+                                return a - b;
+                            });
+                            if (a.length > 0) {
+                                var min = a[0],
+                                    max = a[a.length-1];
+                                if (min == max) {
+                                    return '('+min+'자리)';
+                                } else {
+                                    return '('+min+'~'+max+'자리)';
+                                }
+                            } else {
+                                return '';
+                            }
+                        },
+
+                        pattern: function () {
+                            var a = this.sizes;
+                            if (a.length > 0) {
+                                return a.map(function (v) {
+                                    return v.toString().replace(/(\d+(?:~\d+)?)(\\\w)?/, '[\\d$2]{$1}').replace(/~/, ',')
+                                }).join('|');
+                            } else {
+                                return '.*';
+                            }
+                        }
+                    }.init(extract(rule, 'size'));
+
+                    return {
+                        placeholder: function () {
+                            return hinter.hint() + ' ' + sizer.size();
+                        },
+
+                        pattern: function () {
+                            return sizer.pattern();
+                        },
+
+                        label: function () {
+                            function span(hint, size) {
+                                size = sizer.sanitize(size || '');
+                                return '<span class="badge badge-inverse">'+size+'</span> <span class="label">'+hint+'</span>';
+                            }
+                            return rule.map(function (v) {
+                                if (v.hint instanceof Array) {
+                                    return v.hint.map(function (w) {
+                                        return span(w, v.size);
+                                    }).join('<br>');
+                                } else {
+                                    return span(v.hint, v.size);
+                                }
+                            }).join('<br>');
+                        }
+                    };
+                }(rule);
+
+                notice = notice || '';
+                var content = '<p>' + ruler.label() + '</p>';
+                if (notice) {
+                    content += '<div class="well well-small">' + notice + '</div>';
                 }
-                $auth_password.prop('placeholder', placeholder).prop('pattern', pattern);
+
+                $auth_password.prop('placeholder', ruler.placeholder()).prop('pattern', ruler.pattern());
+                $('#password-button').popover({
+                    html: true,
+                    placement: 'bottom',
+                    trigger: 'click | hover'
+                }).on('shown', function (e) {
+                    e.stopPropagation();
+                }).data('popover').options.content = content;
             }
 
             function showAuthDialog() {
@@ -171,7 +313,7 @@
                 setupSenderBox(sender.name, sender.support, sender.experimental);
 
                 // 비밀번호 설명 표시.
-                setupPasswordBox(sender.support, sender.hint, sender.keylen);
+                setupPasswordBox(sender.support, sender.rule, sender.notice);
 
                 // 지원여부에 따른 인증화면 구성.
                 if (sender.support) {
@@ -536,6 +678,14 @@
                                                     <td>DES, SHA1</td>
                                                     <td><i class='icon-ok'></i></td>
                                                     <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>우리은행</td>
+                                                    <td>XecureExpress</td>
+                                                    <td>PWD</td>
+                                                    <td>SEED, SHA1</td>
+                                                    <td><i class='icon-time'></i></td>
+                                                    <td>확인필요</td>
                                                 </tr>
                                                 <tr>
                                                     <td>푸르덴셜생명</td>

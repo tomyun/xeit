@@ -13,7 +13,7 @@ extend(Soft25.prototype, {
         var S = this.unpack();
         extend(this, S);
 
-        this.recognize(this.normalize(S.Sender), {
+        this.recognize(this.normalize(S.Sender), S.HintKey, {
             name: S.Sender,
             hint: S.ContentEncryptionAlgorithm
         });
@@ -31,14 +31,19 @@ extend(Soft25.prototype, {
         '병무청(동원담당)': {
             name: '병무청',
             support: false,
-            hint: '-'
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }]
         },
 
         'KT': {
             name: 'KT',
             support: true,
-            hint: '주민등록번호 뒤',
-            keylen: 7
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }]
         }
     },
 
