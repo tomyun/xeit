@@ -205,9 +205,13 @@
                             return this;
                         },
 
+                        sanitize: function (size) {
+                            return size.toString().replace(/\\\w+/, '');
+                        },
+
                         size: function () {
                             var a = flatten(this.sizes.map(function (v) {
-                                return v.toString().split(/~/);
+                                return sizer.sanitize(v).split(/~/);
                             })).sort(function (a, b) {
                                 return a - b;
                             });
@@ -228,7 +232,7 @@
                             var a = this.sizes;
                             if (a.length > 0) {
                                 return a.map(function (v) {
-                                    return '\\d{' + v.toString().replace(/~/, ',') + '}';
+                                    return v.toString().replace(/(\d+(?:~\d+)?)(\\\w)?/, '[\\d$2]{$1}').replace(/~/, ',')
                                 }).join('|');
                             } else {
                                 return '.*';
@@ -247,7 +251,7 @@
 
                         label: function () {
                             function span(hint, size) {
-                                size = size || '';
+                                size = sizer.sanitize(size || '');
                                 return '<span class="badge badge-inverse">'+size+'</span> <span class="label">'+hint+'</span>';
                             }
                             return rule.map(function (v) {

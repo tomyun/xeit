@@ -211,7 +211,7 @@ extend(SoftForum.prototype, {
             experimental: true,
             rule: [{
                 hint: '보안메일 비밀번호',
-                size: '4~8'
+                size: '4~8\\w',
             }]
         }
     },
