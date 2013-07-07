@@ -253,6 +253,20 @@ extend(IniTech.prototype, {
             salt: 'consulting'
         },
 
+        MC: {
+            name: 'CJ헬로모바일',
+            support: true,
+            experimental: true,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
+            salt: 'cjhello'
+        },
+
         TC: {
             name: 'SKT',
             support: true,
