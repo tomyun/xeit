@@ -133,7 +133,7 @@
                 hint = hint || '';
                 if (typeof keylen !== 'undefined') {
                     var placeholder = hint + ' (' + keylen.toString().replace(',', '~') + '자리)';
-                    var pattern = '[0-9]{' + keylen + '}';
+                    var pattern = '[a-zA-Z0-9]{' + keylen + '}';
                 } else {
                     var placeholder = hint;
                     var pattern = '';
