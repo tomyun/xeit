@@ -203,6 +203,16 @@ extend(SoftForum.prototype, {
                 hint: '주민등록번호 뒤',
                 size: 7
             }]
+        },
+
+        '우리은행 보안메일': {
+            name: '우리은행',
+            support: true,
+            experimental: true,
+            rule: [{
+                hint: '보안메일 비밀번호',
+                size: '4~8'
+            }]
         }
     },
 
