@@ -159,6 +159,13 @@ extend(SoftForum.prototype, {
             support: true,
             hint: '주민등록번호 뒤',
             keylen: 7
+        },
+
+        '우리은행 보안메일': {
+            name: '우리은행',
+            support: true,
+            hint: '설정한 비밀번호',
+            keylen: '4,8'
         }
     },
 
