@@ -5,7 +5,13 @@ importScripts('deps/crypto-js/build/rollups/seed.js',
 
 var Vendor = function (product) {
     this.product = product || '';
-    this.sender = { name: '?', support: false, hint: '-' };
+    this.sender = {
+        name: '?',
+        support: false,
+        rule: [{
+            hint: '비밀번호'
+        }]
+    };
     this.fixer = {};
 };
 
@@ -33,8 +39,9 @@ Vendor.prototype = {
         };
     },
 
-    recognize: function (sign, shim) {
+    recognize: function (sign, notice, shim) {
         this.sender = this.supported_senders[sign] || ((sign) ? extend({}, this.sender, shim) : this.sender);
+        this.sender.notice = notice || '';
         this.fixer = extend({}, this.supported_fixers.common, this.supported_fixers[sign] || {});
     },
 
