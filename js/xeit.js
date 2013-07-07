@@ -15,21 +15,6 @@ var xeit = (function () {
                     $('param[name="ui_desc"]').val()
                 ]
             };
-        } else if (/prtObj\(([\s\S])*\);/.test(html)) {
-            //TODO: LGU+ 인식용으로 기존 로직과 병합 가능성 확인 필요. (by RyanYoon)
-            var data = html.match(/prtObj\(([\s\S])*\);/)[0].match(/[^']+(?!,)/g);
-            return {
-                func: 'init',
-                opts: { plugin: 'SoftForum' },
-                args: [
-                    html,
-                    data[5],
-                    data[7],
-                    data[9],
-                    data[11],
-                    data[13]
-                ]
-            };
         } else if (html.indexOf('IniMasPlugin') > -1) {
             //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
             var body = html.replace(
