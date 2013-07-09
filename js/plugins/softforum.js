@@ -266,7 +266,56 @@ extend(SoftForum.prototype, {
             }
         };
 
-        var passwordHash = CryptoJS.SHA1(password);
+        function decipher(algorithm, ciphertext, key, iv) {
+            return ciphers[algorithm].decrypt(
+                {
+                    ciphertext: ciphertext,
+                },
+                key,
+                extend({
+                    iv: iv
+                }, options[algorithm])
+            );
+        }
+
+        function keygenASN1(algorithm, params, password) {
+            if (algorithm === 'pkcs5PBKDF2') {
+                var salt = CryptoJS.enc.Latin1.parse(params.sub[0].contentRaw()),
+                    iterationCount = params.sub[1].content();
+                return CryptoJS.PBKDF2(password, salt, {
+                    iterations: iterationCount
+                });
+            } else {
+                throw Error('새로운 유형의 키 유도 과정이 필요합니다.');
+            }
+        }
+
+        function decryptASN1(algorithm, params, ciphertext, password) {
+            if (algorithm === 'pkcs-5') {
+                return decryptASN1(
+                    oids[params.sub[0].content()].d,
+                    params.sub[1],
+                    ciphertext,
+                    password
+                );
+            } else if (algorithm === 'pkcs5PBES2') {
+                var kdf = params.sub[0],
+                    scheme = params.sub[1];
+                var key = keygenASN1(
+                    oids[kdf.sub[0].content()].d,
+                    kdf.sub[1],
+                    password
+                );
+                var cipher = oids[scheme.sub[0].content()].d,
+                    iv = CryptoJS.enc.Latin1.parse(scheme.sub[1].contentRaw());
+                return decipher(cipher, ciphertext, key, iv);
+            } else if (ciphers.hasOwnProperty(algorithm)) {
+                var iv = CryptoJS.enc.Latin1.parse(params.contentRaw());
+                return decipher(algorithm, ciphertext, password, iv);
+            } else {
+                throw Error('새로운 유형의 암호 해석 과정이 필요합니다.');
+            }
+        }
 
         ASN1.prototype.contentRaw = function () {
             var offset = this.posContent(),
@@ -283,56 +332,18 @@ extend(SoftForum.prototype, {
             keyTransportRecipientInfo = recipientInfos.sub[0],
             keyEncryptionAlgorithm = oids[keyTransportRecipientInfo.sub[2].sub[0].content()].d,
             keyEncryptionParameters = keyTransportRecipientInfo.sub[2].sub[1];
-        if (keyEncryptionAlgorithm === 'pkcs-5') {
-            var pkcs5Algorithm = oids[keyEncryptionParameters.sub[0].content()].d,
-                pkcs5Parameters = keyEncryptionParameters.sub[1];
-            if (pkcs5Algorithm === 'pkcs5PBES2') {
-                var keyDerivationFunc = pkcs5Parameters.sub[0],
-                    encryptionScheme = pkcs5Parameters.sub[1];
-                var keyDerivationFuncName = oids[keyDerivationFunc.sub[0].content()].d;
-                if (keyDerivationFuncName === 'pkcs5PBKDF2') {
-                    var pbkdf2Parameters = keyDerivationFunc.sub[1],
-                        salt = CryptoJS.enc.Latin1.parse(pbkdf2Parameters.sub[0].contentRaw()),
-                        iterationCount = pbkdf2Parameters.sub[1].content();
-                    var passwordKey = CryptoJS.PBKDF2(passwordHash, salt, {
-                        iterations: iterationCount
-                    });
-                } else {
-                    throw Error('새로운 유형의 키 유도 과정이 필요합니다.');
-                }
-            } else {
-                throw Error('새로운 유형의 암호 해석 과정이 필요합니다.');
-            }
-            var keyDecryptionAlgorithm = oids[encryptionScheme.sub[0].content()].d,
-                iv = CryptoJS.enc.Latin1.parse(encryptionScheme.sub[1].contentRaw());
-        } else {
-            var passwordKey = passwordHash;
-            var keyDecryptionAlgorithm = keyEncryptionAlgorithm,
-                iv = CryptoJS.enc.Latin1.parse("0");
-        }
-        var encryptedKey = CryptoJS.enc.Latin1.parse(keyTransportRecipientInfo.sub[3].contentRaw());
-        var decryptedKey = ciphers[keyDecryptionAlgorithm].decrypt(
-            { ciphertext: encryptedKey },
-            passwordKey,
-            extend({
-                iv: iv
-            }, options[keyDecryptionAlgorithm])
-        );
+        var encryptedKey = CryptoJS.enc.Latin1.parse(keyTransportRecipientInfo.sub[3].contentRaw()),
+            passwordHash = CryptoJS.SHA1(password);
+        var decryptedKey = decryptASN1(keyEncryptionAlgorithm, keyEncryptionParameters, encryptedKey, passwordHash);
 
         this.verify(decryptedKey);
 
         // 대칭키로 암호화된 메일 본문 복호화.
         var encryptedContentInfo = envelopedData.sub[2],
             contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d,
-            algorithmParameter = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[1].sub[1].contentRaw()),
-            encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
-        var decryptedContent = ciphers[contentEncryptionAlgorithm].decrypt(
-            { ciphertext: encryptedContent },
-            decryptedKey,
-            extend({
-                iv: algorithmParameter
-            }, options[contentEncryptionAlgorithm])
-        );
+            contentEncryptionParameters = encryptedContentInfo.sub[1].sub[1];
+        var encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
+        var decryptedContent = decryptASN1(contentEncryptionAlgorithm, contentEncryptionParameters, encryptedContent, decryptedKey);
         return decryptedContent;
     },
 
