@@ -2,6 +2,7 @@
 
 importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/crypto-js/build/rollups/rc2.js',
+              'deps/crypto-js/build/rollups/pbkdf2.js',
               'deps/crypto-js/build/components/sha1.js',
               'deps/asn1js/asn1.js',
               'deps/asn1js/base64.js',
@@ -55,6 +56,12 @@ extend(SoftForum.prototype, {
             }
         } else if (company === '悼剧积疙 焊救皋老') {
             company = '동양생명 보안메일';
+        } else if (company === '') {
+            if (this.smime_header.indexOf('keb.co.kr') > -1) {
+                company = 'Xeit.yescard';
+            } else {
+                company = '?';
+            }
         }
 
         var notice = this.smime_header.match(/X-XEI_PWD_MSG: \s*(.+)/i)[1].replace(/0x0(A|D)/gi, '');
@@ -176,7 +183,7 @@ extend(SoftForum.prototype, {
         },
 
         'Xeit.yescard': {
-            name: '외환카드',
+            name: '외환은행',
             support: true,
             rule: [{
                 hint: '주민등록번호 뒤',
@@ -259,6 +266,57 @@ extend(SoftForum.prototype, {
             }
         };
 
+        function decipher(algorithm, ciphertext, key, iv) {
+            return ciphers[algorithm].decrypt(
+                {
+                    ciphertext: ciphertext,
+                },
+                key,
+                extend({
+                    iv: iv
+                }, options[algorithm])
+            );
+        }
+
+        function keygenASN1(algorithm, params, password) {
+            if (algorithm === 'pkcs5PBKDF2') {
+                var salt = CryptoJS.enc.Latin1.parse(params.sub[0].contentRaw()),
+                    iterationCount = params.sub[1].content();
+                return CryptoJS.PBKDF2(password, salt, {
+                    iterations: iterationCount
+                });
+            } else {
+                throw Error('새로운 유형의 키 유도 과정이 필요합니다.');
+            }
+        }
+
+        function decryptASN1(algorithm, params, ciphertext, password) {
+            if (algorithm === 'pkcs-5') {
+                return decryptASN1(
+                    oids[params.sub[0].content()].d,
+                    params.sub[1],
+                    ciphertext,
+                    password
+                );
+            } else if (algorithm === 'pkcs5PBES2') {
+                var kdf = params.sub[0],
+                    scheme = params.sub[1];
+                var key = keygenASN1(
+                    oids[kdf.sub[0].content()].d,
+                    kdf.sub[1],
+                    password
+                );
+                var cipher = oids[scheme.sub[0].content()].d,
+                    iv = CryptoJS.enc.Latin1.parse(scheme.sub[1].contentRaw());
+                return decipher(cipher, ciphertext, key, iv);
+            } else if (ciphers.hasOwnProperty(algorithm)) {
+                var iv = CryptoJS.enc.Latin1.parse(params.contentRaw());
+                return decipher(algorithm, ciphertext, password, iv);
+            } else {
+                throw Error('새로운 유형의 암호 해석 과정이 필요합니다.');
+            }
+        }
+
         ASN1.prototype.contentRaw = function () {
             var offset = this.posContent(),
                 length = this.length;
@@ -272,32 +330,20 @@ extend(SoftForum.prototype, {
         // 주민등록번호로 암호화된 대칭키 복호화.
         var recipientInfos = envelopedData.sub[1],
             keyTransportRecipientInfo = recipientInfos.sub[0],
-            keyEncryptionAlgorithm = oids[keyTransportRecipientInfo.sub[2].sub[0].content()].d;
+            keyEncryptionAlgorithm = oids[keyTransportRecipientInfo.sub[2].sub[0].content()].d,
+            keyEncryptionParameters = keyTransportRecipientInfo.sub[2].sub[1];
         var encryptedKey = CryptoJS.enc.Latin1.parse(keyTransportRecipientInfo.sub[3].contentRaw()),
-            passwordKey = CryptoJS.SHA1(password),
-            iv = CryptoJS.enc.Hex.parse("0");
-        var decryptedKey = ciphers[keyEncryptionAlgorithm].decrypt(
-            { ciphertext: encryptedKey },
-            passwordKey,
-            extend({
-                iv: iv
-            }, options[keyEncryptionAlgorithm])
-        );
-
+            passwordHash = CryptoJS.SHA1(password);
+        var decryptedKey = decryptASN1(keyEncryptionAlgorithm, keyEncryptionParameters, encryptedKey, passwordHash);
         this.verify(decryptedKey);
 
         // 대칭키로 암호화된 메일 본문 복호화.
         var encryptedContentInfo = envelopedData.sub[2],
             contentEncryptionAlgorithm = oids[encryptedContentInfo.sub[1].sub[0].content()].d,
-            algorithmParameter = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[1].sub[1].contentRaw()),
-            encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
-        var decryptedContent = ciphers[contentEncryptionAlgorithm].decrypt(
-            { ciphertext: encryptedContent },
-            decryptedKey,
-            extend({
-                iv: algorithmParameter
-            }, options[contentEncryptionAlgorithm])
-        );
+            contentEncryptionParameters = encryptedContentInfo.sub[1].sub[1];
+        var encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
+        var decryptedContent = decryptASN1(contentEncryptionAlgorithm, contentEncryptionParameters, encryptedContent, decryptedKey);
+        this.verify(decryptedContent);
         return decryptedContent;
     },
 
@@ -315,7 +361,6 @@ extend(SoftForum.prototype, {
             passwordKey,
             { iv: iv }
         );
-
         this.verify(decryptedKey);
 
         var encryptedContent = CryptoJS.enc.Base64.parse(content);
@@ -324,6 +369,7 @@ extend(SoftForum.prototype, {
             decryptedKey,
             { iv: iv }
         );
+        this.verify(decryptedContent);
         return decryptedContent;
     },
 
