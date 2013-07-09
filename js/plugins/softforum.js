@@ -335,7 +335,6 @@ extend(SoftForum.prototype, {
         var encryptedKey = CryptoJS.enc.Latin1.parse(keyTransportRecipientInfo.sub[3].contentRaw()),
             passwordHash = CryptoJS.SHA1(password);
         var decryptedKey = decryptASN1(keyEncryptionAlgorithm, keyEncryptionParameters, encryptedKey, passwordHash);
-
         this.verify(decryptedKey);
 
         // 대칭키로 암호화된 메일 본문 복호화.
@@ -344,6 +343,7 @@ extend(SoftForum.prototype, {
             contentEncryptionParameters = encryptedContentInfo.sub[1].sub[1];
         var encryptedContent = CryptoJS.enc.Latin1.parse(encryptedContentInfo.sub[2].contentRaw());
         var decryptedContent = decryptASN1(contentEncryptionAlgorithm, contentEncryptionParameters, encryptedContent, decryptedKey);
+        this.verify(decryptedContent);
         return decryptedContent;
     },
 
@@ -361,7 +361,6 @@ extend(SoftForum.prototype, {
             passwordKey,
             { iv: iv }
         );
-
         this.verify(decryptedKey);
 
         var encryptedContent = CryptoJS.enc.Base64.parse(content);
@@ -370,6 +369,7 @@ extend(SoftForum.prototype, {
             decryptedKey,
             { iv: iv }
         );
+        this.verify(decryptedContent);
         return decryptedContent;
     },
 
