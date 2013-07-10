@@ -1,10 +1,85 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
-    <head>
-        <meta http-equiv="refresh" content="0; url=http://tomyun.github.io/xeit/xeit.html">
-        <meta property="fb:admins" content="1377353823" />
-        <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-40224792-1','github.io');ga('send','pageview');</script>
-    </head>
-    <body>
-    </body>
+<head>
+<meta name="viewport" content="width=device-width" />
+<style>
+@-ms-viewport { width: device-width; }
+@-webkit-viewport { width: device-width; }
+@-moz-viewport { width: device-width; }
+@-o-viewport { width: device-width; }
+@viewport { width: device-width; }
+</style>
+<script>
+"use strict";
+var popup;
+function filechanged(e) {
+    if (e.target.files.length > 0)
+		xeitbutton.disabled = undefined;
+    else
+        xeitbutton.disabled = 'disabled';
+}
+
+function textchanged(e) {
+    if (e.target.value.length > 0)
+        xeitbutton.disabled = undefined;
+    else
+        xeitbutton.disabled = 'disabled';
+}
+
+function loadUrl(url) {
+    try {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.responseType = "blob";
+        xhr.onload = function() {
+            if (xhr.status == 200)
+                loadFile(xhr.response);
+            else {
+                popup.close();
+                alert('URL이 잘못되었습니다.');
+            }
+        }
+        xhr.onerror = function() {
+            popup.close();
+            alert('URL을 불러오는 데에 실패했습니다. 1');
+        }
+        xhr.send();    
+    }
+    catch (e) {
+        popup.close();
+        alert('URL을 불러오는 데에 실패했습니다. 2');
+    }
+}
+
+function loadFile(file) {
+    if (file.type.match('text/html')) {
+		var reader = new FileReader();
+		reader.onload = readfile;
+		reader.readAsText(file);
+	}
+	else
+		alert('올바른 파일 형식이 아닙니다.');
+}
+
+function readfile(e) {
+	var newhtml = e.target.result.replace(decodeURI('%3Cmeta%20http-equiv=%22X-UA-Compatible%22%20content=%22IE=7%22%20/%3E'), '').replace(decodeURI("%3C/body%3E"), decodeURI('%3Cscript%3Eif%20(window.opener)%20(function()%7Bvar%20b=document,c=b.getElementById(%22xeit%22);if(!c)%7Bwindow.addEventListener(%22message%22,function(a)%7B%22ready%22==a.data?c.contentWindow.postMessage(d,%22*%22):%22fallback%22==a.data&&(b.body=e)%7D);var%20a=b.documentElement,d=a.outerHTML;a.style.height=%22100%25%22;var%20e=b.body,a=b.body=b.createElement(%22body%22);a.style.cssText=%22margin:0;padding:0;height:100%25%22;c=b.createElement(%22iframe%22);c.id=%22xeit%22;c.src=%22http://saschanaz.github.io/xeit/xeit.html%22;c.style.cssText=%22width:100%25;height:100%25;border:0%22;a.appendChild(c)%7D%7D)();%3C/script%3E%3C/body%3E'));
+	popup.document.write(newhtml);
+}
+
+function runxeit() {
+	popup = window.open("about:blank");
+    if (fileinput.files.length > 0) {
+		loadFile(fileinput.files[0]);
+    }
+    else if (urlinput.value.length > 0) {
+        loadUrl(urlinput.value);
+	}
+}
+</script>
+</head>
+<body>
+<input type="file" id="fileinput" onchange="filechanged(event)" />
+<input type="text" id="urlinput" oninput="textchanged(event)" />    
+<button id="xeitbutton" onclick="runxeit()" disabled>Xeit!</button>
+</body>
 </html>
