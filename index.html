@@ -1,6 +1,17 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+<meta name="viewport" content="width=device-width" />
+<style>
+@-ms-viewport { width: device-width; }
+@-webkit-viewport { width: device-width; }
+@-moz-viewport { width: device-width; }
+@-o-viewport { width: device-width; }
+@viewport { width: device-width; }
+</style>
+<!DOCTYPE HTML>
+<html>
+<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width" />
 <style>
@@ -12,14 +23,14 @@
 </style>
 <script>
 "use strict";
-function filechanged(e) {
+function fileChanged(e) {
 	if (e.target.files.length > 0) {
 		urlinput.disabled = 'disabled';
 		xeitbutton.disabled = undefined;
 	}
 }
 
-function textchanged(e) {
+function textChanged(e) {
 	if (e.target.value.length > 0) {
 		fileinput.disabled = 'disabled';
 		xeitbutton.disabled = undefined;
@@ -30,7 +41,7 @@ function textchanged(e) {
 	}
 }
 
-function filecanceled() {
+function fileCanceled() {
 	urlinput.disabled = undefined;
 	xeitbutton.disabled = 'disabled';
 }
@@ -42,7 +53,7 @@ function loadUrl(url, popup) {
 		xhr.responseType = "blob";
 		xhr.onload = function() {
 			if (xhr.status == 200)
-				loadFile(xhr.response, popup);
+				loadBlob(xhr.response, popup);
 			else {
 				popup.close();
 				alert('URL이 잘못되었습니다.');
@@ -60,17 +71,22 @@ function loadUrl(url, popup) {
 	}
 }
 
-function loadFile(file, popup) {
-	if (file.type.match('text/html')) {
+function loadBlob(blob, popup) {
+	if (blob.type.match('text/html')) {
 		var reader = new FileReader();
-		reader.onload = function (e) { readfile(e, popup); };
-		reader.readAsText(file);
+		reader.onload = function (e) { readHtml(e, popup); };
+		reader.readAsText(blob);
 	}
-	else
-		alert('올바른 파일 형식이 아닙니다.');
+	else {
+		popup.close();
+		if (blob.name)//blob is File (File inherits Blob)
+			alert(blob.name + ' 파일은 HTML 파일이 아닙니다.');
+		else
+			alert('이 URL의 파일은 HTML 파일이 아닙니다.');
+	}
 }
 
-function readfile(e, popup) {
+function readHtml(e, popup) {
 	var newhtml = e.target.result.replace(decodeURI('%3Cmeta%20http-equiv=%22X-UA-Compatible%22%20content=%22IE=7%22%20/%3E'), '').replace(decodeURI("%3C/body%3E"), decodeURI('%3Cscript%3Eif%20(window.opener)%20(function()%7Bvar%20b=document,c=b.getElementById(%22xeit%22);if(!c)%7Bwindow.addEventListener(%22message%22,function(a)%7B%22ready%22==a.data?c.contentWindow.postMessage(d,%22*%22):%22fallback%22==a.data&&(b.body=e)%7D);var%20a=b.documentElement,d=a.outerHTML;a.style.height=%22100%25%22;var%20e=b.body,a=b.body=b.createElement(%22body%22);a.style.cssText=%22margin:0;padding:0;height:100%25%22;c=b.createElement(%22iframe%22);c.id=%22xeit%22;c.src=%22http://saschanaz.github.io/xeit/xeit.html%22;c.style.cssText=%22width:100%25;height:100%25;border:0%22;a.appendChild(c)%7D%7D)();%3C/script%3E%3C/body%3E'));
 	popup.document.write(newhtml);
 }
@@ -78,7 +94,7 @@ function readfile(e, popup) {
 function runxeit() {
 	if (fileinput.files.length > 0) {
 		Array.prototype.forEach.call(fileinput.files, function (file) {
-			loadFile(file, window.open("about:blank"));
+			loadBlob(file, window.open("about:blank"));
 		});
 	}
 	else if (urlinput.value.length > 0) {
@@ -90,12 +106,12 @@ function runxeit() {
 <body>
 <div>
 	<form>
-		<input type="file" id="fileinput" onchange="filechanged(event)" multiple="multiple" />
-		<input type="reset" value="Cancel" onclick="filecanceled()"/>
+		<input type="file" id="fileinput" onchange="fileChanged(event)" multiple="multiple" accept="text/html"/>
+		<input type="reset" value="Cancel" onclick="fileCanceled()"/>
 	</form>
 </div>
 <div>
-	<input type="text" id="urlinput" oninput="textchanged(event)" />	
+	<input type="text" id="urlinput" oninput="textChanged(event)" />	
 <div>
 <div>
 	<button id="xeitbutton" onclick="runxeit()" disabled="disabled">Xeit!</button>
