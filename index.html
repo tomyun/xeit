@@ -1,17 +1,6 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<meta name="viewport" content="width=device-width" />
-<style>
-@-ms-viewport { width: device-width; }
-@-webkit-viewport { width: device-width; }
-@-moz-viewport { width: device-width; }
-@-o-viewport { width: device-width; }
-@viewport { width: device-width; }
-</style>
-<!DOCTYPE HTML>
-<html>
-<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width" />
 <style>
@@ -41,7 +30,8 @@ function textChanged(e) {
 	}
 }
 
-function fileCanceled() {
+function fileCancel() {
+	fileinput.outerHTML = fileinput.outerHTML;
 	urlinput.disabled = undefined;
 	xeitbutton.disabled = 'disabled';
 }
@@ -52,8 +42,12 @@ function loadUrl(url, popup) {
 		xhr.open("GET", url, true);
 		xhr.responseType = "blob";
 		xhr.onload = function() {
-			if (xhr.status == 200)
-				loadBlob(xhr.response, popup);
+			if (xhr.status == 200) {
+				if (xhr.response.type === 'text/html')
+					loadHtmlBlob(xhr.response, popup);
+				else
+					alert('이 URL의 파일은 HTML 파일이 아닙니다.');
+			}
 			else {
 				popup.close();
 				alert('URL이 잘못되었습니다.');
@@ -71,19 +65,10 @@ function loadUrl(url, popup) {
 	}
 }
 
-function loadBlob(blob, popup) {
-	if (blob.type.match('text/html')) {
-		var reader = new FileReader();
-		reader.onload = function (e) { readHtml(e, popup); };
-		reader.readAsText(blob);
-	}
-	else {
-		popup.close();
-		if (blob.name)//blob is File (File inherits Blob)
-			alert(blob.name + ' 파일은 HTML 파일이 아닙니다.');
-		else
-			alert('이 URL의 파일은 HTML 파일이 아닙니다.');
-	}
+function loadHtmlBlob(blob, popup) {
+	var reader = new FileReader();
+	reader.onload = function (e) { readHtml(e, popup); };
+	reader.readAsText(blob);
 }
 
 function readHtml(e, popup) {
@@ -94,7 +79,10 @@ function readHtml(e, popup) {
 function runxeit() {
 	if (fileinput.files.length > 0) {
 		Array.prototype.forEach.call(fileinput.files, function (file) {
-			loadBlob(file, window.open("about:blank"));
+		if (file.type === 'text/html')
+			loadHtmlBlob(file, window.open("about:blank"));
+		else
+			alert(file.name + ' 파일은 HTML 파일이 아닙니다.');
 		});
 	}
 	else if (urlinput.value.length > 0) {
@@ -105,10 +93,8 @@ function runxeit() {
 </head>
 <body>
 <div>
-	<form>
-		<input type="file" id="fileinput" onchange="fileChanged(event)" multiple="multiple" accept="text/html"/>
-		<input type="reset" value="Cancel" onclick="fileCanceled()"/>
-	</form>
+	<input type="file" id="fileinput" onchange="fileChanged(event)" multiple="multiple" accept="text/html"/>
+	<input type="reset" value="Cancel" onclick="fileCancel()"/>
 </div>
 <div>
 	<input type="text" id="urlinput" oninput="textChanged(event)" />	
