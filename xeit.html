@@ -373,9 +373,9 @@
                 srcDoc.set(content, message);
 
                 //HACK: 로딩 지연시 프레임 잘리는 현상 방지.
-                $content.height(window.innerHeight).load(function () {
-                    $content.height(content.contentDocument.documentElement.scrollHeight);
-                });
+                //$content.height(window.innerHeight).load(function () {
+                    //$content.height(content.contentDocument.documentElement.scrollHeight);
+                //});
 
                 $('#xeit-nav a[href="#mail"]').tab('show');
             }

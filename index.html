@@ -1,10 +1,106 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
-    <head>
-        <meta http-equiv="refresh" content="0; url=http://tomyun.github.io/xeit/xeit.html">
-        <meta property="fb:admins" content="1377353823" />
-        <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-40224792-1','github.io');ga('send','pageview');</script>
-    </head>
-    <body>
-    </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width" />
+<style>
+@-ms-viewport { width: device-width; }
+@-webkit-viewport { width: device-width; }
+@-moz-viewport { width: device-width; }
+@-o-viewport { width: device-width; }
+@viewport { width: device-width; }
+</style>
+<script>
+"use strict";
+function fileChanged(e) {
+	if (e.target.files.length > 0) {
+		urlinput.disabled = 'disabled';
+		xeitbutton.disabled = undefined;
+	}
+}
+
+function textChanged(e) {
+	if (e.target.value.length > 0) {
+		fileinput.disabled = 'disabled';
+		xeitbutton.disabled = undefined;
+	}
+	else {
+		fileinput.disabled = undefined;
+		xeitbutton.disabled = 'disabled';
+	}
+}
+
+function fileCancel() {
+	fileinput.outerHTML = fileinput.outerHTML;
+	urlinput.disabled = undefined;
+	xeitbutton.disabled = 'disabled';
+}
+
+function loadUrl(url, popup) {
+	try {
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.responseType = "blob";
+		xhr.onload = function() {
+			if (xhr.status == 200) {
+				if (xhr.response.type === 'text/html')
+					loadHtmlBlob(xhr.response, popup);
+				else
+					alert('이 URL의 파일은 HTML 파일이 아닙니다.');
+			}
+			else {
+				popup.close();
+				alert('URL이 잘못되었습니다.');
+			}
+		}
+		xhr.onerror = function() {
+			popup.close();
+			alert('URL을 불러오는 데에 실패했습니다. 1');
+		}
+		xhr.send();	
+	}
+	catch (e) {
+		popup.close();
+		alert('URL을 불러오는 데에 실패했습니다. 2');
+	}
+}
+
+function loadHtmlBlob(blob, popup) {
+	var reader = new FileReader();
+	reader.onload = function (e) { readHtml(e, popup); };
+	reader.readAsText(blob);
+}
+
+function readHtml(e, popup) {
+	var newhtml = e.target.result.replace(decodeURI('%3Cmeta%20http-equiv=%22X-UA-Compatible%22%20content=%22IE=7%22%20/%3E'), '').replace(decodeURI("%3C/body%3E"), decodeURI('%3Cscript%3Eif%20(window.opener)%20(function()%7Bvar%20b=document,c=b.getElementById(%22xeit%22);if(!c)%7Bwindow.addEventListener(%22message%22,function(a)%7B%22ready%22==a.data?c.contentWindow.postMessage(d,%22*%22):%22fallback%22==a.data&&(b.body=e)%7D);var%20a=b.documentElement,d=a.outerHTML;a.style.height=%22100%25%22;var%20e=b.body,a=b.body=b.createElement(%22body%22);a.style.cssText=%22margin:0;padding:0;height:100%25%22;c=b.createElement(%22iframe%22);c.id=%22xeit%22;c.src=%22http://saschanaz.github.io/xeit/xeit.html%22;c.style.cssText=%22width:100%25;height:100%25;border:0%22;a.appendChild(c)%7D%7D)();%3C/script%3E%3C/body%3E'));
+	popup.document.write(newhtml);
+}
+
+function runxeit() {
+	if (fileinput.files.length > 0) {
+		Array.prototype.forEach.call(fileinput.files, function (file) {
+		if (file.type === 'text/html')
+			loadHtmlBlob(file, window.open("about:blank"));
+		else
+			alert(file.name + ' 파일은 HTML 파일이 아닙니다.');
+		});
+	}
+	else if (urlinput.value.length > 0) {
+		loadUrl(urlinput.value, window.open("about:blank"));
+	}
+}
+</script>
+</head>
+<body>
+<div>
+	<input type="file" id="fileinput" onchange="fileChanged(event)" multiple="multiple" accept="text/html"/>
+	<input type="reset" value="Cancel" onclick="fileCancel()"/>
+</div>
+<div>
+	<input type="text" id="urlinput" oninput="textChanged(event)" />	
+<div>
+<div>
+	<button id="xeitbutton" onclick="runxeit()" disabled="disabled">Xeit!</button>
+</div>
+</body>
 </html>
