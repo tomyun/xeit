@@ -3,6 +3,17 @@ html, body {
   height: 100%;
 }
 
+.tab-content, #mail-content, .navbar, #footer {
+  position: fixed;
+  width: 100%;
+}
+
+.tab-content, #mail-content {
+	height: calc(100% - 101px);
+	top: 41px;
+	bottom: 60px;
+}
+
 #wrap {
   min-height: 100%;
   height: auto !important;
