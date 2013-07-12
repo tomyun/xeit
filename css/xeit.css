@@ -3,11 +3,10 @@ html, body {
   height: 100%;
 }
 
-#wrap {
+#mail-content {
+  width: 100%;
   min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  margin: 0 auto -60px;
+  border: 0;
 }
 
 /* NavBar */
