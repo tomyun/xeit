@@ -234,8 +234,19 @@ extend(SoftForum.prototype, {
             },
 
             'Xeit.samsungcard': {
+                fix_message: function (message) {
+                    var host = message.match(/form\s+.*name=['"]encfrm['"]\s+.*action=['"](.*)['"]/i)[1];
+                    var pvalue = message.match(/input\s+.*name=['"]?pvalue['"]?\s+value=['"]?(\w+)['"]?\s*/i)[1];
+                    var _command = message.match(/input\s+.*name=['"]?_command['"]?\s+value=['"]?(\w+)['"]?\s*/i)[1];
+                    var url = host+'?pvalue='+pvalue+'&_command='+_command;
+                    //HACK: 4px 만큼 줄여주지 않으면 내부 frameset에 의해 스크롤바 겹침.
+                    var style = 'width: 100%; height: calc(100% - 4px); height: -webkit-calc(100% - 4px); border: 0;'
+                    return '<iframe style="'+style+'" src="'+url+'"></iframe>';
+                },
+
                 weave: function (frame, message) {
-                    return frame.replace(/<object id="XEIViewer"[\s\S]*<\/object>/i, message.replace(/\$/g, '$$$$'));
+                    var style = 'width: 100%; height: 100%; margin: 0;';
+                    return '<html><head><body style="'+style+'">'+message+'</body></head></html>';
                 }
             }
         };
