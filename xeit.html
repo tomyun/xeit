@@ -4,7 +4,7 @@
         <meta charset='utf-8'>
         <title>Xeit</title>
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <link href='http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css' rel='stylesheet'>
+        <link href='http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap.no-responsive.no-icons.min.css' rel='stylesheet'>
         <link href='http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css' rel='stylesheet'>
         <link href='css/xeit.css' rel='stylesheet'>
         <script src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js'></script>
@@ -372,11 +372,6 @@
                 //$mailContent.attr('srcdoc', message);
                 srcDoc.set(content, message);
 
-                //HACK: 로딩 지연시 프레임 잘리는 현상 방지.
-                $content.height(window.innerHeight).load(function () {
-                    $content.height(content.contentDocument.documentElement.scrollHeight);
-                });
-
                 $('#xeit-nav a[href="#mail"]').tab('show');
             }
 
@@ -396,7 +391,7 @@
         <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create','UA-40224792-1','github.io');ga('send','pageview');</script>
     </head>
     <body>
-            <div class='navbar navbar-static-top navbar-inverse'>
+            <div class='navbar navbar-fixed-top navbar-inverse'>
                 <div class='navbar-inner'>
                     <span class='brand'>Xeit</span>
                     <ul id='xeit-nav' class='nav'>

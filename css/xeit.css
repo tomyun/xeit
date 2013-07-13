@@ -1,11 +1,15 @@
-/* Wrap */
-html, body {
-  height: 100%;
+/* Frame */
+
+body {
+  padding-top: 40px;
 }
 
 #mail-content {
+  position: fixed;
+  top: 40px;
   width: 100%;
-  min-height: 100%;
+  height:         calc(100% - 40px);
+  height: -webkit-calc(100% - 40px);
   border: 0;
 }
 
