@@ -1,22 +1,22 @@
-/* Wrap */
-html, body {
-  height: 100%;
+/* Frame */
+
+body {
+  padding-top: 40px;
 }
 
-#wrap {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  margin: 0 auto -60px;
+#mail-content {
+  position: fixed;
+  top: 40px;
+  width: 100%;
+  height:         calc(100% - 40px);
+  height: -webkit-calc(100% - 40px);
+  border: 0;
 }
 
 /* NavBar */
 
-.navbar {
-  font-size: 13px;
-}
-
 .navbar .brand {
+  margin-left: 0;
   font-weight: bold;
   color: #000;
   text-shadow: 0 1px 0 rgba(255,255,255,.1), 0 0 30px rgba(255,255,255,.125);
