@@ -34,3 +34,4 @@ FAQ
 * [kkung](https://github.com/kkung): 메일 추가 (미래에셋생명, 삼성카드)
 * [Koasing](https://github.com/Koasing): 메일 추가 (KT)
 * [teslamint](https://github.com/teslamint): 메일 추가 (하나SK카드)
+* [SaschaNaz](https://github.com/SaschaNaz): 페이지 레이아웃 개선
