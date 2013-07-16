@@ -292,7 +292,7 @@
                 setupSenderBox();
                 setupPasswordBox(false);
 
-                if (window.chrome.webstore && location.search != '?chrome') {
+                if (window.chrome && window.chrome.webstore && location.search != '?chrome') {
                     setupAuthAlert('success', '<strong>나왔습니다!</strong> 크롬에서는 <a href="http://j.mp/xeitce" target="_blank">확장 프로그램</a>으로 더욱 쉽고 편하게 사용하세요.');
                 } else {
                     setupAuthAlert('info', '<strong>걱정마세요!</strong> 비밀번호와 메일 내용을 외부로 전송하거나 저장하지 않아요.');
