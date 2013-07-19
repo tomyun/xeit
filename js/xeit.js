@@ -93,16 +93,21 @@ var xeit = (function () {
         var messageHandler = function (e) {
             if (e.data.func == func) {
                 success(e.data.resp);
-                worker.removeEventListener('message', messageHandler);
+                removeHandlers();
             }
         };
         worker.addEventListener('message', messageHandler);
 
         var errorHandler = function (e) {
             failure(e);
-            worker.removeEventListener('error', errorHandler);
+            removeHandlers();
         };
         worker.addEventListener('error', errorHandler);
+
+        function removeHandlers() {
+            worker.removeEventListener('message', messageHandler);
+            worker.removeEventListener('error', errorHandler);
+        }
 
         worker.postMessage({
             func: func,
