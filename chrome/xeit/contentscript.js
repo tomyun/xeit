@@ -39,6 +39,10 @@ function link() {
 }
 
 function show() {
+    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+        window.postMessage(request, '*');
+        sendResponse({});
+    });
     chrome.runtime.sendMessage({});
 }
 
