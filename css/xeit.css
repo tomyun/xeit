@@ -14,6 +14,10 @@ html, body {
 	bottom: 60px;
 }
 
+.filedrop * {
+  pointer-events: none;
+}
+
 #wrap {
   min-height: 100%;
   height: auto !important;
