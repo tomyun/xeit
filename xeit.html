@@ -7,6 +7,13 @@
         <link href='http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css' rel='stylesheet'>
         <link href='http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css' rel='stylesheet'>
         <link href='css/xeit.css' rel='stylesheet'>
+		<style>
+		@-ms-viewport { width: device-width; }
+		@-webkit-viewport { width: device-width; }
+		@-moz-viewport { width: device-width; }
+		@-o-viewport { width: device-width; }
+		@viewport { width: device-width; }
+		</style>
         <script src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js'></script>
         <script src='http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js'></script>
         <script src='js/deps/srcdoc-polyfill/srcdoc-polyfill.min.js'></script>
@@ -120,7 +127,7 @@
             }
 
             function setupPasswordBox(support, rule, notice) {
-                var $auth_password = $('input#auth-password').off('blur input').on('blur input', resetError);
+                var $auth_password = $('input#auth-password').off('blur input').on('blur input', resetError).prop('value', '');
 
                 support = support || false;
                 $auth_password.prop('disabled', !support);
@@ -372,18 +379,43 @@
                 //$mailContent.attr('srcdoc', message);
                 srcDoc.set(content, message);
 
-                //HACK: 로딩 지연시 프레임 잘리는 현상 방지.
-                //$content.height(window.innerHeight).load(function () {
-                    //$content.height(content.contentDocument.documentElement.scrollHeight);
-                //});
-
                 $('#xeit-nav a[href="#mail"]').tab('show');
             }
 
             function loadHelp() {
-                $('#xeit-nav a[href="#mail"]').remove();
+                $('#xeit-nav a[href="#mail"]').hide();
                 $('#xeit-nav a[href="#help"]').tab('show');
             }
+			
+			function dragoverEffect(event) {
+				event.stopPropagation();
+				event.preventDefault();
+				event.dataTransfer.dropEffect = 'copy';
+			}
+			
+			function loadDroppedFile(event) {
+				event.stopPropagation();
+				event.preventDefault();
+				var file = event.dataTransfer.files[0];
+				if (file && file.type === 'text/html') {
+					$('#xeit-nav a[href="#mail"]').show();
+					$('#xeit-nav a[href="#auth"]').tab('show');
+					showAuthDialog();
+					var reader = new FileReader();
+					reader.onload = function (e) {
+						xeit.init(
+								e.target.result,
+								function (r) {
+									setupAuthDialog(r.sender);
+								},
+								displayError
+							);
+					};
+					reader.readAsText(file);
+				}
+				else
+					alert('올바른 HTML 보안 메일이 아닌 듯합니다. 메일 파일을 끌어온 것이 맞는지 다시 한 번 확인해 주시겠어요?');
+			}
 
             $(document).ready(function () {
                 if (window.self !== window.top) {
@@ -401,6 +433,7 @@
                 <div class='navbar-inner'>
                     <span class='brand'>Xeit</span>
                     <ul id='xeit-nav' class='nav'>
+						<li><a href='#auth' data-toggle='tab' disabled='disabled'></a></li>
                         <li><a class='disabled' href='#mail' data-toggle='tab'>보안메일</a></li>
                         <li><a href='#help' data-toggle='tab'>도움말</a></li>
                     </ul>
@@ -460,11 +493,17 @@
                                     </dd>
                                     <dt>어떻게 보는거죠?</dt>
                                     <dd>
-                                        <p>인터넷 익스플로러가 아닌 브라우저에서 보안메일의 첨부파일을 열어보면 빈 화면 또는 플러그인 설치 안내 화면이 나오는 것을 많이 보셨을 거에요. 이 상태에서 브라우저에 등록해놓은 <strong>Xeit</strong> 북마클릿을 누르면 비밀번호 입력 화면이 등장하면서 보안메일을 읽을 수 있게 됩니다.
+                                        <p>브라우저에서 보안메일의 첨부파일을 열어보면 빈 화면 또는 플러그인 설치 안내 화면이 나오는 것을 많이 보셨을 거에요. 이 상태에서 브라우저에 등록해놓은 <strong>Xeit</strong> 북마클릿을 누르거나 이 페이지에서 메일 파일 자체를 불러오면 비밀번호 입력 화면이 등장하면서 별도로 플러그인을 설치하지 않고도 보안메일을 읽을 수 있게 됩니다.
                                         </p>
-                                    </dt>
-                                    <dt>설치는 어찌하죠?</dt>
-                                        <p>일단 웹 브라우저 상단에 북마클릿을 넣을 수 있는 공간이 있는지 확인해보세요. 사파리에서는 책갈피 막대(Bookmarks Bar), 크롬에서는 북마크바(Bookmarks Bar), 파이어폭스에서는 북마크 도구모음(Bookmarks Toolbar)이라고 부르는 곳입니다. 맥이라면 <span class='label'>⌥</span> + <span class='label'>⌘</span> + <span class='label'>B</span>를 눌러서 확인해볼 수도 있습니다. 그 다음에는 아래의 버튼을 끌어 넣으면 됩니다.</p>
+                                    </dd>
+									<dt>어떻게 사용하나요?</dt>
+									<dd>
+										<p>우선 이 페이지에서 메일 파일을 불러와 사용할 수 있습니다.</p>
+										<div class='well' ondragover="dragoverEffect(event)" ondrop="this.style.backgroundColor='';loadDroppedFile(event)" ondragenter="this.style.backgroundColor='#C0E2E2'" ondragleave="this.style.backgroundColor=''" >
+											<p class='text-center'><input type="file" id="fileloader" hidden="hidden"/></p>
+                                            <p class='text-center text-info'>메일 파일을 마우스로 끌어 이곳에 놓으세요!<br />파일은 외부로 전송되지 않으므로 안심하세요.</p>
+										</div>
+                                        <p>다른 방법도 있습니다. 일단 웹 브라우저 상단에 북마클릿을 넣을 수 있는 공간이 있는지 확인해보세요. 사파리에서는 책갈피 막대(Bookmarks Bar), 크롬에서는 북마크바(Bookmarks Bar), 파이어폭스에서는 북마크 도구모음(Bookmarks Toolbar)이라고 부르는 곳입니다. 맥이라면 <span class='label'>⌥</span> + <span class='label'>⌘</span> + <span class='label'>B</span>를 눌러서 확인해볼 수도 있습니다. 그 다음에는 아래의 버튼을 끌어 넣으면 됩니다.</p>
                                         <div class='well'>
                                             <p class='text-center'><a href="javascript:(function(){var%20b=document,c=b.getElementById(%22xeit%22);if(!c){window.addEventListener(%22message%22,function(a){%22ready%22==a.data%3Fc.contentWindow.postMessage(d,%22*%22):%22fallback%22==a.data%26%26(b.body=e)});var%20a=b.documentElement,d=a.outerHTML;a.style.height=%22100%25%22;var%20e=b.body,a=b.body=b.createElement(%22body%22);a.style.cssText=%22margin:0;padding:0;height:100%25%22;c=b.createElement(%22iframe%22);c.id=%22xeit%22;c.src=%22http://tomyun.github.io/xeit/xeit.html%22;c.style.cssText=%22width:100%25;height:100%25;border:0%22;a.appendChild(c)}})();"><button class='btn btn-info' type='button'><i class='icon-bookmark icon-white'></i> Xeit</button></a></p>
                                             <p class='text-center text-info'>이 버튼을 브라우저 상단의 책갈피에 끌어 넣으세요!</p>
@@ -761,7 +800,6 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                    </p>
                                     </dd>
                                     <dt>Gmail에서 안 열려요.</dt>
                                     <dd>
