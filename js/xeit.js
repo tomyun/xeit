@@ -41,7 +41,7 @@ var xeit = (function () {
                     $('param[name="AttachedFile"]').val()
                 ]
             };
-        } else if (html.indexOf('IniCrossMailObj') > -1) {
+        } else if (html.indexOf('IniCrossMailObj') > -1 || html.indexOf('inisafemail') > -1) {
             return {
                 func: 'init',
                 opts: { plugin: 'IniTech' },
