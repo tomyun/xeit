@@ -373,8 +373,6 @@
                 //$mailContent.attr('srcdoc', message);
                 srcDoc.set(content, message);
 
-                $content.attr("data-loaded", new Date());
-
                 $('#xeit-nav a[href="#mail"]').tab('show');
             }
 
@@ -383,10 +381,14 @@
                 $('#xeit-nav a[href="#help"]').tab('show');
             }
 
+            function isMailLoaded() {
+                return ($('#mail.active').length > 0);
+            }
+
             $(document).ready(function () {
                 if (window.self !== window.top) {
-                    if (typeof $('#mail-content').attr("data-loaded") === 'undefined') {
-                        // 내용을 아직 채우지 않은 경우에만 진행. (Safari에서 .webarchive으로 저장해놓은 경우를 위해서)
+                    //HACK: Safari webarchive 처럼 메일이 이미 열려있으면 무시. (#55)
+                    if (!isMailLoaded()) {
                         loadMail();
                     }
                 } else {
