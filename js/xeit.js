@@ -2,7 +2,7 @@ var xeit = (function () {
     "use strict";
 
     function parse($doc, html) {
-        if ($('#XEIViewer').length || html.indexOf('XEIViewer') > -1) {
+        if ($('#XEIViewer').length || (html.indexOf('PrintObjectTag') > -1 && html.indexOf('XEIViewer') > -1)) { 
             return {
                 func: 'init',
                 opts: { plugin: 'SoftForum' },
@@ -15,7 +15,7 @@ var xeit = (function () {
                     $('param[name="ui_desc"]').val()
                 ]
             };
-        } else if (html.indexOf('IniMasPlugin') > -1) {
+        } else if ($('#IniMasPluginObj').length || (html.indexOf('activeControl') > -1 && html.indexOf('IniMasPlugin') > -1)) { 
             //HACK: IE에서만 동작하는 activeControl() (function.js) 이슈 회피.
             var body = html.replace(
                 /activeControl\(([\s]*['"])/,
@@ -41,7 +41,7 @@ var xeit = (function () {
                     $('param[name="AttachedFile"]').val()
                 ]
             };
-        } else if (html.indexOf('IniCrossMailObj') > -1 || html.indexOf('inisafemail') > -1) {
+        } else if ($('#IniCrossMailObj').length) { 
             return {
                 func: 'init',
                 opts: { plugin: 'IniTech' },
