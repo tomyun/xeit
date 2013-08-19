@@ -2,7 +2,10 @@
 function check() {
     var html = document.head.innerHTML + document.body.innerHTML;
     return document.getElementById('XEIViewer') ||
-           html.search(/XEIViewer|IniMasPlugin|IniCrossMailObj/) > -1 ||
+           (html.search(/PrintObjectTag/) > -1 && html.search(/XEIViewer/) > -1) ||
+           document.getElementById('IniMasPluginObj') ||
+           (html.search(/activeControl/) > -1 && html.search(/IniMasPlugin/) > -1) ||
+           document.getElementById('IniCrossMailObj') ||
            document.getElementById('JXCEAL') ||
            document.getElementById('MailDec');
 }
