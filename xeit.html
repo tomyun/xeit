@@ -381,12 +381,16 @@
                 $('#xeit-nav a[href="#help"]').tab('show');
             }
 
+            function isMailAttached() {
+                return (window.self !== window.top);
+            }
+
             function isMailLoaded() {
                 return ($('#mail.active').length > 0);
             }
 
             $(document).ready(function () {
-                if (window.self !== window.top) {
+                if (isMailAttached()) {
                     //HACK: Safari webarchive 처럼 메일이 이미 열려있으면 무시. (#55)
                     if (!isMailLoaded()) {
                         loadMail();
