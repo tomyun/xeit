@@ -35,3 +35,4 @@ FAQ
 * [Koasing](https://github.com/Koasing): 메일 추가 (KT)
 * [teslamint](https://github.com/teslamint): 메일 추가 (하나SK카드)
 * [SaschaNaz](https://github.com/SaschaNaz): 페이지 레이아웃 개선
+* [netj](https://github.com/netj): 사파리 웹아카이브 지원
