@@ -45,7 +45,7 @@ extend(SoftForum.prototype, {
                 company = 'Xeit.kbcard';
             } else if (/(?=.*lottecard)(?=.*point)/.test(this.smime_header)) {
                 company = 'Xeit.lottepoint';
-            } else if (this.html.indexOf('samsungcard.co.kr') > -1) {
+            } else if (this.smime_header.indexOf('samsungcard.co.kr') > -1) {
                 company = 'Xeit.samsungcard';
             } else if (this.html.indexOf('uplus.co.kr') > -1) {
                 company = 'Xeit.uplus';
@@ -235,18 +235,27 @@ extend(SoftForum.prototype, {
 
             'Xeit.samsungcard': {
                 fix_message: function (message) {
-                    var host = message.match(/form\s+.*name=['"]encfrm['"]\s+.*action=['"](.*)['"]/i)[1];
-                    var pvalue = message.match(/input\s+.*name=['"]?pvalue['"]?\s+value=['"]?(\w+)['"]?\s*/i)[1];
-                    var _command = message.match(/input\s+.*name=['"]?_command['"]?\s+value=['"]?(\w+)['"]?\s*/i)[1];
-                    var url = host+'?pvalue='+pvalue+'&_command='+_command;
-                    //HACK: 4px 만큼 줄여주지 않으면 내부 frameset에 의해 스크롤바 겹침.
-                    var style = 'width: 100%; height: calc(100% - 4px); height: -webkit-calc(100% - 4px); border: 0;'
-                    return '<iframe style="'+style+'" src="'+url+'"></iframe>';
+                    // 외부연결 필요한 신용카드 vs. 자체열람 가능한 체크카드 명세서 구분.
+                    if (message.indexOf('encfrm') > -1) {
+                        var host = message.match(/form\s+.*name=['"]encfrm['"]\s+.*action=['"](.*)['"]/i)[1];
+                        var pvalue = message.match(/input\s+.*name=['"]?pvalue['"]?\s+value=['"]?(\w+)['"]?\s*/i)[1];
+                        var _command = message.match(/input\s+.*name=['"]?_command['"]?\s+value=['"]?(\w+)['"]?\s*/i)[1];
+                        var url = host+'?pvalue='+pvalue+'&_command='+_command;
+                        //HACK: 4px 만큼 줄여주지 않으면 내부 frameset에 의해 스크롤바 겹침.
+                        var style = 'width: 100%; height: calc(100% - 4px); height: -webkit-calc(100% - 4px); border: 0;'
+                        return '<iframe id="xeit-samsungcard" style="'+style+'" src="'+url+'"></iframe>';
+                    } else {
+                        return fixer.fix_message(message);
+                    }
                 },
 
                 weave: function (frame, message) {
-                    var style = 'width: 100%; height: 100%; margin: 0;';
-                    return '<html><head><body style="'+style+'">'+message+'</body></head></html>';
+                    if (message.indexOf('xeit-samsungcard') > -1) {
+                        var style = 'width: 100%; height: 100%; margin: 0;';
+                        return '<html><head><body style="'+style+'">'+message+'</body></head></html>';
+                    } else {
+                        return message;
+                    }
                 }
             }
         };
