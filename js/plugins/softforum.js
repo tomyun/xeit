@@ -53,6 +53,8 @@ extend(SoftForum.prototype, {
                 company = 'Xeit.yescard';
             } else if (this.info_msg.indexOf('miraeassetlife.com') > -1) {
                 company = 'Xeit.miraeassetlife';
+            } else {
+                company = '보안메일';
             }
         } else if (company === '悼剧积疙 焊救皋老') {
             company = '동양생명 보안메일';

@@ -421,9 +421,20 @@
 					alert('올바른 HTML 보안 메일이 아닌 듯합니다. 메일 파일을 끌어온 것이 맞는지 다시 한 번 확인해 주시겠어요?');
 			}
 
+            function isMailAttached() {
+                return (window.self !== window.top);
+            }
+
+            function isMailLoaded() {
+                return ($('#mail.active').length > 0);
+            }
+
             $(document).ready(function () {
-                if (window.self !== window.top) {
-                    loadMail();
+                if (isMailAttached()) {
+                    //HACK: Safari webarchive 처럼 메일이 이미 열려있으면 무시. (#55)
+                    if (!isMailLoaded()) {
+                        loadMail();
+                    }
                 } else {
                     loadHelp();
                 }
