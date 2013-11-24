@@ -97,7 +97,7 @@ extend(IniTech.prototype, {
             support: true,
             rule: [{
                 hint: '보안메일 비밀번호',
-                size: '6~8'
+                size: '6~8\\w'
             }],
             salt: 'shinhanbank'
         },
