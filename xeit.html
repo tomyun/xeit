@@ -413,10 +413,10 @@
 				var messageListener = function (e) {
 					window.removeEventListener("message", messageListener);
 					onload(e.data);
-				}
+				};
 				window.addEventListener("message", messageListener);
 				script = doc.createElement('script');
-				script.appendChild(doc.createTextNode('window.onload=function(){window.parent.postMessage(document.documentElement.outerHTML,"*")};'));
+				script.appendChild(doc.createTextNode('window.addEventListener("DOMContentLoaded",function(){window.parent.postMessage(document.documentElement.outerHTML,"*")});'));
 				doc.head.appendChild(script);
 			}
 			
@@ -441,7 +441,7 @@
 						});
 						var iframe = document.createElement("iframe");
 						iframe.sandbox = "allow-same-origin allow-scripts";
-						iframe.style.display = "none";
+						//iframe.style.display = "none";
 						document.body.appendChild(iframe);
 						iframe.contentDocument.open();
 						iframe.contentDocument.write(parsedDoc.documentElement.outerHTML);
