@@ -441,7 +441,7 @@
 						});
 						var iframe = document.createElement("iframe");
 						iframe.sandbox = "allow-same-origin allow-scripts";
-						//iframe.style.display = "none";
+						iframe.style.display = "none";
 						document.body.appendChild(iframe);
 						iframe.contentDocument.open();
 						iframe.contentDocument.write(parsedDoc.documentElement.outerHTML);
