@@ -358,7 +358,8 @@
 
             function loadMail() {
                 showAuthDialog().on('shown', function () {
-                    window.addEventListener('message', function (e) {
+					var messageListener = function (e) {
+						window.removeEventListener('message', messageListener);
                         var html = e.data;
                         xeit.init(
                             html,
@@ -367,7 +368,8 @@
                             },
                             displayError
                         );
-                    }, false);
+                    };
+                    window.addEventListener('message', messageListener, false);
                     window.parent.postMessage('ready', '*');
                 });
             }
@@ -400,6 +402,24 @@
 				loadFile(event.dataTransfer.files[0]);
 			}
 			
+			function preprocessDOM(doc) {
+				var script = doc.createElement('script');
+				//window.alert, window.open 함수 및 window.location.href setter를 작동하지 않게 하고 이를 사용할 경우 web messaging API를 통해 부모로 함수명 및 패러미터 로그를 보내도록 한다
+				script.appendChild(doc.createTextNode('window.alert=window.open=function(str){};'));
+				doc.head.insertBefore(script, doc.head.firstChild);
+			}
+			
+			function addContentListener(doc, onload) {
+				var messageListener = function (e) {
+					window.removeEventListener("message", messageListener);
+					onload(e.data);
+				}
+				window.addEventListener("message", messageListener);
+				script = doc.createElement('script');
+				script.appendChild(doc.createTextNode('window.onload=function(){window.parent.postMessage(document.documentElement.outerHTML,"*")};'));
+				doc.head.appendChild(script);
+			}
+			
 			function loadFile(file) {
 				if (file && file.type === 'text/html') {
 					$('#xeit-nav a[href="#mail"]').show();
@@ -407,13 +427,25 @@
 					showAuthDialog();
 					var reader = new FileReader();
 					reader.onload = function (e) {
-						xeit.init(
-								e.target.result,
-								function (r) {
-									setupAuthDialog(r.sender);
-								},
-								displayError
-							);
+						var parsedDoc = (new DOMParser()).parseFromString(e.target.result, "text/html");
+						preprocessDOM(parsedDoc);
+						addContentListener(parsedDoc, function(html) {
+							document.body.removeChild(iframe);
+							xeit.init(
+									html,
+									function (r) {
+										setupAuthDialog(r.sender);
+									},
+									displayError
+								);
+						});
+						var iframe = document.createElement("iframe");
+						iframe.sandbox = "allow-same-origin allow-scripts";
+						iframe.style.display = "none";
+						document.body.appendChild(iframe);
+						iframe.contentDocument.open();
+						iframe.contentDocument.write(parsedDoc.documentElement.outerHTML);
+						iframe.contentDocument.close();
 					};
 					reader.readAsText(file);
 				}
