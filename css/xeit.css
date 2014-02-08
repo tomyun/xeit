@@ -4,6 +4,10 @@ body {
   padding-top: 40px;
 }
 
+.filedrop * {
+  pointer-events: none;
+}
+
 #mail-content {
   position: fixed;
   top: 40px;
