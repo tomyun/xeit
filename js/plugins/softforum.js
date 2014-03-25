@@ -56,6 +56,8 @@ extend(SoftForum.prototype, {
             } else {
                 company = '보안메일';
             }
+        } else if (company === 'ｱｹｹﾎｿｬｱﾝ ｺｸｾﾈｸﾞﾀﾏ') {
+            company = '국민연금 보안메일';
         } else if (company === '悼剧积疙 焊救皋老') {
             company = '동양생명 보안메일';
         } else if (company === '') {
@@ -193,6 +195,15 @@ extend(SoftForum.prototype, {
             }, {
                 hint: '사업자등록번호',
                 size: 10
+            }]
+        },
+
+        '국민연금 보안메일': {
+            name: '국민연금',
+            support: true,
+            rule: [{
+                hint: ['주민등록번호 뒤', '사업자등록번호 뒤'],
+                size: 7
             }]
         },
 
