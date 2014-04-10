@@ -222,6 +222,9 @@ extend(SoftForum.prototype, {
             rule: [{
                 hint: '주민등록번호 뒤',
                 size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
             }]
         },
 
