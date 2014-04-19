@@ -92,6 +92,16 @@ extend(IniTech.prototype, {
             salt: 'nonghyup'
         },
 
+        BK: {
+            name: '산업은행',
+            support: true,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }],
+            salt: 'kdb'
+        },
+
         BO: {
             name: '신한은행',
             support: true,
