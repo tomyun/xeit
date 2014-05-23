@@ -51,6 +51,8 @@ extend(SoftForum.prototype, {
                 company = 'Xeit.uplus';
             } else if (this.info_msg.indexOf('KEB') > -1) {
                 company = 'Xeit.yescard';
+            } else if (this.info_msg.indexOf('LIG') > -1) {
+                company = 'Xeit.lig';
             } else if (this.info_msg.indexOf('miraeassetlife.com') > -1) {
                 company = 'Xeit.miraeassetlife';
             } else {
@@ -147,6 +149,21 @@ extend(SoftForum.prototype, {
             }, {
                 hint: 'SMS인증번호',
                 size: 6
+            }]
+        },
+
+        'Xeit.lig': {
+            name: 'LIG손해보험',
+            support: true,
+            rule: [{
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }, {
+                hint: '보유자코드',
+                size: 8
             }]
         },
 
