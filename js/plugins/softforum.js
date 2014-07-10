@@ -132,6 +132,9 @@ extend(SoftForum.prototype, {
             name: '하나은행',
             support: true,
             rule: [{
+                hint: ['생년월일'],
+                size: 6
+            }, {
                 hint: ['주민등록번호 뒤', '사업자등록번호 뒤'],
                 size: 7
             }]
