@@ -41,6 +41,9 @@ extend(Soft25.prototype, {
             name: 'KT',
             support: true,
             rule: [{
+                hint: '생년월일',
+                size: 6
+            }, {
                 hint: '주민등록번호 뒤',
                 size: 7
             }]
