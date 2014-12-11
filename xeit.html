@@ -274,9 +274,9 @@
                     content += '<div class="well well-small">' + notice + '</div>';
                 }
 
-                $auth_password.prop('placeholder', ruler.placeholder()).prop('pattern', ruler.pattern());
+                $auth_password.attr('placeholder', ruler.placeholder()).attr('pattern', ruler.pattern());
                 //HACK: 최근 각종 입력패턴 변경 사례에 대응. (#71)
-                $auth_password.removeProp('pattern');
+                $auth_password.removeAttr('pattern');
                 $('#password-button').popover({
                     html: true,
                     placement: 'bottom',
