@@ -7,4 +7,4 @@
 	url = https://github.com/tomyun/asn1js.git
 [submodule "js/deps/srcdoc-polyfill"]
 	path = js/deps/srcdoc-polyfill
-	url = git://github.com/jugglinmike/srcdoc-polyfill.git
+	url = https://github.com/jugglinmike/srcdoc-polyfill.git
