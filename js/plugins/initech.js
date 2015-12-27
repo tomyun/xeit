@@ -254,6 +254,17 @@ extend(IniTech.prototype, {
             salt: 'korealife2'
         },
 
+        IM: {
+            name: '흥국화재',
+            support: true,
+            experimental: true,
+            rule: [{
+                hint: '주민등록번호 앞',
+                size: 6
+            }],
+            salt: 'heungkukfire'
+        },
+
         KA: {
             name: 'Initech',
             support: true,
