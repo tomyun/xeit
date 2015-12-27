@@ -65,6 +65,8 @@ extend(SoftForum.prototype, {
         } else if (company === '') {
             if (this.smime_header.indexOf('keb.co.kr') > -1) {
                 company = 'Xeit.yescard';
+            } else if (this.smime_header.indexOf('myangel.co.kr') > -1) {
+                company = '동양생명 보안메일';
             } else {
                 company = '?';
             }
