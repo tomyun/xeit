@@ -265,6 +265,17 @@ extend(IniTech.prototype, {
             salt: 'heungkukfire'
         },
 
+        IX: {
+            name: '한화손해보험',
+            support: true,
+            experimental: true,
+            rule: [{
+                hint: '주민등록번호 앞',
+                size: 6
+            }],
+            // no salt required
+        },
+
         KA: {
             name: 'Initech',
             support: true,
@@ -341,6 +352,13 @@ extend(IniTech.prototype, {
 
             TC: {
                 ignore_replacer: true
+            },
+
+            IX: {
+                  fix_frame: function (frame) {
+                      // disable downloading plugin
+                      return frame.replace('CMPlugin_Write', '//CMPlugin_Write');
+                }
             },
         };
     }({
