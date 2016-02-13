@@ -8,3 +8,6 @@
 [submodule "js/deps/srcdoc-polyfill"]
 	path = js/deps/srcdoc-polyfill
 	url = https://github.com/jugglinmike/srcdoc-polyfill.git
+[submodule "js/deps/node-sjcl-all"]
+	path = js/deps/node-sjcl-all
+	url = https://github.com/alanhoff/node-sjcl-all.git

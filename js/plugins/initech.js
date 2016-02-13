@@ -2,7 +2,8 @@
 
 importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/crypto-js/build/rollups/pbkdf1.js',
-              'deps/crypto-js/build/rollups/pbkdf2.js');
+              'deps/crypto-js/build/rollups/pbkdf2.js',
+              'deps/node-sjcl-all/sjcl.js');
 
 var IniTech = function (html, contents, question, attachedFile, optData) {
     this.html = html || '';
@@ -416,10 +417,15 @@ extend(IniTech.prototype, {
     },
 
     keygenPBKDF2: function (password) {
-        return CryptoJS.PBKDF2(password, this.salt, {
-            keySize: this.cipher.algorithm.keySize,
-            iterations: 5139
-        });
+        var bits = sjcl.misc.pbkdf2(password,
+            sjcl.codec.hex.toBits(this.salt + ''),
+            5139,
+            this.cipher.algorithm.keySize * 32,
+            function (key) {
+                return new sjcl.misc.hmac(key, sjcl.hash.sha1)
+            });
+        var hex = sjcl.codec.hex.fromBits(bits);
+        return CryptoJS.enc.Hex.parse(hex);
     },
 
     decrypt: function (password) {
