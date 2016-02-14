@@ -54,7 +54,7 @@ extend(IniTech.prototype, {
         } else {
             if (S.version >= 'J 1.0.3') {
                 this.iv = CryptoJS.enc.Base64.parse(S.iv);
-                this.salt = this.iv.clone();
+                this.salt = this.iv.clone() + '';
             } else {
                 this.iv = CryptoJS.enc.Latin1.parse(S.iv);
                 this.salt = CryptoJS.enc.Latin1.parse(this.sender.salt);
@@ -274,7 +274,7 @@ extend(IniTech.prototype, {
                 hint: '주민등록번호 앞',
                 size: 6
             }],
-            // no salt required
+            salt: ''
         },
 
         KA: {
@@ -417,11 +417,10 @@ extend(IniTech.prototype, {
     },
 
     keygenPBKDF2: function (password) {
-        var bits = sjcl.misc.pbkdf2(password,
-            sjcl.codec.hex.toBits(this.salt + ''),
-            5139,
-            this.cipher.algorithm.keySize * 32,
-            function (key) {
+        var salt = sjcl.codec.hex.toBits(this.salt),
+            count = 5139,
+            length = this.cipher.algorithm.keySize * 32;
+        var bits = sjcl.misc.pbkdf2(password, salt, count, length, function (key) {
                 return new sjcl.misc.hmac(key, sjcl.hash.sha1)
             });
         var hex = sjcl.codec.hex.fromBits(bits);
