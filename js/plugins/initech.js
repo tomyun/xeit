@@ -3,7 +3,7 @@
 importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/crypto-js/build/rollups/pbkdf1.js',
               'deps/crypto-js/build/rollups/pbkdf2.js',
-              'deps/node-sjcl-all/sjcl.js');
+              'deps/sjcl/sjcl.js');
 
 var IniTech = function (html, contents, question, attachedFile, optData) {
     this.html = html || '';
