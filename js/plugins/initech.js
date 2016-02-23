@@ -54,7 +54,7 @@ extend(IniTech.prototype, {
         } else {
             if (S.version >= 'J 1.0.3') {
                 this.iv = CryptoJS.enc.Base64.parse(S.iv);
-                this.salt = this.iv.clone() + '';
+                this.salt = this.iv.clone();
             } else {
                 this.iv = CryptoJS.enc.Latin1.parse(S.iv);
                 this.salt = CryptoJS.enc.Latin1.parse(this.sender.salt);
@@ -417,7 +417,7 @@ extend(IniTech.prototype, {
     },
 
     keygenPBKDF2: function (password) {
-        var salt = sjcl.codec.hex.toBits(this.salt),
+        var salt = sjcl.codec.hex.toBits(this.salt + ''),
             count = 5139,
             length = this.cipher.algorithm.keySize * 32;
         var bits = sjcl.misc.pbkdf2(password, salt, count, length, function (key) {
