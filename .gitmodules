@@ -11,3 +11,4 @@
 [submodule "js/deps/sjcl"]
 	path = js/deps/sjcl
 	url = https://github.com/tomyun/sjcl.git
+	branch = xeit-1.0.4
