@@ -22,7 +22,7 @@ FAQ
 
 ### 개발은 어떡하죠? ###
 
-다양한 메일 종류를 지원할 수 있도록 최대한 구조를 맞춰 보았는데 아직 문서로 정리되지는 않았네요. 동일한 플러그인이라면 큰 수정 없이 지원될 가능성이 높기는 합니다. 혹시 헤더 정보만이라도 샘플을 제공해주실 수 있다면 직접 확인을 도와드릴 수도 있습니다~ 참고로 암호화 알고리즘은 [CryptoJS](https://github.com/tomyun/crypto-js)를 기반으로 SEED, PBKDF1, RC2 등을 추가하여 사용하고 있습니다.
+다양한 메일 종류를 지원할 수 있도록 최대한 구조를 맞춰 보았는데 아직 문서로 정리되지는 않았네요. 동일한 플러그인이라면 큰 수정 없이 지원될 가능성이 높기는 합니다. 혹시 헤더 정보만이라도 샘플을 제공해주실 수 있다면 직접 확인을 도와드릴 수도 있습니다~ 참고로 암호화 알고리즘은 [CryptoJS](https://github.com/tomyun/crypto-js)를 기반으로 SEED, PBKDF1, RC2 등을 추가하여 사용하고 있습니다. PBKDF2에서는 좀 더 나은 성능을 위해 [SJCL](https://github.com/tomyun/sjcl)을 활용하기도 합니다.
 
 도와주신 분들
 -------------
@@ -36,3 +36,4 @@ FAQ
 * [teslamint](https://github.com/teslamint): 메일 추가 (하나SK카드)
 * [SaschaNaz](https://github.com/SaschaNaz): 페이지 레이아웃 개선
 * [netj](https://github.com/netj): 사파리 웹아카이브 지원
+* [keewon](https://github.com/keewon): 메일 추가 (흥국화재, 한화손해보험), 사파리 성능 개선
