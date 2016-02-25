@@ -2,7 +2,8 @@
 
 importScripts('deps/crypto-js/build/rollups/tripledes.js',
               'deps/crypto-js/build/rollups/pbkdf1.js',
-              'deps/crypto-js/build/rollups/pbkdf2.js');
+              'deps/crypto-js/build/rollups/pbkdf2.js',
+              'deps/sjcl/sjcl.js');
 
 var IniTech = function (html, contents, question, attachedFile, optData) {
     this.html = html || '';
@@ -265,6 +266,17 @@ extend(IniTech.prototype, {
             salt: 'heungkukfire'
         },
 
+        IX: {
+            name: '한화손해보험',
+            support: true,
+            experimental: true,
+            rule: [{
+                hint: '주민등록번호 앞',
+                size: 6
+            }],
+            salt: ''
+        },
+
         KA: {
             name: 'Initech',
             support: true,
@@ -342,6 +354,13 @@ extend(IniTech.prototype, {
             TC: {
                 ignore_replacer: true
             },
+
+            IX: {
+                  fix_frame: function (frame) {
+                      // disable downloading plugin
+                      return frame.replace('CMPlugin_Write', '//CMPlugin_Write');
+                }
+            },
         };
     }({
         weave: function (frame, message) {
@@ -398,10 +417,14 @@ extend(IniTech.prototype, {
     },
 
     keygenPBKDF2: function (password) {
-        return CryptoJS.PBKDF2(password, this.salt, {
-            keySize: this.cipher.algorithm.keySize,
-            iterations: 5139
-        });
+        var salt = sjcl.codec.hex.toBits(this.salt + ''),
+            count = 5139,
+            length = this.cipher.algorithm.keySize * 32;
+        var bits = sjcl.misc.pbkdf2(password, salt, count, length, function (key) {
+                return new sjcl.misc.hmac(key, sjcl.hash.sha1)
+            });
+        var hex = sjcl.codec.hex.fromBits(bits);
+        return CryptoJS.enc.Hex.parse(hex);
     },
 
     decrypt: function (password) {
