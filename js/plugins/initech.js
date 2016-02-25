@@ -356,10 +356,7 @@ extend(IniTech.prototype, {
             },
 
             IX: {
-                  fix_frame: function (frame) {
-                      // disable downloading plugin
-                      return frame.replace('CMPlugin_Write', '//CMPlugin_Write');
-                }
+                ignore_replacer: true
             },
         };
     }({
