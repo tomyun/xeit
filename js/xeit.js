@@ -28,6 +28,9 @@ var xeit = (function () {
             ).replace(
                 /^[\s\S]*<body.*?>|<\/body>[\s\S]*$/ig,
                 ''
+            ).replace(
+                /applyPatch\((.*?)\)/ig,
+                ''
             );
             $doc.empty().append($.parseHTML(body, true));
 
