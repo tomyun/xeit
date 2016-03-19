@@ -126,6 +126,19 @@ extend(IniTech.prototype, {
             salt: 'bccard'
         },
 
+        CM: {
+            name: '하나카드',
+            support: true,
+            rule: [{
+                hint: '생년월일',
+                size: 6
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
+            salt: 'hanaskcard'
+        },
+
         DI: {
             name: '하나SK카드',
             support: true,
@@ -300,6 +313,19 @@ extend(IniTech.prototype, {
             salt: 'cjhello'
         },
 
+        SD: {
+            name: 'SK증권',
+            support: true,
+            rule: [{
+                hint: '생년월일',
+                size: 6
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
+            salt: 'skstock'
+        },
+
         TC: {
             name: 'SKT',
             support: true,
@@ -344,6 +370,14 @@ extend(IniTech.prototype, {
             },
 
             DI: {
+                fix_message: function (message) {
+                    return message.replace(/href="#"/g, '').replace(".getElementById('tab_img').", '.');
+                },
+
+                ignore_replacer: true
+            },
+
+            CM: {
                 fix_message: function (message) {
                     return message.replace(/href="#"/g, '').replace(".getElementById('tab_img').", '.');
                 },
