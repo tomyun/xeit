@@ -152,6 +152,22 @@ extend(IniTech.prototype, {
             salt: 'defaultmailid'
         },
 
+        FU: {
+            name: '아이즈모바일',
+            support: true,
+            rule: [{
+                hint: '생년월일',
+                size: 6
+            }, {
+                hint: '주민등록번호 뒤',
+                size: 7
+            }, {
+                hint: '사업자등록번호',
+                size: 10
+            }],
+            salt: 'eyesvision'
+        },
+
         IA: {
             name: '신한생명',
             support: true,
