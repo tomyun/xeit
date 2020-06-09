@@ -164,8 +164,7 @@ extend(IniTech.prototype, {
             }, {
                 hint: '사업자등록번호',
                 size: 10
-            }],
-            salt: 'eyesvision'
+            }]
         },
 
         IA: {
