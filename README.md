@@ -38,3 +38,4 @@ FAQ
 * [netj](https://github.com/netj): 사파리 웹아카이브 지원
 * [keewon](https://github.com/keewon): 메일 추가 (흥국화재, 한화손해보험), 사파리 성능 개선
 * [kisuo](https://github.com/kisuo): 메일 추가 (하나카드, SK증권)
+* [peremen](https://github.com/peremen): 메일 추가 (아이즈모바일)
